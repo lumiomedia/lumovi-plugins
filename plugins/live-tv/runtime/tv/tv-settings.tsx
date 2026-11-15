@@ -17,6 +17,8 @@ import { groupOrderLabelKey, nextGroupOrder } from '../group-order'
 import { TvSettingsPhone } from './mobile/settings-phone'
 import { useNewGuideSurface } from './guide-surface'
 import { SportKeySettingsTv } from '../sport/sport-key-settings'
+import { useFeatureLocked } from '../supporter'
+import { PlusLockedPanel } from './plus-lock-panel'
 import { SportBackdropSettingsTv } from '../sport/sport-backdrop-settings'
 import { SportSpoilerSettingsTv } from '../sport/sport-spoiler-settings'
 import { nextStartView, startViewLabelKey } from './start-view'
@@ -81,12 +83,14 @@ function useLeftToTabs(ref: RefObject<HTMLElement | null>): void {
 
 function TvSettingsDesktop({ model, nav, params, settings }: TvViewProps) {
   const { tt, locale, lang } = useTvText()
+  // Sportläget är Plus (supporter.ts): fliken står kvar med lås, innehållet blir förklaringen.
+  const sportLocked = useFeatureLocked('sportsMode')
   const initial = (TABS as string[]).includes(params.tab ?? '') ? (params.tab as Tab) : 'appearance'
   const [tab, setTab] = useState<Tab>(initial)
   const contentRef = useRef<HTMLDivElement | null>(null)
   useRowNeighbours(contentRef, true)
   useLeftToTabs(contentRef)
-  const labels: Record<Tab, string> = { appearance: tt('tabAppearance'), content: tt('tabContent'), playlists: tt('tabPlaylists'), epg: tt('tabEpg'), alerts: hubText(lang, 'epgWatchesTitle'), parental: tt('tabParental'), remote: tt('tabRemote'), sport: tt('tabSport'), help: tt('tabHelp') }
+  const labels: Record<Tab, string> = { appearance: tt('tabAppearance'), content: tt('tabContent'), playlists: tt('tabPlaylists'), epg: tt('tabEpg'), alerts: hubText(lang, 'epgWatchesTitle'), parental: tt('tabParental'), remote: tt('tabRemote'), sport: sportLocked ? `${tt('tabSport')} · ${tt('plusBadge')}` : tt('tabSport'), help: tt('tabHelp') }
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
       <div style={{ width: dp(340), flexShrink: 0, borderRight: `1px solid ${TV.line}`, padding: `${dp(34)}px ${dp(20)}px 0 ${dp(48)}px`, display: 'flex', flexDirection: 'column', gap: dp(6) }}>
@@ -104,7 +108,8 @@ function TvSettingsDesktop({ model, nav, params, settings }: TvViewProps) {
         {tab === 'parental' ? <ParentalTab model={model} tt={tt} /> : null}
         {tab === 'remote' ? <RemoteTab bindings={settings.remoteKeys} nav={nav} tt={tt} /> : null}
         {tab === 'help' ? <HelpTab tt={tt} lang={lang} /> : null}
-        {tab === 'sport' ? <><SportKeySettingsTv pushLayer={nav.pushLayer} /><SportBackdropSettingsTv pushLayer={nav.pushLayer} /><SportSpoilerSettingsTv /></> : null}
+        {tab === 'sport' && sportLocked ? <PlusLockedPanel feature="sportsMode" /> : null}
+        {tab === 'sport' && !sportLocked ? <><SportKeySettingsTv pushLayer={nav.pushLayer} /><SportBackdropSettingsTv pushLayer={nav.pushLayer} /><SportSpoilerSettingsTv /></> : null}
       </div>
     </div>
   )

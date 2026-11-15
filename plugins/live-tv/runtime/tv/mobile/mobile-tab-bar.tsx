@@ -4,6 +4,7 @@ import { useTvText, type TvStringKey } from '../tv-strings'
 import type { TvView } from '../tv-shell'
 import { MT } from './mobile-tokens'
 import { MIcons } from './mobile-icons'
+import { useFeatureLocked } from '../../supporter'
 
 export type MobileTab = 'home' | 'hub' | 'guide' | 'sport' | 'search' | 'library' | 'more'
 
@@ -29,8 +30,9 @@ const MORE_TAB: TabDef = { key: 'more', icon: MIcons.DotsThree, label: 'tabMore'
  * kanaler ska inte betala bredd för en vy utan innehåll. Därför villkoret —
  * inte en permanent sjätte plats.
  */
-function tabsFor(showLibrary: boolean): TabDef[] {
-  return showLibrary ? [...BASE_TABS, LIBRARY_TAB, MORE_TAB] : [...BASE_TABS, MORE_TAB]
+function tabsFor(showLibrary: boolean, showSport = true): TabDef[] {
+  const base = showSport ? BASE_TABS : BASE_TABS.filter((tab) => tab.key !== 'sport')
+  return showLibrary ? [...base, LIBRARY_TAB, MORE_TAB] : [...base, MORE_TAB]
 }
 
 /** Kanaldetalj hör till Guide-fliken; multivy och inställningar saknar egen flik och landar under More. */
@@ -46,7 +48,9 @@ export function tabForView(view: TvView): MobileTab {
 export function MobileTabBar({ view, activeOverride, onGo, onMore, showLibrary = false }: { view: TvView; /** Vinner över `tabForView(view)` — ramen runt VOD-hemmet saknar en riktig vy. */ activeOverride?: MobileTab; onGo: (view: 'home' | 'hub' | 'guide' | 'sport' | 'search' | 'library') => void; onMore: () => void; showLibrary?: boolean }) {
   const { tt } = useTvText()
   const active = activeOverride ?? tabForView(view)
-  const tabs = tabsFor(showLibrary)
+  // Sportläget är Plus (supporter.ts): fliken döljs tyst när det är låst.
+  const sportLocked = useFeatureLocked('sportsMode')
+  const tabs = tabsFor(showLibrary, !sportLocked)
   return (
     <nav
       data-testid="mobile-tab-bar"

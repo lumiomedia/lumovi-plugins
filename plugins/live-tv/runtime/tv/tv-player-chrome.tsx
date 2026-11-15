@@ -79,7 +79,8 @@ function TvPlayerChromeDesktop({ channel, tv, controls, paused, onTogglePause, o
   const hoverRef = useRef(false)
   const TvGlassMenu = getTvGlassMenu()
   const info = tv.nowFor(channel)
-  const rec = useChannelRecording(channel, info.now, tv.nowMs)
+  // Låst inspelning (Plus): förklaringens knapp stänger spelaren innan Inställningar öppnas.
+  const rec = useChannelRecording(channel, info.now, tv.nowMs, { beforeOpenSettings: onClose })
   // 0 = dölj aldrig (LiveTvPlayerTvProps-kommentaren). Ingen egen tröskel
   // ovanpå inställningen — README §9 anger just "4 s (inställning)", inget
   // golv.
@@ -287,7 +288,7 @@ function TvPlayerChromeDesktop({ channel, tv, controls, paused, onTogglePause, o
         { key: 'pause', label: paused ? tt('menuResume') : tt('menuPause'), run: onTogglePause },
         { key: 'fav', label: tv.favourite ? tt('menuRemoveFavourite') : tt('menuAddFavourite'), run: tv.onToggleFavourite },
         { key: 'info', label: tt('menuChannelDetails'), run: tv.onOpenChannelDetails },
-        ...(rec.enabled ? [{ key: 'record', label: rec.active ? tt('stopRecording') : tt('record'), run: () => { void rec.toggle() } }] : []),
+        ...(rec.enabled ? [{ key: 'record', label: rec.active ? tt('stopRecording') : rec.locked ? `${tt('record')} · ${tt('plusBadge')}` : tt('record'), run: () => { void rec.toggle() } }] : []),
       ],
     })
   }
@@ -308,8 +309,8 @@ function TvPlayerChromeDesktop({ channel, tv, controls, paused, onTogglePause, o
         {replay ? <PlayerReplayInfo match={replay} ps={ps} nowMs={tv.nowMs} locale={tv.locale} /> : null}
         {tv.sport && sportHere ? <PlayerSourceSwitcher sport={tv.sport} channel={channel} nowMs={tv.nowMs} ps={ps} /> : null}
         {tv.sport && sportHere && tv.sport.view === 'matchday' ? <PlayerSportTicker sport={tv.sport} channel={channel} nowMs={tv.nowMs} variant="ticker" ps={ps} /> : null}
-        {rec.error ? <RecordingErrorNote error={rec.error} ps={ps} tt={tt} /> : null}
-        <PlayerControlRow channel={channel} tv={tv} info={info} ps={ps} isTv={isTv} paused={paused} onTogglePause={onTogglePause} controls={controls} guideOpen={guideOpen} onToggleGuide={toggleGuide} dotsRef={initRef} onOpenMenu={openMenu} volumeRef={volumeRef} sportAvailable={sportHere} matchesOpen={matchesOpen} onToggleMatches={() => { if (matchesOpen) closeMatches(); else { setMatchesOpen(true); setVisible(true); clearTimer() } }} recording={{ enabled: rec.enabled, active: !!rec.active, onToggle: () => { void rec.toggle() } }} />
+        {rec.error ? <RecordingErrorNote error={rec.error} ps={ps} tt={tt} onOpenSupporter={rec.openSupporter} /> : null}
+        <PlayerControlRow channel={channel} tv={tv} info={info} ps={ps} isTv={isTv} paused={paused} onTogglePause={onTogglePause} controls={controls} guideOpen={guideOpen} onToggleGuide={toggleGuide} dotsRef={initRef} onOpenMenu={openMenu} volumeRef={volumeRef} sportAvailable={sportHere} matchesOpen={matchesOpen} onToggleMatches={() => { if (matchesOpen) closeMatches(); else { setMatchesOpen(true); setVisible(true); clearTimer() } }} recording={{ enabled: rec.enabled, active: !!rec.active, locked: rec.locked, onToggle: () => { void rec.toggle() } }} />
         <PlayerFavouritesRow channel={channel} tv={tv} ps={ps} onSwitch={switchChannel} onHold={holdChip} />
       </div>
       {/* Under toppfältet (det har kanalens logotyp och namn uppe till vänster). */}

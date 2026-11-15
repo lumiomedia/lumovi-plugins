@@ -11,6 +11,8 @@ import { ChannelOverridesSection } from '../channel-overrides-settings'
 import { nextStartView, startViewLabelKey } from '../start-view'
 import { groupOrderLabelKey, nextGroupOrder } from '../../group-order'
 import { SportKeySettingsTv } from '../../sport/sport-key-settings'
+import { useFeatureLocked } from '../../supporter'
+import { PlusLockedPanel } from '../plus-lock-panel'
 import { SportBackdropSettingsTv } from '../../sport/sport-backdrop-settings'
 import { SportSpoilerSettingsTv } from '../../sport/sport-spoiler-settings'
 import { MT, ellipsis, sectionLabel } from './mobile-tokens'
@@ -37,6 +39,8 @@ export function TvSettingsPhone(props: TvViewProps) {
   const { model, nav, params, settings } = props
   const { tt, locale, lang } = useTvText()
   const guideMode = useGuideMode()
+  // Sportläget är Plus (supporter.ts): raden står kvar med lås, undersidan blir förklaringen.
+  const sportLocked = useFeatureLocked('sportsMode')
 
   /* INNEHÅLL ÄR EN UNDERSIDA HÄR OCKSÅ (Jerry 2026-09-22).
 
@@ -71,6 +75,8 @@ export function TvSettingsPhone(props: TvViewProps) {
             ? <EpgTab lists={model.lists} nav={nav} tt={tt} locale={locale} phone />
             : params.tab === 'parental'
               ? <ParentalTab model={model} tt={tt} phone />
+              : params.tab === 'sport' && sportLocked
+                ? <PlusLockedPanel feature="sportsMode" phone />
               : params.tab === 'sport'
                 ? <><SportKeySettingsTv phone pushLayer={nav.pushLayer} /><SportBackdropSettingsTv phone pushLayer={nav.pushLayer} /><SportSpoilerSettingsTv phone /></>
                 : <><ContentTab model={model} nav={nav} tt={tt} phone /><ChannelOverridesSection tt={tt} phone /></>}
@@ -132,7 +138,7 @@ export function TvSettingsPhone(props: TvViewProps) {
           <NavRow testId="settings-epg" label={tt('tabEpg')} onOk={() => nav.go('settings', { tab: 'epg' })} />
           <NavRow testId="settings-alerts" label={hubText(lang, 'epgWatchesTitle')} onOk={() => nav.go('settings', { tab: 'alerts' })} />
           <NavRow testId="settings-parental" label={tt('tabParental')} onOk={() => nav.go('settings', { tab: 'parental' })} />
-          <NavRow testId="settings-sport" label={tt('tabSport')} onOk={() => nav.go('settings', { tab: 'sport' })} />
+          <NavRow testId="settings-sport" label={sportLocked ? `${tt('tabSport')} · ${tt('plusBadge')}` : tt('tabSport')} onOk={() => nav.go('settings', { tab: 'sport' })} />
           <NavRow testId="settings-help" label={tt('tabHelp')} onOk={() => nav.go('settings', { tab: 'help' })} />
         </Card>
       </Section>

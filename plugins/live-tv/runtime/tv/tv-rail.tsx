@@ -1,6 +1,6 @@
 'use client'
 
-import { cloneElement, isValidElement, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { cloneElement, isValidElement, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react'
 import { onTvFocusEdge } from '@/lib/plugin-sdk'
 import { useTvSettings } from './tv-settings-store'
 import { useTvText } from './tv-strings'
@@ -9,6 +9,8 @@ import type { TvView } from './tv-shell'
 import { SportIcons } from '../sport/tv/sport-icons'
 import { V2 } from './v2-tokens'
 import { railTintBackground, useRailTint } from './rail-tint'
+import { useFeatureLocked } from '../supporter'
+import { getCachedRecordings, onRecordingsChanged, showRecordingsTab } from '../recordings'
 
 /**
  * IKONRADENS MÅTT — allt på ETT ställe, i designpixlar.
@@ -82,7 +84,13 @@ export function shellRailActive(view: TvView, redirecting: boolean): RailKey | n
   return redirecting ? 'home' : railKeyForView(view)
 }
 
-export function TvRail({ active, onSelect, isTv, narrow, labels: railLabels, showRecordings = false }: TvRailProps) {
+export function TvRail({ active, onSelect, isTv, narrow, labels: railLabels, showRecordings: recordingsEnabled = false }: TvRailProps) {
+  // Plus (supporter.ts): Sport döljs tyst när sportläget är låst; Inspelningar
+  // bara om det inte finns några inspelningar kvar att titta på.
+  const sportLocked = useFeatureLocked('sportsMode')
+  const recordingsLocked = useFeatureLocked('liveTvRecording')
+  const recordingList = useSyncExternalStore(onRecordingsChanged, getCachedRecordings, getCachedRecordings)
+  const showRecordings = showRecordingsTab(recordingsEnabled, recordingsLocked, recordingList)
   // En vy med bakgrundsbild (sporten) tonar rälsen efter bilden; annars rälsens vanliga yta.
   const tint = useRailTint()
   const railBg = tint ? railTintBackground(tint) : V2.railSurface
@@ -181,7 +189,7 @@ export function TvRail({ active, onSelect, isTv, narrow, labels: railLabels, sho
     // Kanaler (dagens Hem): egen ikon, skild från Guides Tv-ikon.
     { key: 'hub', label: tt('railChannels'), icon: <Icons.Eye /> },
     { key: 'guide', label: tt('railGuide'), icon: <Icons.Tv /> },
-    { key: 'sport', label: tt('railSport'), icon: <SportIcons.Ball /> },
+    ...(sportLocked ? [] : [{ key: 'sport' as const, label: tt('railSport'), icon: <SportIcons.Ball /> }]),
     { key: 'library', label: tt('railLibrary'), icon: <Icons.FilmStrip /> },
     { key: 'multi', label: tt('railMultiview'), icon: <Icons.SquaresFour /> },
     { key: 'favs', label: tt('railFavourites'), icon: <Icons.Heart /> },

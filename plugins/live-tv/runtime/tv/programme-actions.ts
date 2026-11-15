@@ -9,7 +9,9 @@ import type { TvStringKey } from './tv-strings'
 import { displayTitle } from '../display-title'
 import { addEpgWatch, getEpgWatches, hasEpgWatch, normalizeWatchQuery, removeEpgWatch } from '../epg-watches'
 import { hubText } from '../hub-strings'
-import { getCachedRecordings, recordingFor, scheduleRecording, stopRecording } from '../recordings'
+import { getCachedRecordings, isSupporterRequired, recordingFor, scheduleRecording, stopRecording } from '../recordings'
+import { isFeatureLocked } from '../supporter'
+import { showPlusLocked } from './plus-lock'
 import { planFromNow, planFromProgramme } from '../recording-plan'
 import { getTvSettings, recordMargins } from './tv-settings-store'
 
@@ -86,12 +88,23 @@ export function holdMenu(ctx: Ctx & { element: HTMLElement; tt: TT; locale: stri
     if (settings.recordingEnabled && state !== 'past') {
       const existing = recordingFor(getCachedRecordings(), channelKey(channel), programme.start)
         ?? (state === 'live' ? recordingFor(getCachedRecordings(), channelKey(channel), null) : undefined)
+      // Plus (supporter.ts): låst visar posten med lås och förklarar i stället
+      // för att planera; avbryta en befintlig går alltid. Svarar appen ändå
+      // 402 `supporter_required` visas samma förklaring.
+      const lang = locale.slice(0, 2)
+      const locked = isFeatureLocked('liveTvRecording')
+      const explainIfPlus = (e: unknown) => { if (isSupporterRequired(e)) showPlusLocked(lang, 'liveTvRecording') }
+      const lockedLabel = (label: string) => (locked ? `${label} · ${tt('plusBadge')}` : label)
+      const schedule = (run: () => Promise<unknown>) => () => {
+        if (locked) { showPlusLocked(lang, 'liveTvRecording'); return }
+        void run().catch(explainIfPlus)
+      }
       if (existing) {
         extra.push({ key: 'record', label: tt('cancelRecording'), run: () => { void stopRecording(existing.id).catch(() => {}) } })
       } else if (state === 'future') {
-        extra.push({ key: 'record', label: tt('recordProgramme', { time: formatClock(programme.start, locale) }), run: () => { void scheduleRecording(planFromProgramme(channel, programme, recordMargins(settings))).catch(() => {}) } })
+        extra.push({ key: 'record', label: lockedLabel(tt('recordProgramme', { time: formatClock(programme.start, locale) })), run: schedule(() => scheduleRecording(planFromProgramme(channel, programme, recordMargins(settings)))) })
       } else {
-        extra.push({ key: 'record', label: tt('record'), run: () => { void scheduleRecording(planFromNow(channel, programme, nowMs, recordMargins(settings))).catch(() => {}) } })
+        extra.push({ key: 'record', label: lockedLabel(tt('record')), run: schedule(() => scheduleRecording(planFromNow(channel, programme, nowMs, recordMargins(settings)))) })
       }
     }
   }

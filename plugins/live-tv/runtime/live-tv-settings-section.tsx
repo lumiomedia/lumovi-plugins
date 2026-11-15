@@ -44,6 +44,8 @@ import {
 import { useHubText } from './hub-strings'
 import { EpgStatusCard } from './epg-sources-section'
 import { SportKeySettingsDesktop } from './sport/sport-key-settings'
+import { useFeatureLocked } from './supporter'
+import { PlusLockedPanel } from './tv/plus-lock-panel'
 import { SportBackdropSettingsDesktop } from './sport/sport-backdrop-settings'
 import { SportSpoilerSettingsDesktop } from './sport/sport-spoiler-settings'
 import { XtreamLoginSection, prefillXtreamLogin } from './xtream-login-section'
@@ -263,6 +265,9 @@ function DesktopPage() {
   const s = useLiveTvSettings()
   const { tt } = useTvText()
   const tvSettings = useTvSettings()
+  // Plus (supporter.ts): inspelning och sportläget visas med lås när de är låsta.
+  const recordingLocked = useFeatureLocked('liveTvRecording')
+  const sportLocked = useFeatureLocked('sportsMode')
   const narrow = useLtNarrow()
   const vod = useVodLibrarySources()
   // Spellistor står öppen från början (Jerry 2026-10-15) — det är där man
@@ -421,11 +426,11 @@ function DesktopPage() {
         </LtRows>
       ))}
 
-      {section('recording', tt('settingRecording'), recordingSummary(tvSettings, tt), <RecordingSettingsDesktop tvSettings={tvSettings} tt={tt} />)}
+      {section('recording', tt('settingRecording'), recordingLocked ? tt('plusBadge') : recordingSummary(tvSettings, tt), <RecordingSettingsDesktop tvSettings={tvSettings} tt={tt} />)}
 
       {vod.rows.length > 0 ? section('library', h('sectionLibrary'), sourcesText(vod.rows.length), <VodLibraryCardView controller={vod} bare />) : null}
 
-      {section('sport', tt('tabSport'), tt('sportSettingsTitle'), (
+      {section('sport', tt('tabSport'), sportLocked ? tt('plusBadge') : tt('sportSettingsTitle'), sportLocked ? <PlusLockedPanel feature="sportsMode" phone /> : (
         <>
           <SportKeySettingsDesktop bare />
           <SportBackdropSettingsDesktop />

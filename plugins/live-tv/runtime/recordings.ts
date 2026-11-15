@@ -76,6 +76,16 @@ export class RecordRequestError extends Error {
   }
 }
 
+/**
+ * Kärnan nekar nya inspelningar utan Plus: 402
+ * `{"error":"supporter_required","feature":"liveTvRecording"}`. Knappen visar
+ * då Plus-förklaringen (tv/plus-lock.ts) i stället för "kunde inte starta".
+ */
+export function isSupporterRequired(e: unknown): boolean {
+  if (!(e instanceof RecordRequestError)) return false
+  return e.status === 402 || e.message === 'supporter_required'
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, init)
   let data: unknown = null
@@ -104,6 +114,10 @@ export async function listRecordings(): Promise<RecordingList> {
   return { recordings: Array.isArray(list?.recordings) ? list.recordings : [], folder: list?.folder ?? null, freeBytes: typeof list?.freeBytes === 'number' ? list.freeBytes : null, keepFreeBytes: typeof list?.keepFreeBytes === 'number' ? list.keepFreeBytes : 0 }
 }
 
+/**
+ * Planerar en inspelning. Utan Plus svarar appen 402 `supporter_required`
+ * (`isSupporterRequired`) — anroparen visar förklaringen, inget jobb skapas.
+ */
 export async function scheduleRecording(body: ScheduleBody): Promise<Recording> {
   const rec = await request<Recording>(`${RECORD_API}/schedule`, jsonInit('POST', body))
   // Svaret är sanningen om jobbet: in i cachen direkt, så knappen vet att det
@@ -208,6 +222,17 @@ export function useRecordings(active: boolean): { list: RecordingList | null; re
     return () => clearInterval(timer)
   }, [active, pending])
   return { list, refresh: refreshRecordings }
+}
+
+/**
+ * Visas Inspelningar i rälsen/arket? Av i inställningen → nej. Låst (Plus,
+ * supporter.ts) → bara när det finns inspelningar kvar att titta på; annars
+ * döljs fliken tyst, som kärnans rader.
+ */
+export function showRecordingsTab(enabled: boolean, locked: boolean, list: RecordingList | null): boolean {
+  if (!enabled) return false
+  if (!locked) return true
+  return (list?.recordings.length ?? 0) > 0
 }
 
 /** Jobbet för kanal + program (väntande eller pågående); utan program: det som spelas in på kanalen just nu. */

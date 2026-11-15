@@ -195,7 +195,8 @@ export function PlayerNextUpCard({ channel, next, nowMs, locale, ps }: {
 
 export function PlayerControlRow({ channel, tv, info, ps, isTv, paused, onTogglePause, controls, guideOpen, onToggleGuide, dotsRef, onOpenMenu, volumeRef, sportAvailable, matchesOpen, onToggleMatches, recording }: {
   /** Inspelningsknappen (use-channel-recording.ts). Saknas eller `enabled: false` = ingen knapp. */
-  recording?: { enabled: boolean; active: boolean; onToggle: () => void }
+  /** `locked`: inspelning är Plus — knappen bär ett lås och förklarar i stället för att spela in. */
+  recording?: { enabled: boolean; active: boolean; locked?: boolean; onToggle: () => void }
   channel: M3uChannel
   tv: LiveTvPlayerTvProps
   info: NowNextLater
@@ -258,8 +259,13 @@ export function PlayerControlRow({ channel, tv, info, ps, isTv, paused, onToggle
           <GuideIcon size={icon} />
         </div>
         {recording?.enabled ? (
-          <div data-testid="player-record" {...station(recording.onToggle, undefined, { 'aria-label': recording.active ? tt('stopRecording') : tt('record'), 'aria-pressed': recording.active ? 'true' : 'false', 'data-guide-row': '' })} style={{ ...ctlStyle(ps, recording.active), padding: 0, color: recording.active ? '#ef4444' : undefined }}>
+          <div data-testid="player-record" {...station(recording.onToggle, undefined, { 'aria-label': recording.active ? tt('stopRecording') : recording.locked ? `${tt('record')} · ${tt('plusBadge')}` : tt('record'), 'aria-pressed': recording.active ? 'true' : 'false', 'data-guide-row': '', ...(recording.locked && !recording.active ? { 'data-plus-locked': '' } : {}) })} style={{ ...ctlStyle(ps, recording.active), padding: 0, color: recording.active ? '#ef4444' : undefined, position: 'relative' }}>
             <Icons.Record size={icon} filled={recording.active} />
+            {recording.locked && !recording.active ? (
+              <span data-testid="player-record-lock" aria-hidden="true" style={{ position: 'absolute', right: ps(2), bottom: ps(2), display: 'inline-flex', opacity: 0.9 }}>
+                <Icons.Lock size={Math.round(icon * 0.5)} />
+              </span>
+            ) : null}
           </div>
         ) : null}
         {sportAvailable && onToggleMatches ? (

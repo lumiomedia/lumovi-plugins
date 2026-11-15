@@ -27,7 +27,9 @@ import { setChannelHidden, setChannelName, sourceName } from '../channel-overrid
 import { releaseAllSurfaces } from './video-surface'
 import { cutoutClipPath, useSurfaceCutouts, type SurfaceCutout } from './surface-cutouts'
 import { buildTvPlayerProps } from './tv-player-props'
-import { useRecordings } from '../recordings'
+import { showRecordingsTab, useRecordings } from '../recordings'
+import { useFeatureLocked } from '../supporter'
+import { PlusLockedPanel } from './plus-lock-panel'
 import { multiviewFor, usePlayerSport } from '../sport/tv/player-sport'
 import type { LiveTvPlayerTvProps } from './tv-player-types'
 import { TV_VIEWS } from './tv-views'
@@ -224,7 +226,10 @@ export function LiveTvTvShell({ params, onNavigate, sportOnly = false }: LiveTvT
   const model = useLiveTvModel()
   const settings = useTvSettings()
   // Inspelningslistan hålls varm medan Live TV är öppet: hold-OK-menyn läser den synkront.
-  useRecordings(false)
+  const { list: recordingList } = useRecordings(false)
+  // Plus (supporter.ts): sportläget och inspelning. Okänd status/äldre värd = öppet.
+  const sportLocked = useFeatureLocked('sportsMode')
+  const recordingsLocked = useFeatureLocked('liveTvRecording')
   // Hål i skalets bakgrund åt nativa videoytor (multivy, förhandsvisningar).
   // Tom lista = ingen nativ yta lever, och skalet målas precis som förut.
   const cutouts = useSurfaceCutouts()
@@ -795,7 +800,9 @@ export function LiveTvTvShell({ params, onNavigate, sportOnly = false }: LiveTvT
     setMultiviewState(multiviewFor(keys))
     leavePlayerForMultiview()
   }, [leavePlayerForMultiview])
-  const playerSport = usePlayerSport({ playingKey: active !== null ? channelKey(active.channel) : null, model, play, openMultiview: openSportMultiview })
+  // Sportkrommet i spelaren är sportläget (Plus): låst → ingen nyckel att slå upp, inget krom.
+  const playerSportUnlocked = usePlayerSport({ playingKey: active !== null && !sportLocked ? channelKey(active.channel) : null, model, play, openMultiview: openSportMultiview })
+  const playerSport = sportLocked ? undefined : playerSportUnlocked
 
   // FJÄRRENS KNAPPAR (remote-keys.ts). Skalets egna åtgärder; spelarens
   // (minigiude, meny, favorit, paus, kanal upp/ner) tar kromet via
@@ -908,7 +915,12 @@ export function LiveTvTvShell({ params, onNavigate, sportOnly = false }: LiveTvT
         />
       )}
       <main ref={mainRef} style={{ flex: 1, minWidth: 0, minHeight: 0, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-        {redirectCheck ? null : <View key={view} model={model} nav={nav} params={viewParams} settings={settings} phone={phone} standalone={sportOnly} />}
+        {redirectCheck
+          ? null
+          : view === 'sport' && sportLocked
+            // Sportvyn nådd ändå (startvy, fjärrens sportknapp, sportsidan): förklaringen i stället.
+            ? <PlusLockedPanel feature="sportsMode" phone={phone} />
+            : <View key={view} model={model} nav={nav} params={viewParams} settings={settings} phone={phone} standalone={sportOnly} />}
       </main>
       {/* Flik-raden (telefon): borta medan spelaren är öppen — den ligger
           `position: fixed` och hade annars legat över bilden. */}
@@ -918,7 +930,7 @@ export function LiveTvTvShell({ params, onNavigate, sportOnly = false }: LiveTvT
           title={tt('moreActions')}
           items={[
             { key: 'favs', label: tt('sheetFavourites'), run: () => go('favs') },
-            ...(settings.recordingEnabled ? [{ key: 'recordings', label: tt('sheetRecordings'), run: () => go('recordings') }] : []),
+            ...(showRecordingsTab(settings.recordingEnabled, recordingsLocked, recordingList) ? [{ key: 'recordings', label: tt('sheetRecordings'), run: () => go('recordings') }] : []),
             { key: 'multi', label: tt('sheetMultiview'), run: () => go('multi') },
             { key: 'settings', label: tt('sheetSettings'), run: () => go('settings') },
           ]}

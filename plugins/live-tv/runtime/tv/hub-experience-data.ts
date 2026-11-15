@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useFeatureLocked } from '../supporter'
 import { channelKey, type M3uChannel } from '../live-tv-data'
 import { catchUpAcross, type CatchUpItem } from '../catch-up'
 import type { EpgProgramme, NowNextLater } from '../epg/types'
@@ -310,8 +311,10 @@ export function useExperienceRows(model: LiveTvModel, chip: string | null, limit
 
   const counts = useMemo(() => groupCounts(model.channels), [model.channels])
   // Live sport: dagens sportdag ur värdens lokala cache, bara i hemläget.
-  const { data: sportDay } = useSportDay(chip === null ? localDayKey(model.nowMs) : null, model.nowMs)
-  const sport = sportDay?.matches
+  // Sportläget är Plus (supporter.ts): låst → raden döljs tyst (ingen sportdag hämtas).
+  const sportLocked = useFeatureLocked('sportsMode')
+  const { data: sportDay } = useSportDay(chip === null && !sportLocked ? localDayKey(model.nowMs) : null, model.nowMs)
+  const sport = sportLocked ? undefined : sportDay?.matches
   const byKey = model.byKey
   const channelFor = useMemo(() => (key: string) => byKey.get(key), [byKey])
   // Egna listor som hemrader: listans sparade kanaler slås upp i modellen (aktuell ström/logga).

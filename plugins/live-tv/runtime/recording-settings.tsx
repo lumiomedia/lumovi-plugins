@@ -5,8 +5,10 @@ import { requestOpenBrowsePage } from '@/lib/plugin-sdk'
 import { LtChoiceRow, LtNote, LtRows, LtTextRow, LtToggleRow } from './settings-ui'
 import { TvRow } from './tv-settings-ui'
 import { Heading, Row } from './tv/settings-tabs'
-import { Toggle, dp } from './tv/tv-ui'
-import type { TvStringKey } from './tv/tv-strings'
+import { Icons, Toggle, dp } from './tv/tv-ui'
+import { useTvText, type TvStringKey } from './tv/tv-strings'
+import { openSupporterSettings, useFeatureLocked } from './supporter'
+import { showPlusLocked } from './tv/plus-lock'
 import { TIMESHIFT_MINUTE_OPTIONS, nextRecordEndLate, nextRecordStartEarly, nextTimeshiftMinutes, setTvSettings, type TimeshiftMinutesSetting, type TvSettings } from './tv/tv-settings-store'
 import { RECORD_END_LATE_OPTIONS, RECORD_KEEP_FREE_OPTIONS, RECORD_START_EARLY_OPTIONS, type RecordEndLateMin, type RecordStartEarlyMin } from './recording-plan'
 import { formatBytes, saveRecordSettings, useRecordings } from './recordings'
@@ -71,6 +73,19 @@ export function RecordingSettingsDesktop({ tvSettings, tt }: { tvSettings: TvSet
     const folder = await desktopSdk.pickPluginFolder?.()
     if (folder) await saveRecordSettings({ folder, keepFreeGb })
   }
+  // Plus (supporter.ts): låst → EN rad med förklaringen och vägen till Supporter
+  // i stället för inspelningens val. Valen ligger kvar och gäller igen med Plus.
+  // Tidigare inspelningar går fortfarande att öppna; timeshift är inte Plus.
+  const locked = useFeatureLocked('liveTvRecording')
+  if (locked) {
+    return (
+      <LtRows>
+        <LtChoiceRow first testId="lt-record-locked" label={`${tt('settingRecording')} · ${tt('plusBadge')}`} desc={tt('plusRecordingLocked')} options={[{ key: 'supporter', label: tt('plusOpenSupporter') }]} value="" onChange={openSupporterSettings} />
+        <LtChoiceRow testId="lt-record-open" label={tt('settingRecordOpen')} options={[{ key: 'open', label: tt('railRecordings') }]} value="" onChange={openRecordings} />
+        {timeshiftDesktopRows(tvSettings, tt, onDevice)}
+      </LtRows>
+    )
+  }
   return (
     <LtRows>
       <LtToggleRow first testId="lt-record-enabled" label={tt('settingRecording')} desc={tt('settingRecordingHint')} checked={tvSettings.recordingEnabled} onChange={(recordingEnabled) => setTvSettings({ recordingEnabled })} />
@@ -106,6 +121,15 @@ export function RecordingSettingsDesktop({ tvSettings, tt }: { tvSettings: TvSet
       />
       <LtToggleRow first={false} testId="lt-record-notify" label={tt('settingRecordNotify')} checked={tvSettings.recordNotify} onChange={(recordNotify) => setTvSettings({ recordNotify })} />
       <LtChoiceRow testId="lt-record-open" label={tt('settingRecordOpen')} options={[{ key: 'open', label: tt('railRecordings') }]} value="" onChange={openRecordings} />
+      {timeshiftDesktopRows(tvSettings, tt, onDevice)}
+    </LtRows>
+  )
+}
+
+/** Pausa Live TV (timeshift) — inte Plus, så raderna står kvar även när inspelning är låst. */
+function timeshiftDesktopRows(tvSettings: TvSettings, tt: TT, onDevice: boolean) {
+  return (
+    <>
       {showDeviceTimeshift() ? null : (
         <LtToggleRow first={false} testId="lt-timeshift-enabled" label={tt('settingTimeshift')} desc={tt('settingTimeshiftHint')} checked={tvSettings.timeshiftEnabled} onChange={(timeshiftEnabled) => setTvSettings({ timeshiftEnabled })} />
       )}
@@ -119,23 +143,32 @@ export function RecordingSettingsDesktop({ tvSettings, tt }: { tvSettings: TvSet
       {showDeviceTimeshift() ? (
         <LtToggleRow first={false} testId="lt-timeshift-device" label={tt('settingTimeshift')} desc={tt('settingTimeshiftDeviceHint')} checked={deviceTimeshiftOn(tvSettings, onDevice)} onChange={(on) => setDeviceTimeshift(tvSettings, on)} />
       ) : null}
-    </LtRows>
+    </>
   )
 }
 
 /** Live TV:s egna inställningar (skrivbord/TV i skalet och telefonen): rader i Beteende-stil. */
 export function RecordingSettingsRows({ settings, tt, phone = false, onOpen }: { settings: TvSettings; tt: TT; phone?: boolean; onOpen: () => void }) {
   const onDevice = useTimeshiftOnDevice()
+  const { lang } = useTvText()
+  const locked = useFeatureLocked('liveTvRecording')
   const { list } = useRecordings(false)
   const keepFreeGb = keepFreeGbOf(list)
   const rows = (
     <>
-      <Row phone={phone} testId="setting-recordingEnabled" label={tt('settingRecording')} right={<Toggle on={settings.recordingEnabled} />} onOk={() => setTvSettings({ recordingEnabled: !settings.recordingEnabled })} />
-      <Row phone={phone} testId="setting-recordStartEarlyMin" label={tt('settingRecordStartEarly')} right={minutesLabel(tt, settings.recordStartEarlyMin)} onOk={() => setTvSettings({ recordStartEarlyMin: nextRecordStartEarly(settings.recordStartEarlyMin) })} />
-      <Row phone={phone} testId="setting-recordEndLateMin" label={tt('settingRecordEndLate')} right={minutesLabel(tt, settings.recordEndLateMin)} onOk={() => setTvSettings({ recordEndLateMin: nextRecordEndLate(settings.recordEndLateMin) })} />
-      <Row phone={phone} testId="setting-recordNotify" label={tt('settingRecordNotify')} right={<Toggle on={settings.recordNotify} />} onOk={() => setTvSettings({ recordNotify: !settings.recordNotify })} />
-      <Row phone={phone} testId="setting-recordKeepFree" label={tt('settingRecordKeepFree')} right={tt('gigabytes', { gb: keepFreeGb })} onOk={() => { void saveRecordSettings({ folder: list?.folder ?? null, keepFreeGb: nextKeepFree(keepFreeGb) }) }} />
-      <Row phone={phone} testId="setting-recordFreeSpace" label={tt('settingRecordFreeSpace')} right={typeof list?.freeBytes === 'number' ? formatBytes(list.freeBytes, 'en') : '–'} onOk={() => {}} />
+      {locked ? (
+        // Plus: EN rad med lås; OK förklarar och leder till Inställningar → Supporter.
+        <Row phone={phone} testId="setting-recordingLocked" label={tt('settingRecording')} right={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icons.Lock size={phone ? 14 : dp(16)} />{tt('plusBadge')}</span>} onOk={() => showPlusLocked(lang, 'liveTvRecording')} />
+      ) : (
+        <>
+          <Row phone={phone} testId="setting-recordingEnabled" label={tt('settingRecording')} right={<Toggle on={settings.recordingEnabled} />} onOk={() => setTvSettings({ recordingEnabled: !settings.recordingEnabled })} />
+          <Row phone={phone} testId="setting-recordStartEarlyMin" label={tt('settingRecordStartEarly')} right={minutesLabel(tt, settings.recordStartEarlyMin)} onOk={() => setTvSettings({ recordStartEarlyMin: nextRecordStartEarly(settings.recordStartEarlyMin) })} />
+          <Row phone={phone} testId="setting-recordEndLateMin" label={tt('settingRecordEndLate')} right={minutesLabel(tt, settings.recordEndLateMin)} onOk={() => setTvSettings({ recordEndLateMin: nextRecordEndLate(settings.recordEndLateMin) })} />
+          <Row phone={phone} testId="setting-recordNotify" label={tt('settingRecordNotify')} right={<Toggle on={settings.recordNotify} />} onOk={() => setTvSettings({ recordNotify: !settings.recordNotify })} />
+          <Row phone={phone} testId="setting-recordKeepFree" label={tt('settingRecordKeepFree')} right={tt('gigabytes', { gb: keepFreeGb })} onOk={() => { void saveRecordSettings({ folder: list?.folder ?? null, keepFreeGb: nextKeepFree(keepFreeGb) }) }} />
+          <Row phone={phone} testId="setting-recordFreeSpace" label={tt('settingRecordFreeSpace')} right={typeof list?.freeBytes === 'number' ? formatBytes(list.freeBytes, 'en') : '–'} onOk={() => {}} />
+        </>
+      )}
       <Row phone={phone} testId="setting-recordOpen" label={tt('settingRecordOpen')} right="›" onOk={onOpen} />
       {showDeviceTimeshift() ? null : (
         <Row phone={phone} testId="setting-timeshiftEnabled" label={tt('settingTimeshift')} right={<Toggle on={settings.timeshiftEnabled} />} onOk={() => setTvSettings({ timeshiftEnabled: !settings.timeshiftEnabled })} />
@@ -149,7 +182,7 @@ export function RecordingSettingsRows({ settings, tt, phone = false, onOpen }: {
   if (phone) return rows
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: dp(10) }}>
-      <Heading hint={tt('settingRecordingHint')}>{tt('settingRecording')}</Heading>
+      <Heading hint={locked ? tt('plusRecordingLocked') : tt('settingRecordingHint')}>{tt('settingRecording')}</Heading>
       {rows}
     </section>
   )
@@ -158,16 +191,24 @@ export function RecordingSettingsRows({ settings, tt, phone = false, onOpen }: {
 /** Appens Inställningar i TV-läget: TvRow-rader med hjälptext. */
 export function RecordingSettingsTvRows({ tvSettings, tt }: { tvSettings: TvSettings; tt: TT }) {
   const onDevice = useTimeshiftOnDevice()
+  const locked = useFeatureLocked('liveTvRecording')
   const { list } = useRecordings(false)
   const keepFreeGb = keepFreeGbOf(list)
   return (
     <>
-      <TvRow testId="tv-record-enabled" label={tt('settingRecording')} hint={tt('settingRecordingHint')} toggle={tvSettings.recordingEnabled} onToggle={(recordingEnabled) => setTvSettings({ recordingEnabled })} />
-      <TvRow testId="tv-record-start-early" label={tt('settingRecordStartEarly')} value={minutesLabel(tt, tvSettings.recordStartEarlyMin)} onOk={() => setTvSettings({ recordStartEarlyMin: nextRecordStartEarly(tvSettings.recordStartEarlyMin) })} />
-      <TvRow testId="tv-record-end-late" label={tt('settingRecordEndLate')} value={minutesLabel(tt, tvSettings.recordEndLateMin)} onOk={() => setTvSettings({ recordEndLateMin: nextRecordEndLate(tvSettings.recordEndLateMin) })} />
-      <TvRow testId="tv-record-notify" label={tt('settingRecordNotify')} toggle={tvSettings.recordNotify} onToggle={(recordNotify) => setTvSettings({ recordNotify })} />
-      <TvRow testId="tv-record-keep-free" label={tt('settingRecordKeepFree')} hint={tt('settingRecordKeepFreeHint')} value={tt('gigabytes', { gb: keepFreeGb })} onOk={() => { void saveRecordSettings({ folder: list?.folder ?? null, keepFreeGb: nextKeepFree(keepFreeGb) }) }} />
-      <TvRow testId="tv-record-free-space" label={tt('settingRecordFreeSpace')} value={typeof list?.freeBytes === 'number' ? formatBytes(list.freeBytes, 'en') : '–'} valueTone="muted" />
+      {locked ? (
+        // Plus: redan i appens Inställningar — OK går direkt till Supporter.
+        <TvRow testId="tv-record-locked" label={tt('settingRecording')} hint={tt('plusRecordingLocked')} value={<span style={{ display: 'inline-flex', alignItems: 'center', gap: dp(6) }}><Icons.Lock size={dp(16)} />{tt('plusBadge')}</span>} onOk={openSupporterSettings} />
+      ) : (
+        <>
+          <TvRow testId="tv-record-enabled" label={tt('settingRecording')} hint={tt('settingRecordingHint')} toggle={tvSettings.recordingEnabled} onToggle={(recordingEnabled) => setTvSettings({ recordingEnabled })} />
+          <TvRow testId="tv-record-start-early" label={tt('settingRecordStartEarly')} value={minutesLabel(tt, tvSettings.recordStartEarlyMin)} onOk={() => setTvSettings({ recordStartEarlyMin: nextRecordStartEarly(tvSettings.recordStartEarlyMin) })} />
+          <TvRow testId="tv-record-end-late" label={tt('settingRecordEndLate')} value={minutesLabel(tt, tvSettings.recordEndLateMin)} onOk={() => setTvSettings({ recordEndLateMin: nextRecordEndLate(tvSettings.recordEndLateMin) })} />
+          <TvRow testId="tv-record-notify" label={tt('settingRecordNotify')} toggle={tvSettings.recordNotify} onToggle={(recordNotify) => setTvSettings({ recordNotify })} />
+          <TvRow testId="tv-record-keep-free" label={tt('settingRecordKeepFree')} hint={tt('settingRecordKeepFreeHint')} value={tt('gigabytes', { gb: keepFreeGb })} onOk={() => { void saveRecordSettings({ folder: list?.folder ?? null, keepFreeGb: nextKeepFree(keepFreeGb) }) }} />
+          <TvRow testId="tv-record-free-space" label={tt('settingRecordFreeSpace')} value={typeof list?.freeBytes === 'number' ? formatBytes(list.freeBytes, 'en') : '–'} valueTone="muted" />
+        </>
+      )}
       <TvRow testId="tv-record-open" label={tt('settingRecordOpen')} caret onOk={openRecordings} />
       {showDeviceTimeshift() ? null : (
         <TvRow testId="tv-timeshift-enabled" label={tt('settingTimeshift')} hint={tt('settingTimeshiftHint')} toggle={tvSettings.timeshiftEnabled} onToggle={(timeshiftEnabled) => setTvSettings({ timeshiftEnabled })} />

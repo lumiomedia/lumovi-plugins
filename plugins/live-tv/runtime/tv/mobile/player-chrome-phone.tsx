@@ -96,7 +96,8 @@ export function TvPlayerChromePhone({ channel, tv, controls, paused, onTogglePau
   const [sheet, setSheet] = useState<Sheet>(null)
   const timerRef = useRef<number | null>(null)
   const info = tv.nowFor(channel)
-  const rec = useChannelRecording(channel, info.now, tv.nowMs)
+  // Låst inspelning (Plus): förklaringens knapp stänger spelaren innan Inställningar öppnas.
+  const rec = useChannelRecording(channel, info.now, tv.nowMs, { beforeOpenSettings: onClose })
   const hideMs = tv.bannerHideMs
 
   const clearTimer = useCallback(() => {
@@ -180,7 +181,7 @@ export function TvPlayerChromePhone({ channel, tv, controls, paused, onTogglePau
     { key: 'pause', label: paused ? tt('menuResume') : tt('menuPause'), run: onTogglePause },
     { key: 'fav', label: favLabel, run: tv.onToggleFavourite },
     { key: 'info', label: tt('menuChannelDetails'), run: tv.onOpenChannelDetails },
-    ...(rec.enabled ? [{ key: 'record', label: rec.active ? tt('stopRecording') : tt('record'), run: () => { void rec.toggle() } }] : []),
+    ...(rec.enabled ? [{ key: 'record', label: rec.active ? tt('stopRecording') : rec.locked ? `${tt('record')} · ${tt('plusBadge')}` : tt('record'), run: () => { void rec.toggle() } }] : []),
   ]
   // Matchen som spelar och dess källor — ur dagens redan hämtade matcher, inga anrop.
   const currentKey = channelKey(channel)
@@ -297,7 +298,7 @@ export function TvPlayerChromePhone({ channel, tv, controls, paused, onTogglePau
               {tv.quality ? <span>{tv.quality}</span> : null}
             </span>
           </div>
-          {rec.error ? <div style={{ position: 'absolute', left: 12, right: 12, bottom: 120 }}><RecordingErrorNote error={rec.error} ps={(v) => v} tt={tt} /></div> : null}
+          {rec.error ? <div style={{ position: 'absolute', left: 12, right: 12, bottom: 120 }}><RecordingErrorNote error={rec.error} ps={(v) => v} tt={tt} onOpenSupporter={rec.openSupporter} /></div> : null}
           {timeshiftRow ? <div style={{ position: 'absolute', left: 12, right: 12, bottom: 64 }}>{timeshiftRow}</div> : null}
           <div style={{ position: 'absolute', left: 12, right: 12, bottom: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
             {muteBtn(40)}

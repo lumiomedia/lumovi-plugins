@@ -1,3 +1,4 @@
+import { gatedMount, installSupporterApi, type SupporterApiLike } from './supporter'
 import { createElement } from 'react'
 import * as sdk from '@/lib/plugin-sdk'
 import { type BrowsePageProps, type LumioPlugin } from '@/lib/plugin-sdk'
@@ -92,6 +93,9 @@ export const LiveTvPlugin: LumioPlugin = {
   preinstalled: true,
 
   register(ctx) {
+    // Supporternivån (Lumovi): inspelning och sport är Plus. Saknas fältet
+    // (äldre värd) är allt öppet — supporter.ts.
+    installSupporterApi((ctx as unknown as { supporter?: SupporterApiLike }).supporter)
     // Finns appens HLS-spellisteproxy? Svaret behövs före första kanalstarten
     // (Auto väljer HLS bara med proxyn, se live-format.ts).
     void detectHlsPlaylistProxy()
@@ -100,8 +104,9 @@ export const LiveTvPlugin: LumioPlugin = {
     if (typeof window !== 'undefined') void ensureVodChoiceMigrated(vodStatus).catch(() => {})
     // Påminnelser om kommande program, oavsett var i appen man står.
     ctx.registerBootstrap({ id: 'live-tv-reminders', Mount: LiveTvRemindersMount })
-    ctx.registerBootstrap({ id: 'live-tv-sport-goals', Mount: SportGoalMount })
-    ctx.registerBootstrap({ id: 'live-tv-sport-couch', Mount: SportCouchMount })
+    // Sportläget är Plus: målnotiserna och sportens Soffläge-yta monteras bara när det är öppet.
+    ctx.registerBootstrap({ id: 'live-tv-sport-goals', Mount: gatedMount('sportsMode', SportGoalMount) })
+    ctx.registerBootstrap({ id: 'live-tv-sport-couch', Mount: gatedMount('sportsMode', SportCouchMount) })
     ctx.registerSettingsSection({
       id: 'm3u',
       label: { en: 'Live TV', sv: 'Live TV', de: 'Live-TV', fr: 'TV en direct', es: 'TV en directo' },
