@@ -498,6 +498,7 @@ export const Icons = {
   Play: ({ size = dp(24) }: IconProps) => svg(size, <path d="M8 5v14l11-7z" />, true),
   Pause: ({ size = dp(24) }: IconProps) => svg(size, <path d="M7 5h4v14H7zM13 5h4v14h-4z" />, true),
   Bell: ({ size = dp(20), filled = false }: IconProps) => svg(size, <><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20a2 2 0 0 0 4 0" /></>, filled),
+  Pin: ({ size = dp(18), filled = false }: IconProps) => svg(size, <><path d="M9 3.5h6l-1 6.5 3.5 3.5h-11L10 10z" strokeLinejoin="round" /><path d="M12 13.5V21" /></>, filled),
   Lock: ({ size = dp(18) }: IconProps) => svg(size, <><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>),
   Plus: ({ size = dp(40) }: IconProps) => svg(size, <path d="M12 5v14M5 12h14" />),
   Dots: ({ size = dp(24) }: IconProps) => svg(size, <><circle cx="6" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18" cy="12" r="1.6" /></>, true),

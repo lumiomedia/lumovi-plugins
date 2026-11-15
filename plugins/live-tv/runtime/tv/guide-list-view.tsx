@@ -14,6 +14,7 @@ import { GuidePaginationRow, ROWS_STEP, useHoverSelect, withPointerLeave } from 
 import { V2 } from './v2-tokens'
 import { ACCENT, GUIDE_CELL_RADIUS, GUIDE_CHANNEL_W, GUIDE_ROW_GAP, GUIDE_ROW_H, ChannelCellV2, accentMix, ellipsis, useAutoSelection, useFocusNowOnTick, useLatest, useRemindersVersion, withLeftEdge } from './guide-nowsen-view'
 import type { GuideSelection, GuideViewProps } from './guide-types'
+import { GuidePinnedFrame, PIN_ORIGIN_OPACITY, guidePinKeyDown, inPinnedRow, type PinState } from './guide-pin'
 import { displayTitle } from '../display-title'
 
 /** Programkortens kolumn (handoff "Kanallista"). */
@@ -51,7 +52,7 @@ const onKeys = (props: StationProps, handle: (key: string) => boolean): StationP
  * Data och kapning som Nu/Sen: `filterByGroup` + nu-snapshotet, högst
  * `ROWS_STEP` rader med "Visa fler".
  */
-export function GuideListView({ model, nav, category, categoryLabel, selection, onSelect, onFocusProgramme, onLeftEdge, focusChannelKey, nowTick, isTv }: GuideViewProps): JSX.Element {
+export function GuideListView({ model, nav, category, categoryLabel, selection, onSelect, onFocusProgramme, onLeftEdge, focusChannelKey, nowTick, isTv, pinned, onTogglePin }: GuideViewProps): JSX.Element {
   const { tt, locale } = useTvText()
   const { nowMs } = model
   const focusProgramme = onFocusProgramme ?? onSelect
@@ -105,17 +106,18 @@ export function GuideListView({ model, nav, category, categoryLabel, selection, 
     return true
   }
   const focusRow = (key: string | null): boolean => {
-    const rowEl = Array.from(rootRef.current?.querySelectorAll<HTMLElement>('[data-guide-v2-row]') ?? []).find((r) => r.dataset.key === key)
+    const rowEl = Array.from(rootRef.current?.querySelectorAll<HTMLElement>('[data-guide-v2-row]') ?? []).find((r) => r.dataset.key === key && !inPinnedRow(r))
     const target = rowEl?.querySelector<HTMLElement>('[data-now-station]')
     if (!target) return false
     target.focus()
     return true
   }
 
-  const api = useLatest<ListApi>({ focusProgramme, nav, nowMs, tt, locale, onLeftEdge, hover, focusCard })
+  const api = useLatest<ListApi>({ focusProgramme, nav, nowMs, tt, locale, onLeftEdge, hover, focusCard, onTogglePin })
+  const pinnedKey = pinned ? channelKey(pinned) : null
 
   return (
-    <div ref={rootRef} data-testid="guide-list-view" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    <div ref={rootRef} data-testid="guide-list-view" onKeyDownCapture={(event) => guidePinKeyDown(event, rootRef.current, { onLeftEdge, rowJump: true })} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <div data-testid="list-header" style={{ height: dp(44), flexShrink: 0, display: 'flex', gap: dp(GUIDE_ROW_GAP), fontSize: dp(15), letterSpacing: '0.1em', textTransform: 'uppercase', color: V2.text3 }}>
         <div style={{ width: dp(GUIDE_CHANNEL_W), flexShrink: 0, display: 'flex', alignItems: 'center', paddingLeft: dp(16), boxSizing: 'border-box', ...ellipsis }}>
           {`${categoryLabel ?? tt('categoryAll')} · ${tt('channelsCount', { count: channels.length })}`}
@@ -125,7 +127,26 @@ export function GuideListView({ model, nav, category, categoryLabel, selection, 
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: dp(GUIDE_ROW_GAP) }}>
-        <div data-scroll="" data-testid="list-scroll" style={{ flex: 1, minWidth: 0, overflowY: 'auto', scrollbarWidth: 'none', display: 'flex', flexDirection: 'column', gap: dp(GUIDE_ROW_GAP), paddingTop: dp(6), paddingBottom: dp(24), boxSizing: 'border-box' }}>
+        <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        {pinned && pinnedKey && !nothing ? (
+          <GuidePinnedFrame isTv={isTv} onUnpin={() => onTogglePin?.(pinned)}>
+            <ListRow
+              channel={pinned}
+              rowKey={pinnedKey}
+              info={nowFor(pinned).now ? nowFor(pinned) : null}
+              selected={selectedKey === pinnedKey}
+              init={false}
+              number={model.channelNumber(pinned)}
+              pinned={model.pinnedSet.has(pinnedKey)}
+              locked={model.locked.has(pinnedKey)}
+              nowMs={nowMs}
+              hoverEnabled={hover.enter !== undefined}
+              pinState="sticky"
+              api={api}
+            />
+          </GuidePinnedFrame>
+        ) : null}
+        <div data-scroll="" data-testid="list-scroll" style={{ flex: 1, minWidth: 0, minHeight: 0, overflowY: 'auto', scrollbarWidth: 'none', display: 'flex', flexDirection: 'column', gap: dp(GUIDE_ROW_GAP), paddingTop: dp(6), paddingBottom: dp(24), boxSizing: 'border-box' }}>
           {nothing ? (
             <div data-testid="list-empty-state" {...station(() => {}, undefined, { 'data-init': '' })} style={{ margin: dp(12), padding: dp(24), borderRadius: dp(12), background: V2.surface1, fontSize: dp(18), color: V2.text3 }}>
               {model.channelsLoading ? tt('loadingChannels') : model.epgLoading ? tt('loadingGuide') : tt('guideEmpty')}
@@ -145,10 +166,12 @@ export function GuideListView({ model, nav, category, categoryLabel, selection, 
                 locked={model.locked.has(key)}
                 nowMs={nowMs}
                 hoverEnabled={hover.enter !== undefined}
+                pinState={key === pinnedKey ? 'origin' : 'none'}
                 api={api}
               />
             )
           })}
+        </div>
         </div>
 
         <div ref={cardsRef} data-testid="list-cards" style={{ flex: `0 1 ${dp(CARDS_W)}px`, minWidth: dp(360), display: 'flex', flexDirection: 'column', gap: dp(10), paddingTop: dp(6), paddingLeft: dp(6), boxSizing: 'border-box' }}>
@@ -223,10 +246,11 @@ interface ListApi {
   onLeftEdge?(): boolean
   hover: { enter?: (sel: GuideSelection) => void; leave?: () => void }
   focusCard(index: number): boolean
+  onTogglePin?(channel: M3uChannel): void
 }
 
 /** EN rad i Kanallistan, memoiserad (se `TimelineRow`): en fokusflytt ritar om två rader, inte alla. */
-const ListRow = memo(function ListRow({ channel, rowKey: key, info, selected, init, number, pinned, locked, nowMs, hoverEnabled, api }: {
+const ListRow = memo(function ListRow({ channel, rowKey: key, info, selected, init, number, pinned, locked, nowMs, hoverEnabled, pinState, api }: {
   channel: M3uChannel
   rowKey: string
   info: NowNextLater | null
@@ -237,6 +261,8 @@ const ListRow = memo(function ListRow({ channel, rowKey: key, info, selected, in
   locked: boolean
   nowMs: number
   hoverEnabled: boolean
+  /** Fäst kanal: `sticky` = raden överst, `origin` = originalraden i listan (tonas). */
+  pinState: PinState
   api: { readonly current: ListApi }
 }): JSX.Element {
   const { tt } = useTvText()
@@ -250,8 +276,8 @@ const ListRow = memo(function ListRow({ channel, rowKey: key, info, selected, in
     (k) => (k === 'ArrowRight' ? api.current.focusCard(0) : false),
   )
   return (
-    <div data-testid="list-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0 }}>
-      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} />
+    <div data-testid="list-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0, opacity: pinState === 'origin' ? PIN_ORIGIN_OPACITY : undefined }}>
+      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} pinState={pinState} onPinToggle={api.current.onTogglePin ? () => api.current.onTogglePin?.(channel) : undefined} />
       <div
         data-testid="list-now"
         data-now-station=""

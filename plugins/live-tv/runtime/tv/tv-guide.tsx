@@ -7,7 +7,8 @@ import { formatClock, progressOf } from '../live-tv-ui'
 import type { TvViewProps } from './tv-shell'
 import { Chip, Progress, Segment, Tag, TV, dp, station, useTvClockNode } from './tv-ui'
 import { useTvText } from './tv-strings'
-import { setGuideMode, useGuideMode, type GuideMode } from './tv-settings-store'
+import { useTvMode } from '@/lib/plugin-sdk'
+import { getTvSettings, setGuideMode, setTvSettings, useGuideMode, type GuideMode } from './tv-settings-store'
 import { blockGeometry, nowLinePct, scheduleWindow, timeTicks } from './tv-schedule-window'
 import { ChannelCell, FAVS_GROUP, MORE_GROUPS, channelColumnStyle, filterByGroup, useDebouncedChannel, useGuideGroups } from './tv-guide-shared'
 import { groupCounts } from './group-chips'
@@ -20,6 +21,7 @@ import { TvGuideNowPhone, phoneGuideMode, type PhoneGuideMode } from './mobile/g
 import { useNewGuideSurface } from './guide-surface'
 import { TvGuideShell } from './guide-shell'
 import { displayTitle } from '../display-title'
+import { GuidePinnedFrame, PIN_ORIGIN_OPACITY, inPinnedRow } from './guide-pin'
 
 const ROW_STEP = 40
 
@@ -139,6 +141,7 @@ export function TvGuide(props: TvViewProps) {
 
 function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: TvViewProps & { mode: 'now' | 'tl'; onModeChange: (mode: GuideMode) => void }) {
   const { tt, locale } = useTvText()
+  const isTv = useTvMode()
   const clock = useTvClockNode(locale)
   const channelColStyle = channelColumnStyle()
   // params.group kan vara en föråldrad eller manipulerad query-parameter
@@ -162,8 +165,50 @@ function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: T
   // därmed selectedKey. En egen "rows[0]"-fallback hade dubblerat NU/SEN-
   // texten (samma titel i toppbandet och i första radens kolumner).
   const selected = useMemo(() => (selectedKey ? model.byKey.get(selectedKey) ?? null : null), [selectedKey, model.byKey])
-  const previewChannel = useDebouncedChannel(selected, 300)
+  /*
+    FÄST KANAL (guide-pin.tsx, samma regler som den städade guiden): OK på en
+    kanalrad spelar kanalen som förut OCH fäster den — förhandsrutan står
+    sedan kvar på den medan fokus flyttas, och raden ritas överst. OK på den
+    fästa kanalen igen lossar (rutan har OK = spela). Bakåt på den fästa
+    raden lossar också. Vy-state: guiden som stängs glömmer fästet.
+  */
+  const [pinned, setPinned] = useState<M3uChannel | null>(null)
+  const pinnedKey = pinned ? channelKey(pinned) : null
+  const [inPinned, setInPinned] = useState(false)
+  // Fäst: rutan byter direkt till den fästa kanalen och står sedan still.
+  const debouncedChannel = useDebouncedChannel(selected, 300)
+  const previewChannel = pinned ?? debouncedChannel
+  const unpin = () => {
+    const wasFocused = inPinnedRow(document.activeElement)
+    const key = pinnedKey
+    setPinned(null)
+    setInPinned(false)
+    if (wasFocused && key) {
+      window.requestAnimationFrame(() => {
+        listRef.current?.querySelector<HTMLElement>(`[data-testid="guide-row"][data-key="${CSS.escape(key)}"]`)?.focus({ preventScroll: true })
+      })
+    }
+  }
+  const pinAndPlay = (channel: M3uChannel) => {
+    if (pinnedKey === channelKey(channel)) { unpin(); return }
+    setPinned(channel)
+    if (!getTvSettings().guidePinHintSeen) {
+      nav.toast(tt(isTv ? 'guidePinHintTv' : 'guidePinHint'))
+      setTvSettings({ guidePinHintSeen: true })
+    }
+    nav.play({ channel })
+  }
+  const unpinRef = useRef(unpin)
+  unpinRef.current = unpin
+  const pinNavRef = useRef(nav)
+  useEffect(() => { pinNavRef.current = nav })
+  const claimPinBack = pinned !== null && inPinned
+  useEffect(() => {
+    if (!claimPinBack) return
+    return pinNavRef.current.pushLayer(() => unpinRef.current())
+  }, [claimPinBack])
   const listRef = useRef<HTMLDivElement | null>(null)
+  const pinnedRowRef = useRef<HTMLDivElement | null>(null)
   const win = useMemo(() => scheduleWindow(model.nowMs), [model.nowMs])
   const nowLeftPct = useMemo(() => nowLinePct(model.nowMs, win), [model.nowMs, win])
 
@@ -177,7 +222,7 @@ function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: T
    * rader som FAKTISKT syns, i ett anrop per fönster — NU-läget klarar sig med
    * modellens nu-snapshot och frågar inte efter något.
    */
-  const timelineChannels = useMemo(() => (mode === 'tl' ? visibleRows : []), [mode, visibleRows])
+  const timelineChannels = useMemo(() => (mode === 'tl' ? (pinned && !visibleRows.includes(pinned) ? [...visibleRows, pinned] : visibleRows) : []), [mode, visibleRows, pinned])
   const { schedules: timelineSchedules, loading: timelineLoading } = useSchedules(timelineChannels, win.start, win.end)
 
   const info = selected ? model.nowFor(selected) : { now: null, next: null, later: null }
@@ -218,11 +263,103 @@ function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: T
     })
   }
 
+  // EN kanalrad: listans rader och den fästa raden överst (`sticky`) ritas likadant.
+  const renderRow = (channel: M3uChannel, index: number, sticky: boolean) => {
+    const rowInfo = model.nowFor(channel)
+    const key = channelKey(channel)
+    const focused = selected ? channelKey(selected) === key : false
+    // `data-init` följer den valda raden — men bara om den FAKTISKT
+    // renderas. Listan visar `visible` rader åt gången, och efter ett
+    // läges- eller kategoribyte kan den valda kanalen ligga bortom den
+    // gränsen; då gav `selected ? focused : …` noll data-init i hela vyn
+    // och värdens fokusmotor hade ingen startstation att gå till.
+    const isInit = selectedVisible ? focused : index === 0
+    const rowStation = station(() => pinAndPlay(channel), (el) => nav.channelMenu(channel, el), {
+      ...(isInit && !sticky ? { 'data-init': '' } : {}),
+      'data-key': key,
+    })
+    const baseOnKeyDown = rowStation.onKeyDown as ((event: ReactKeyboardEvent<HTMLDivElement>) => void) | undefined
+    const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault()
+        event.stopPropagation()
+        stepCategory(event.key === 'ArrowLeft' ? -1 : 1)
+        return
+      }
+      // ▲ från listans första rad → den fästa raden; ▼ från den fästa → listans första.
+      const jump = pinned && ((event.key === 'ArrowUp' && !sticky && index === 0) || (event.key === 'ArrowDown' && sticky))
+      if (jump) {
+        const target = sticky
+          ? listRef.current?.querySelector<HTMLElement>('[data-testid="guide-row"]')
+          : pinnedRowRef.current?.querySelector<HTMLElement>('[data-testid="guide-row"]')
+        if (target) {
+          event.preventDefault()
+          event.stopPropagation()
+          target.focus({ preventScroll: true })
+          return
+        }
+      }
+      baseOnKeyDown?.(event)
+    }
+    // EN uppslagning per rad, ur den tablå som hämtats för HELA den
+    // synliga listan i ett anrop (`useSchedules`). Tidigare filtrerades
+    // kanalens hela tablå mot fönstret vid varje anrop, två gånger per
+    // rad — med 40 rader blev det 80 genomsökningar vid varje minuttick.
+    // `undefined` = raden har inte fått svar ännu (visa "Hämtar tablå…"),
+    // tom lista = appen svarade att kanalen saknar program i fönstret.
+    // Utan den skillnaden blinkade varje rad förbi "Ingen
+    // programinformation" innan tablån landade.
+    const timeline = mode === 'tl' ? timelineSchedules[key] ?? null : null
+    return (
+      <div key={sticky ? `pinned-${key}` : key} style={{ height: dp(86), borderBottom: sticky ? undefined : `1px solid rgba(255,255,255,0.07)`, display: 'flex', alignItems: 'center', gap: dp(16), opacity: !sticky && key === pinnedKey ? PIN_ORIGIN_OPACITY : undefined }}>
+        <div
+          data-testid="guide-row"
+          {...rowStation}
+          onKeyDown={onKeyDown}
+          onFocus={() => setSelectedKey(key)}
+          style={{ ...channelColStyle, cursor: 'pointer', borderRadius: dp(12), minHeight: dp(86) }}
+        >
+          <ChannelCell channel={channel} number={model.channelNumber(channel)} pinned={model.pinnedSet.has(key)} locked={model.locked.has(key)} quality={qualityFromName(channel.name)} focused={focused} width="100%" />
+        </div>
+        {mode === 'now' ? (
+          <>
+            <div style={{ flex: 1.2, minWidth: 0 }}>
+              <div style={{ fontSize: dp(20), fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: rowInfo.now ? TV.text : TV.dim }}>{displayTitle(rowInfo.now?.title) ?? tt('noProgramme')}</div>
+              {rowInfo.now ? <div style={{ display: 'flex', alignItems: 'center', gap: dp(12), marginTop: dp(8) }}><Progress value={progressOf(rowInfo.now.start, rowInfo.now.stop, model.nowMs)} height={dp(4)} style={{ flex: 1 }} /><span style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.5)', whiteSpace: 'nowrap' }}>{Math.max(0, Math.round((rowInfo.now.stop - model.nowMs) / 60_000))} min</span></div> : null}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {rowInfo.next ? <><div style={{ fontSize: dp(19), color: 'rgba(243,244,248,0.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(rowInfo.next.title)}</div><div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.5)' }}>{formatClock(rowInfo.next.start, locale)}</div></> : null}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {rowInfo.later ? <><div style={{ fontSize: dp(19), color: 'rgba(243,244,248,0.6)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(rowInfo.later.title)}</div><div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.4)' }}>{formatClock(rowInfo.later.start, locale)}</div></> : null}
+            </div>
+          </>
+        ) : (
+          <div style={{ flex: 1, position: 'relative', height: dp(72), minWidth: 0 }}>
+            {(timeline ?? []).map((p) => {
+              const g = blockGeometry(p, win)
+              if (!g) return null
+              const onNow = p.start <= model.nowMs && p.stop > model.nowMs
+              return (
+                <div key={p.start} style={{ position: 'absolute', top: 0, bottom: 0, left: `${g.leftPct}%`, width: `calc(${g.widthPct}% - ${dp(6)}px)`, borderRadius: dp(10), padding: `${dp(14)}px ${dp(16)}px`, background: onNow ? TV.accMix(16) : TV.s05, color: onNow ? TV.text : 'rgba(243,244,248,0.7)', overflow: 'hidden' }}>
+                  <div style={{ fontSize: dp(18), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(p.title)}</div>
+                  <div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.45)' }}>{formatClock(p.start, locale)}–{formatClock(p.stop, locale)}</div>
+                </div>
+              )
+            })}
+            {(timeline?.length ?? 0) === 0 ? <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', paddingLeft: dp(16), color: TV.dim, fontSize: dp(18) }}>{timeline === null && timelineLoading ? tt('loadingGuide') : tt('noProgramme')}</div> : null}
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${nowLeftPct}%`, width: 2, background: TV.acc, boxShadow: `0 0 12px ${TV.accMix(60)}`, pointerEvents: 'none' }} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       {/* Toppband */}
       <div style={{ height: previewOn ? dp(340) : dp(230), padding: `${dp(34)}px ${dp(48)}px 0`, display: 'flex', gap: dp(32), flexShrink: 0 }}>
-        <TvPreview channel={previewChannel} enabled={previewOn} live={Boolean(info.now)} width={dp(480)} height={dp(270)} label={previewOn ? tt('previewLabel') : tt('previewFrame')} onOk={() => selected && nav.play({ channel: selected })} />
+        <TvPreview channel={previewChannel} enabled={previewOn} live={previewChannel ? Boolean(model.nowFor(previewChannel).now) : false} width={dp(480)} height={dp(270)} label={previewOn ? tt('previewLabel') : tt('previewFrame')} onOk={() => { const target = pinned ?? selected; if (target) nav.play({ channel: target }) }} extra={{ 'data-testid': 'guide-preview', 'data-preview-key': previewChannel ? channelKey(previewChannel) : '', ...(pinned ? { 'data-pinned': '' } : {}) }} />
         <div data-testid="guide-headline" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: dp(10) }}>
           {/*
             RUBRIKRADEN TÅL 1280 DESIGNPIXLAR (spec 5).
@@ -278,6 +415,15 @@ function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: T
         )}
       </div>
 
+      {/* Den fästa kanalen: överst, utanför rullningen (guide-pin.tsx). */}
+      {pinned ? (
+        <div ref={pinnedRowRef} onFocusCapture={() => setInPinned(true)} onBlurCapture={() => setInPinned(false)} style={{ padding: `${dp(8)}px ${dp(48)}px 0`, flexShrink: 0 }}>
+          <GuidePinnedFrame isTv={isTv} onUnpin={unpin}>
+            {renderRow(pinned, 0, true)}
+          </GuidePinnedFrame>
+        </div>
+      ) : null}
+
       {/* Rader */}
       <div ref={listRef} data-scroll="" style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: `0 ${dp(48)}px ${dp(24)}px` }}>
         {/* Tomläget MONTERAS ALLTID.
@@ -294,82 +440,7 @@ function TvGuideStandard({ model, nav, params, settings, mode, onModeChange }: T
         >
           {model.channelsLoading ? tt('loadingChannels') : tt('guideEmpty')}
         </div>
-        {visibleRows.map((channel, index) => {
-          const rowInfo = model.nowFor(channel)
-          const key = channelKey(channel)
-          const focused = selected ? channelKey(selected) === key : false
-          // `data-init` följer den valda raden — men bara om den FAKTISKT
-          // renderas. Listan visar `visible` rader åt gången, och efter ett
-          // läges- eller kategoribyte kan den valda kanalen ligga bortom den
-          // gränsen; då gav `selected ? focused : …` noll data-init i hela vyn
-          // och värdens fokusmotor hade ingen startstation att gå till.
-          const isInit = selectedVisible ? focused : index === 0
-          const rowStation = station(() => nav.play({ channel }), (el) => nav.channelMenu(channel, el), {
-            ...(isInit ? { 'data-init': '' } : {}),
-          })
-          const baseOnKeyDown = rowStation.onKeyDown as ((event: ReactKeyboardEvent<HTMLDivElement>) => void) | undefined
-          const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-              event.preventDefault()
-              event.stopPropagation()
-              stepCategory(event.key === 'ArrowLeft' ? -1 : 1)
-              return
-            }
-            baseOnKeyDown?.(event)
-          }
-          // EN uppslagning per rad, ur den tablå som hämtats för HELA den
-          // synliga listan i ett anrop (`useSchedules`). Tidigare filtrerades
-          // kanalens hela tablå mot fönstret vid varje anrop, två gånger per
-          // rad — med 40 rader blev det 80 genomsökningar vid varje minuttick.
-          // `undefined` = raden har inte fått svar ännu (visa "Hämtar tablå…"),
-          // tom lista = appen svarade att kanalen saknar program i fönstret.
-          // Utan den skillnaden blinkade varje rad förbi "Ingen
-          // programinformation" innan tablån landade.
-          const timeline = mode === 'tl' ? timelineSchedules[key] ?? null : null
-          return (
-            <div key={key} style={{ height: dp(86), borderBottom: `1px solid rgba(255,255,255,0.07)`, display: 'flex', alignItems: 'center', gap: dp(16) }}>
-              <div
-                data-testid="guide-row"
-                {...rowStation}
-                onKeyDown={onKeyDown}
-                onFocus={() => setSelectedKey(key)}
-                style={{ ...channelColStyle, cursor: 'pointer', borderRadius: dp(12), minHeight: dp(86) }}
-              >
-                <ChannelCell channel={channel} number={model.channelNumber(channel)} pinned={model.pinnedSet.has(key)} locked={model.locked.has(key)} quality={qualityFromName(channel.name)} focused={focused} width="100%" />
-              </div>
-              {mode === 'now' ? (
-                <>
-                  <div style={{ flex: 1.2, minWidth: 0 }}>
-                    <div style={{ fontSize: dp(20), fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: rowInfo.now ? TV.text : TV.dim }}>{displayTitle(rowInfo.now?.title) ?? tt('noProgramme')}</div>
-                    {rowInfo.now ? <div style={{ display: 'flex', alignItems: 'center', gap: dp(12), marginTop: dp(8) }}><Progress value={progressOf(rowInfo.now.start, rowInfo.now.stop, model.nowMs)} height={dp(4)} style={{ flex: 1 }} /><span style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.5)', whiteSpace: 'nowrap' }}>{Math.max(0, Math.round((rowInfo.now.stop - model.nowMs) / 60_000))} min</span></div> : null}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    {rowInfo.next ? <><div style={{ fontSize: dp(19), color: 'rgba(243,244,248,0.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(rowInfo.next.title)}</div><div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.5)' }}>{formatClock(rowInfo.next.start, locale)}</div></> : null}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    {rowInfo.later ? <><div style={{ fontSize: dp(19), color: 'rgba(243,244,248,0.6)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(rowInfo.later.title)}</div><div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.4)' }}>{formatClock(rowInfo.later.start, locale)}</div></> : null}
-                  </div>
-                </>
-              ) : (
-                <div style={{ flex: 1, position: 'relative', height: dp(72), minWidth: 0 }}>
-                  {(timeline ?? []).map((p) => {
-                    const g = blockGeometry(p, win)
-                    if (!g) return null
-                    const onNow = p.start <= model.nowMs && p.stop > model.nowMs
-                    return (
-                      <div key={p.start} style={{ position: 'absolute', top: 0, bottom: 0, left: `${g.leftPct}%`, width: `calc(${g.widthPct}% - ${dp(6)}px)`, borderRadius: dp(10), padding: `${dp(14)}px ${dp(16)}px`, background: onNow ? TV.accMix(16) : TV.s05, color: onNow ? TV.text : 'rgba(243,244,248,0.7)', overflow: 'hidden' }}>
-                        <div style={{ fontSize: dp(18), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayTitle(p.title)}</div>
-                        <div style={{ fontSize: dp(14), color: 'rgba(243,244,248,0.45)' }}>{formatClock(p.start, locale)}–{formatClock(p.stop, locale)}</div>
-                      </div>
-                    )
-                  })}
-                  {(timeline?.length ?? 0) === 0 ? <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', paddingLeft: dp(16), color: TV.dim, fontSize: dp(18) }}>{timeline === null && timelineLoading ? tt('loadingGuide') : tt('noProgramme')}</div> : null}
-                  <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${nowLeftPct}%`, width: 2, background: TV.acc, boxShadow: `0 0 12px ${TV.accMix(60)}`, pointerEvents: 'none' }} />
-                </div>
-              )}
-            </div>
-          )
-        })}
+        {visibleRows.map((channel, index) => renderRow(channel, index, false))}
         {rows.length > visible ? (
           <div {...station(() => setVisible((v) => v + ROW_STEP))} style={{ margin: `${dp(20)}px auto 0`, width: 'fit-content', height: dp(48), minHeight: dp(48), padding: `0 ${dp(24)}px`, borderRadius: 999, background: TV.s10, display: 'flex', alignItems: 'center', fontSize: dp(18), cursor: 'pointer' }}>{tt('showMore')}</div>
         ) : null}
