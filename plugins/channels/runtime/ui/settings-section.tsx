@@ -59,6 +59,7 @@ export function buildChannelRows(channels: ChannelDef[], actions: ChannelRowActi
   const accounts = cloudAccounts()
   if (accounts.length > 0) {
     rows.push({ t: 'eyebrow', label: S.settingsCloudTitle })
+    rows.push({ t: 'note', text: S.settingsCloudHint })
     for (const id of accounts) {
       rows.push({
         t: 'action',
@@ -124,7 +125,8 @@ function removeCloudAccount(id: CloudServiceId): void {
 }
 
 /**
- * Molnkonton med sparad nyckel. Appens egen inställningsflik för tjänsterna
+ * Sparade molnnycklar (bara konton med en nyckel i appen; tilläggens egna
+ * nycklar och biblioteksservrar syns inte här, vilket texten säger). Appens egen inställningsflik för tjänsterna
  * finns inte längre, så ett gammalt konto (utgånget, oanvänt) gick inte att
  * ta bort och gav kanalposter som aldrig gick att spela (2026-10-19).
  */

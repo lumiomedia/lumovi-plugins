@@ -42648,13 +42648,13 @@ ${cue.text}`).join("\n\n")}
     studioDeleteConfirm: { en: "Confirm deletion", sv: "Bekr\xE4fta borttagning", de: "L\xF6schen best\xE4tigen", fr: "Confirmer la suppression", es: "Confirmar eliminaci\xF3n" },
     // Inställningssektionen
     settingsTitle: { en: "Your channels", sv: "Dina kanaler", de: "Deine Sender", fr: "Vos cha\xEEnes", es: "Tus canales" },
-    settingsCloudTitle: { en: "Cloud accounts", sv: "Molnkonton", de: "Cloud-Konten", fr: "Comptes cloud", es: "Cuentas en la nube" },
+    settingsCloudTitle: { en: "Saved cloud keys", sv: "Sparade molnnycklar", de: "Gespeicherte Cloud-Schl\xFCssel", fr: "Cl\xE9s cloud enregistr\xE9es", es: "Claves de nube guardadas" },
     settingsCloudHint: {
-      en: "Accounts whose files the channels can play. Remove one you no longer use: its files leave the channels the next time they are built.",
-      sv: "Konton vars filer kanalerna kan spela. Ta bort ett du inte anv\xE4nder l\xE4ngre: dess filer f\xF6rsvinner ur kanalerna n\xE4sta g\xE5ng de byggs.",
-      de: "Konten, deren Dateien die Sender abspielen k\xF6nnen. Entferne ein Konto, das du nicht mehr nutzt: Seine Dateien verschwinden beim n\xE4chsten Aufbau aus den Sendern.",
-      fr: "Comptes dont les cha\xEEnes peuvent lire les fichiers. Retirez celui que vous n\u2019utilisez plus : ses fichiers dispara\xEEtront des cha\xEEnes \xE0 leur prochaine construction.",
-      es: "Cuentas cuyos archivos pueden reproducir los canales. Quita la que ya no uses: sus archivos desaparecer\xE1n de los canales la pr\xF3xima vez que se generen."
+      en: "The channels play files straight from these accounts with a key saved in the app. Add-ons such as AIOStreams keep their own keys and are not listed here, and media servers such as Plex and Jellyfin reach the channels through your library. Remove a key you no longer use: its files leave the channels the next time they are built.",
+      sv: "Kanalerna spelar filer direkt fr\xE5n de h\xE4r kontona med en nyckel som sparats i appen. Till\xE4gg som AIOStreams har egna nycklar och listas inte h\xE4r, och medieservrar som Plex och Jellyfin n\xE5r kanalerna via ditt bibliotek. Ta bort en nyckel du inte anv\xE4nder l\xE4ngre: kontots filer f\xF6rsvinner ur kanalerna n\xE4sta g\xE5ng de byggs.",
+      de: "Die Sender spielen Dateien direkt von diesen Konten mit einem in der App gespeicherten Schl\xFCssel ab. Add-ons wie AIOStreams haben eigene Schl\xFCssel und erscheinen hier nicht, und Medienserver wie Plex und Jellyfin erreichen die Sender \xFCber deine Bibliothek. Entferne einen Schl\xFCssel, den du nicht mehr nutzt: Die Dateien des Kontos verschwinden beim n\xE4chsten Aufbau aus den Sendern.",
+      fr: "Les cha\xEEnes lisent les fichiers directement depuis ces comptes gr\xE2ce \xE0 une cl\xE9 enregistr\xE9e dans l\u2019app. Les extensions comme AIOStreams ont leurs propres cl\xE9s et n\u2019apparaissent pas ici, et les serveurs multim\xE9dias comme Plex et Jellyfin rejoignent les cha\xEEnes via votre biblioth\xE8que. Retirez une cl\xE9 que vous n\u2019utilisez plus : les fichiers du compte dispara\xEEtront des cha\xEEnes \xE0 leur prochaine construction.",
+      es: "Los canales reproducen archivos directamente desde estas cuentas con una clave guardada en la app. Los complementos como AIOStreams tienen sus propias claves y no aparecen aqu\xED, y los servidores multimedia como Plex y Jellyfin llegan a los canales a trav\xE9s de tu biblioteca. Quita una clave que ya no uses: los archivos de la cuenta desaparecer\xE1n de los canales la pr\xF3xima vez que se generen."
     },
     settingsCloudRemove: { en: "Remove", sv: "Ta bort", de: "Entfernen", fr: "Retirer", es: "Quitar" },
     settingsCloudRemoveConfirm: { en: "Press again to remove", sv: "Tryck igen f\xF6r att ta bort", de: "Nochmal dr\xFCcken zum Entfernen", fr: "Appuyez \xE0 nouveau pour retirer", es: "Pulsa otra vez para quitar" },
@@ -49594,6 +49594,7 @@ ${cue.text}`).join("\n\n")}
     const accounts = cloudAccounts();
     if (accounts.length > 0) {
       rows.push({ t: "eyebrow", label: S.settingsCloudTitle });
+      rows.push({ t: "note", text: S.settingsCloudHint });
       for (const id of accounts) {
         rows.push({
           t: "action",

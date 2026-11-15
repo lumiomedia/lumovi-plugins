@@ -106,8 +106,11 @@ describe('inställningssektionen', () => {
   it('molnkonton på TV: en rad per konto med bekräftelse', () => {
     state.accounts = ['torbox']
     const rows = channelsSettingsSection.rows!()
-    const i = rows.findIndex((r) => r.t === 'eyebrow' && (r as { label: { sv: string } }).label.sv === 'Molnkonton')
-    const row = rows[i + 1] as { label: { sv: string }; danger?: boolean; confirm?: { title: { sv: string } }; run(): void }
+    const i = rows.findIndex((r) => r.t === 'eyebrow' && (r as { label: { sv: string } }).label.sv === 'Sparade molnnycklar')
+    const note = rows[i + 1] as { t: string; text: { sv: string } }
+    expect(note.t).toBe('note')
+    expect(note.text.sv).toContain('AIOStreams')
+    const row = rows[i + 2] as { label: { sv: string }; danger?: boolean; confirm?: { title: { sv: string } }; run(): void }
     expect(row.label.sv).toBe('TorBox')
     expect(row.danger).toBe(true)
     expect(row.confirm!.title.sv).toBe('Ta bort TorBox?')
