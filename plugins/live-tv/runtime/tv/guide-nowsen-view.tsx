@@ -16,6 +16,7 @@ import { GuidePaginationRow, ROWS_STEP, useHoverSelect, withPointerLeave } from 
 import { V2 } from './v2-tokens'
 import { LogoPlate } from './v2-ui'
 import type { GuideSelection, GuideViewProps } from './guide-types'
+import { GuidePinnedFrame, PIN_ORIGIN_OPACITY, guidePinKeyDown, inPinnedRow, pinCellProps, type PinState } from './guide-pin'
 import { displayTitle } from '../display-title'
 
 /** Guide v2:s mått (handoff "Screen 2 / Layout"): rader 76, gap 6, kanalcell 380, celler radius 12. */
@@ -32,8 +33,9 @@ export const ellipsis: CSSProperties = { whiteSpace: 'nowrap', overflow: 'hidden
 /**
  * Kanalcellen 380 px (handoff "Channel cell"), delad av Nu/Sen, Tablå och
  * Kanallista: logoplatta 76×48 med numret i plattans hörn (ingen egen
- * nummerkolumn), namn 20/600, "Kategori · HD" 15 px och hjärta. Ingen
- * station — fokus står på programcellerna bredvid.
+ * nummerkolumn), namn 20/600, "Kategori · HD" 15 px och hjärta. Med
+ * `onPinToggle` är cellen en station: klick/OK fäster kanalen överst i
+ * guiden (eller lossar den) — se `guide-pin.tsx`.
  */
 export function GuideChannelCellV2({ channel, model, selected }: { channel: M3uChannel; model: LiveTvModel; selected: boolean }): JSX.Element {
   const key = channelKey(channel)
@@ -41,10 +43,13 @@ export function GuideChannelCellV2({ channel, model, selected }: { channel: M3uC
 }
 
 /** Kanalcellen med bara primitiva props, så en memoiserad rad inte ritar om den i onödan. */
-export const ChannelCellV2 = memo(function ChannelCellV2({ channel, number, pinned, locked, selected }: { channel: M3uChannel; number: number | null; pinned: boolean; locked: boolean; selected: boolean }): JSX.Element {
+export const ChannelCellV2 = memo(function ChannelCellV2({ channel, number, pinned, locked, selected, pinState = 'none', onPinToggle }: { channel: M3uChannel; number: number | null; pinned: boolean; locked: boolean; selected: boolean; pinState?: PinState; onPinToggle?: () => void }): JSX.Element {
+  const { tt } = useTvText()
   const meta = [channel.group, qualityFromName(channel.name)].filter(Boolean).join(' · ')
+  const isPinned = pinState !== 'none'
+  const pinProps = onPinToggle ? pinCellProps(onPinToggle, isPinned, tt(isPinned ? 'guideUnpinChannel' : 'guidePinChannel', { name: channel.name })) : undefined
   return (
-    <div data-testid="guide-channel-v2" style={{ width: dp(GUIDE_CHANNEL_W), flexShrink: 0, borderRadius: dp(GUIDE_CELL_RADIUS), display: 'flex', alignItems: 'center', gap: dp(14), padding: `0 ${dp(14)}px`, boxSizing: 'border-box', background: selected ? V2.surface4 : V2.surface2 }}>
+    <div data-testid="guide-channel-v2" data-pin={pinState === 'none' ? undefined : pinState} {...pinProps} style={{ width: dp(GUIDE_CHANNEL_W), flexShrink: 0, borderRadius: dp(GUIDE_CELL_RADIUS), display: 'flex', alignItems: 'center', gap: dp(14), padding: `0 ${dp(14)}px`, boxSizing: 'border-box', background: selected ? V2.surface4 : V2.surface2, cursor: onPinToggle ? 'pointer' : undefined }}>
       <LogoPlate channel={channel} width={76} height={48} number={number} radius={8} />
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ fontSize: dp(20), fontWeight: 600, ...ellipsis }}>{channel.name}</div>
@@ -52,6 +57,7 @@ export const ChannelCellV2 = memo(function ChannelCellV2({ channel, number, pinn
       </div>
       {pinned ? <span data-testid="guide-channel-fav" style={{ color: ACCENT, flexShrink: 0 }}><Icons.Heart size={dp(18)} filled /></span> : null}
       {locked ? <span style={{ color: 'rgba(243,244,248,0.45)', flexShrink: 0 }}><Icons.Lock size={dp(18)} /></span> : null}
+      {isPinned ? <span data-testid="guide-channel-pin" style={{ color: ACCENT, flexShrink: 0, display: 'inline-flex' }}><Icons.Pin size={dp(18)} filled /></span> : null}
     </div>
   )
 })
@@ -89,7 +95,8 @@ export function useFocusNowOnTick(rootRef: RefObject<HTMLElement | null>, nowTic
     // fönstret flyttades tillbaka (Tablå). Då hör fokus också hemma här.
     const active = document.activeElement
     if (!root || !(root.contains(active) || active === document.body || active === null)) return
-    const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-guide-v2-row]'))
+    // Listans rader, inte den fästa raden överst (samma `data-key` som originalet).
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-guide-v2-row]')).filter((r) => !inPinnedRow(r))
     const row = rows.find((r) => r.dataset.key === selectedKey) ?? rows[0]
     row?.querySelector<HTMLElement>('[data-now-station]')?.focus()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,7 +160,7 @@ const headCell = (weight: number, extra?: CSSProperties): CSSProperties => ({ fl
  * snapshotet), kanaler MED pågående program först, tablålösa sist. Högst
  * `ROWS_STEP` rader monteras; "Visa fler" lägger till nästa sida.
  */
-export function GuideNowSenView({ model, nav, category, categoryLabel, selection, onSelect, onFocusProgramme, onLeftEdge, focusChannelKey, nowTick, isTv }: GuideViewProps): JSX.Element {
+export function GuideNowSenView({ model, nav, category, categoryLabel, selection, onSelect, onFocusProgramme, onLeftEdge, focusChannelKey, nowTick, isTv, pinned, onTogglePin }: GuideViewProps): JSX.Element {
   const { tt, locale } = useTvText()
   const { nowMs } = model
   const focusProgramme = onFocusProgramme ?? onSelect
@@ -196,10 +203,11 @@ export function GuideNowSenView({ model, nav, category, categoryLabel, selection
 
   const nothing = rows.length === 0 || (model.epgLoading && !rows.some((row) => row.info))
 
-  const api = useLatest<NowSenApi>({ focusProgramme, nav, nowMs, tt, locale, onLeftEdge, hover })
+  const api = useLatest<NowSenApi>({ focusProgramme, nav, nowMs, tt, locale, onLeftEdge, hover, onTogglePin })
+  const pinnedKey = pinned ? channelKey(pinned) : null
 
   return (
-    <div ref={rootRef} data-testid="guide-nowsen-view" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    <div ref={rootRef} data-testid="guide-nowsen-view" onKeyDownCapture={(event) => guidePinKeyDown(event, rootRef.current, { onLeftEdge, rowJump: true })} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <div data-testid="nowsen-header" style={{ height: dp(44), flexShrink: 0, display: 'flex', gap: dp(GUIDE_ROW_GAP), fontSize: dp(15), letterSpacing: '0.1em', textTransform: 'uppercase', color: V2.text3 }}>
         <div style={{ width: dp(GUIDE_CHANNEL_W), flexShrink: 0, display: 'flex', alignItems: 'center', paddingLeft: dp(16), boxSizing: 'border-box', ...ellipsis }}>
           {`${categoryLabel ?? tt('categoryAll')} · ${tt('channelsCount', { count: channels.length })}`}
@@ -208,6 +216,27 @@ export function GuideNowSenView({ model, nav, category, categoryLabel, selection
         <div style={headCell(WEIGHTS[1])}>{tt('colNext')}</div>
         <div style={headCell(WEIGHTS[2])}>{tt('colLater')}</div>
       </div>
+
+      {pinned && pinnedKey && !nothing ? (
+        <GuidePinnedFrame isTv={isTv} onUnpin={() => onTogglePin?.(pinned)}>
+          <NowSenRow
+            channel={pinned}
+            rowKey={pinnedKey}
+            info={nowFor(pinned).now ? nowFor(pinned) : null}
+            selected={selectedKey === pinnedKey}
+            init={false}
+            number={model.channelNumber(pinned)}
+            pinned={model.pinnedSet.has(pinnedKey)}
+            locked={model.locked.has(pinnedKey)}
+            nowMs={nowMs}
+            locale={locale}
+            remindersVersion={remindersVersion}
+            hoverEnabled={hover.enter !== undefined}
+            pinState="sticky"
+            api={api}
+          />
+        </GuidePinnedFrame>
+      ) : null}
 
       <div data-scroll="" data-testid="nowsen-scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto', scrollbarWidth: 'none', display: 'flex', flexDirection: 'column', gap: dp(GUIDE_ROW_GAP), paddingTop: dp(6), paddingBottom: dp(24), boxSizing: 'border-box' }}>
         {nothing ? (
@@ -231,6 +260,7 @@ export function GuideNowSenView({ model, nav, category, categoryLabel, selection
               locale={locale}
               remindersVersion={remindersVersion}
               hoverEnabled={hover.enter !== undefined}
+              pinState={key === pinnedKey ? 'origin' : 'none'}
               api={api}
             />
           )
@@ -252,10 +282,11 @@ interface NowSenApi {
   locale: string
   onLeftEdge?(): boolean
   hover: { enter?: (sel: GuideSelection) => void; leave?: () => void }
+  onTogglePin?(channel: M3uChannel): void
 }
 
 /** EN rad i Nu/Sen, memoiserad (se `TimelineRow`): en fokusflytt ritar om två rader, inte alla. */
-const NowSenRow = memo(function NowSenRow({ channel, rowKey: key, info, selected, init, number, pinned, locked, nowMs, locale, hoverEnabled, api }: {
+const NowSenRow = memo(function NowSenRow({ channel, rowKey: key, info, selected, init, number, pinned, locked, nowMs, locale, hoverEnabled, pinState, api }: {
   channel: M3uChannel
   rowKey: string
   info: NowNextLater | null
@@ -269,6 +300,8 @@ const NowSenRow = memo(function NowSenRow({ channel, rowKey: key, info, selected
   /** Bara för att rita om när påminnelser ändras. */
   remindersVersion: number
   hoverEnabled: boolean
+  /** Fäst kanal: `sticky` = raden överst, `origin` = originalraden i listan (tonas). */
+  pinState: PinState
   api: { readonly current: NowSenApi }
 }): JSX.Element {
   const { tt } = useTvText()
@@ -288,8 +321,8 @@ const NowSenRow = memo(function NowSenRow({ channel, rowKey: key, info, selected
     ? <span data-testid="nowsen-bell" style={{ color: V2.accText, display: 'inline-flex' }}><Icons.Bell size={dp(14)} filled /></span>
     : null)
   return (
-    <div data-testid="nowsen-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0 }}>
-      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} />
+    <div data-testid="nowsen-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0, opacity: pinState === 'origin' ? PIN_ORIGIN_OPACITY : undefined }}>
+      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} pinState={pinState} onPinToggle={api.current.onTogglePin ? () => api.current.onTogglePin?.(channel) : undefined} />
       {info?.now ? (
         <>
           <div data-testid="nowsen-now" data-now-station="" {...cellProps({ channel, programme: info.now }, init, true)} style={{ ...cellBase, flex: `${WEIGHTS[0]} 1 0%`, gap: dp(8), background: selected ? accentMix(18) : V2.surface3 }}>

@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useTvMode } from '@/lib/plugin-sdk'
-import { channelKey } from '../live-tv-data'
-import type { TvViewProps } from './tv-shell'
+import { channelKey, type M3uChannel } from '../live-tv-data'
+import type { TvNav, TvViewProps } from './tv-shell'
+import { CHANNEL_CELL_ATTR, inPinnedRow } from './guide-pin'
 import { useTvText } from './tv-strings'
 import { getTvSettings, setGuideMode, setTvSettings, useGuideMode, useTvSettings } from './tv-settings-store'
 import { desktopGuideMode, type DesktopGuideMode } from './guide-surface'
@@ -41,6 +42,12 @@ import type { GuideSelection, GuideViewProps } from './guide-types'
  * stänger först.
  *
  * N = till nu, T = växla Nu/Sen ↔ Tablå (från Kanallista → Tablå).
+ *
+ * Fäst kanal (`guide-pin.tsx`): klick/OK på en kanalcell fäster kanalen —
+ * förhandsvisningen står kvar på den och raden ritas överst. Står fokus på
+ * den fästa raden tar Bakåt först lossningen. Fästet är vy-state här (som
+ * markeringen): det följer med genom lägen, kategorier och spelaren, men
+ * guiden som stängs glömmer det.
  */
 export function TvGuideShell({ model, nav, params }: TvViewProps) {
   const { tt } = useTvText()
@@ -149,16 +156,70 @@ export function TvGuideShell({ model, nav, params }: TvViewProps) {
     return true
   }
   const columnLayout = settings.guideCategoryLayout === 'column'
-  const onLeftEdge = () => (columnLayout ? focusCategories() : false)
+  const toCategories = () => (columnLayout ? focusCategories() : false)
+  // ◂ från radens första programcell går först till radens kanalcell (fäst-
+  // stationen), därifrån till kategorierna.
+  const onLeftEdge = () => {
+    const active = document.activeElement as HTMLElement | null
+    if (active && !active.hasAttribute(CHANNEL_CELL_ATTR)) {
+      const cell = active.closest('[data-guide-v2-row]')?.querySelector<HTMLElement>(`[${CHANNEL_CELL_ATTR}]`)
+      if (cell) { cell.focus(); return true }
+    }
+    return toCategories()
+  }
+
+  // Fäst kanal (se filhuvudet).
+  const [pinned, setPinned] = useState<M3uChannel | null>(null)
+  const pinnedKey = pinned ? channelKey(pinned) : null
+  const [inPinned, setInPinned] = useState(false)
+  // Kanalen vars originalrad ska få fokus när den fästa raden försvinner
+  // under fokus (lossad med Bakåt eller OK på den fästa raden).
+  const refocusRef = useRef<string | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
+  const unpin = () => {
+    if (!pinned) return
+    if (inPinnedRow(document.activeElement)) refocusRef.current = channelKey(pinned)
+    setPinned(null)
+    setInPinned(false)
+  }
+  const togglePin = (channel: M3uChannel) => {
+    if (pinnedKey === channelKey(channel)) { unpin(); return }
+    setPinned(channel)
+    if (!getTvSettings().guidePinHintSeen) {
+      nav.toast(tt(isTv ? 'guidePinHintTv' : 'guidePinHint'))
+      setTvSettings({ guidePinHintSeen: true })
+    }
+  }
+  useEffect(() => {
+    const key = refocusRef.current
+    if (pinned || key === null) return
+    refocusRef.current = null
+    const rows = Array.from(contentRef.current?.querySelectorAll<HTMLElement>('[data-guide-v2-row]') ?? [])
+    const row = rows.find((r) => r.dataset.key === key) ?? rows[0]
+    row?.querySelector<HTMLElement>(`[${CHANNEL_CELL_ATTR}]`)?.focus()
+  }, [pinned])
+  // OK på ett program som byter kanal (spelaren öppnas på en annan kanal)
+  // flyttar fästet dit — annars hade rutan stått kvar på en kanal man lämnat.
+  const pinnedRef = useRef(pinned)
+  pinnedRef.current = pinned
+  const viewNav: TvNav = useMemo(() => ({
+    ...nav,
+    play: (request) => {
+      const current = pinnedRef.current
+      if (current && channelKey(current) !== channelKey(request.channel)) setPinned(request.channel)
+      nav.play(request)
+    },
+  }), [nav])
 
   // Bakåt-kedjan (se filhuvudet).
   const nowStart = guideWindowStart(model.nowMs)
   const programme = selection?.programme ?? null
   const focusAtNow = programme === null || (programme.start <= model.nowMs && programme.stop > model.nowMs)
   const atNow = windowStart === nowStart && focusAtNow
-  const claimBack = !atNow || !inCats
+  const claimBack = !atNow || !inCats || (pinned !== null && inPinned)
   const backRef = useRef<() => void>(() => {})
   backRef.current = () => {
+    if (pinned && inPinnedRow(document.activeElement)) { unpin(); return }
     if (!atNow) { jumpToNow(); return }
     focusCategories()
   }
@@ -183,7 +244,7 @@ export function TvGuideShell({ model, nav, params }: TvViewProps) {
 
   const viewProps: GuideViewProps = {
     model,
-    nav,
+    nav: viewNav,
     category,
     categoryLabel,
     dayOffset: 0,
@@ -197,6 +258,8 @@ export function TvGuideShell({ model, nav, params }: TvViewProps) {
     onWindowStart: setWindowStart,
     isTv,
     mode,
+    pinned,
+    onTogglePin: togglePin,
   }
   const view = mode === 'now'
     ? <GuideNowSenView {...viewProps} />
@@ -229,6 +292,7 @@ export function TvGuideShell({ model, nav, params }: TvViewProps) {
           sourceLabel={model.activePlaylistName ?? tt('sourceAll')}
           onOpenSource={() => setPanel('source')}
           isTv={isTv}
+          pinned={pinned}
         />
       </div>
       {columnLayout ? null : (
@@ -242,7 +306,7 @@ export function TvGuideShell({ model, nav, params }: TvViewProps) {
             <GuideCategoryColumn {...categories} />
           </div>
         ) : null}
-        <div data-testid="guide-content" onFocusCapture={() => setInCats(false)} style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <div ref={contentRef} data-testid="guide-content" data-pinned-key={pinnedKey ?? undefined} onFocusCapture={(event) => { setInCats(false); setInPinned(inPinnedRow(event.target as HTMLElement)) }} style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {view}
         </div>
       </div>

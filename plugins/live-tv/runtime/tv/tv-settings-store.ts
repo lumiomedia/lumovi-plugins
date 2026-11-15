@@ -74,6 +74,8 @@ export interface TvSettings {
   hubLayout: HubLayout
   /** Guidens kategorier: kolumn till vänster (standard) eller chips ovanför listan. */
   guideCategoryLayout: GuideCategoryLayout
+  /** Tipset "Kanalen är fäst …" har visats (guidens fäst kanal) — visas bara första gången. */
+  guidePinHintSeen: boolean
   /** Färgton från bild i guidens hero och Upplevelses bakgrund. */
   heroTint: boolean
   /** Bakgrundstonen i Kanaler och guiden (Skiffer/Grafit/Natt). `TV.bg` rörs inte. */
@@ -121,6 +123,7 @@ const DEFAULTS: TvSettings = {
   groupOrder: DEFAULT_GROUP_ORDER,
   hubLayout: DEFAULT_HUB_LAYOUT,
   guideCategoryLayout: 'column',
+  guidePinHintSeen: false,
   // Av som standard: Jerry vill inte ha en tonad gradient bakom Live TV (2026-10-30).
   heroTint: false,
   liveBackground: 'slate',
@@ -159,6 +162,7 @@ function sanitize(raw: unknown): TvSettings {
     groupOrder: sanitizeGroupOrder(r.groupOrder),
     hubLayout: sanitizeHubLayout(r.hubLayout),
     guideCategoryLayout: sanitizeGuideCategoryLayout(r.guideCategoryLayout),
+    guidePinHintSeen: r.guidePinHintSeen === true,
     heroTint: typeof r.heroTint === 'boolean' ? r.heroTint : DEFAULTS.heroTint,
     liveBackground: sanitizeLiveBackground(r.liveBackground),
     liveBgColor: sanitizeHexColor(r.liveBgColor),

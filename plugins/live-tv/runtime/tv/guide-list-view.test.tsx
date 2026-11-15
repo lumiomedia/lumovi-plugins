@@ -104,10 +104,12 @@ describe('GuideListView (TV-läge)', () => {
     expect(screen.getByTestId('guide-hero-title')).toHaveTextContent('Later A')
   })
 
-  it('◂ från listraden går till kategorikolumnen', async () => {
+  it('◂ från listraden går till kanalcellen, ◂ igen till kategorikolumnen', async () => {
     await mount()
     act(() => { nowCell('A').focus() })
     fireEvent.keyDown(nowCell('A'), { key: 'ArrowLeft' })
+    expect(document.activeElement).toHaveAttribute('data-guide-channel-cell')
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' })
     expect(screen.getByTestId('guide-category-column').contains(document.activeElement)).toBe(true)
   })
 

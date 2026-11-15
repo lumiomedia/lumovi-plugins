@@ -77,7 +77,7 @@ function clear(color: string): string {
  * 448×252 uppe till höger (OK = helskärm). Bandet målar också sidans ton:
  * `heroBase` ur bildens (annars logons) färg, blandad med bakgrunden.
  */
-export function GuideHero({ sel, model, nav, mode, onMode, tint, background, sourceLabel, onOpenSource, isTv }: {
+export function GuideHero({ sel, model, nav, mode, onMode, tint, background, sourceLabel, onOpenSource, isTv, pinned = null }: {
   sel: GuideSelection | null
   model: LiveTvModel
   nav: TvNav
@@ -89,6 +89,11 @@ export function GuideHero({ sel, model, nav, mode, onMode, tint, background, sou
   sourceLabel: string
   onOpenSource(): void
   isTv: boolean
+  /**
+   * Fäst kanal (`guide-pin.tsx`): förhandsvisningen står kvar på den medan
+   * texten följer fokus. Utan fäst följer rutan den markerade kanalen.
+   */
+  pinned?: M3uChannel | null
 }): JSX.Element {
   const { tt, locale } = useTvText()
   const { nowMs } = model
@@ -112,7 +117,10 @@ export function GuideHero({ sel, model, nav, mode, onMode, tint, background, sou
       : state === 'past' ? tt('guideAiredToday') : ''
   const number = channel ? model.channelNumber(channel) : null
   const quality = channel ? qualityFromName(channel.name) : null
-  const channelLive = channel ? model.nowFor(channel).now !== null : false
+  // Förhandsrutan: den fästa kanalen om en finns, annars den markerade.
+  const previewChannel = pinned ?? channel
+  const previewNumber = previewChannel ? model.channelNumber(previewChannel) : null
+  const previewLive = previewChannel ? model.nowFor(previewChannel).now !== null : false
 
   const segment = (key: DesktopGuideMode, label: string) => {
     const active = mode === key
@@ -143,22 +151,25 @@ export function GuideHero({ sel, model, nav, mode, onMode, tint, background, sou
         ) : null}
       </CutoutLayer>
 
-      {channel ? (
+      {previewChannel ? (
         <div
           data-testid="guide-hero-preview"
-          {...station(() => nav.play({ channel }), undefined, { 'data-v2f': 'btn' })}
+          data-preview-key={channelKey(previewChannel)}
+          data-pinned={pinned ? '' : undefined}
+          {...station(() => nav.play({ channel: previewChannel }), undefined, { 'data-v2f': 'btn' })}
           style={{ position: 'absolute', right: dp(48), top: dp(24), width: dp(448), height: dp(252), borderRadius: dp(14), overflow: 'hidden', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 18px 48px rgba(0,0,0,.45)', boxSizing: 'border-box', zIndex: 2, cursor: 'pointer' }}
         >
-          <LivePreviewArt channel={channel} live={channelLive} enabled={previewEnabled && !nav.playerOpen} height={dp(252)} radius={dp(14)} style={{ width: '100%' }}>
+          <LivePreviewArt channel={previewChannel} live={previewLive} enabled={previewEnabled && !nav.playerOpen} height={dp(252)} radius={dp(14)} style={{ width: '100%' }}>
             <span style={{ position: 'absolute', left: dp(14), bottom: dp(12) }}><LivePill /></span>
-            <span style={{ position: 'absolute', right: dp(12), bottom: dp(12), fontSize: dp(14), color: V2.text2, maxWidth: '60%', ...ellipsis }}>
-              {number !== null ? `${number} · ${channel.name}` : channel.name}
+            <span style={{ position: 'absolute', right: dp(12), bottom: dp(12), fontSize: dp(14), color: V2.text2, maxWidth: '60%', display: 'inline-flex', alignItems: 'center', gap: dp(6), ...ellipsis }}>
+              {pinned ? <span data-testid="guide-hero-preview-pin" style={{ color: V2.accText, display: 'inline-flex', flexShrink: 0 }}><Icons.Pin size={dp(14)} filled /></span> : null}
+              <span style={ellipsis}>{previewNumber !== null ? `${previewNumber} · ${previewChannel.name}` : previewChannel.name}</span>
             </span>
           </LivePreviewArt>
         </div>
       ) : null}
 
-      <div style={{ position: 'relative', zIndex: 1, height: '100%', boxSizing: 'border-box', padding: `${dp(34)}px ${dp(48)}px ${dp(26)}px`, display: 'flex', flexDirection: 'column', gap: dp(10), maxWidth: channel ? `calc(100% - ${dp(448 + 48 + 24)}px)` : undefined }}>
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', boxSizing: 'border-box', padding: `${dp(34)}px ${dp(48)}px ${dp(26)}px`, display: 'flex', flexDirection: 'column', gap: dp(10), maxWidth: previewChannel ? `calc(100% - ${dp(448 + 48 + 24)}px)` : undefined }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: dp(16), minWidth: 0 }}>
           <span style={{ fontSize: dp(30), fontWeight: 600, whiteSpace: 'nowrap' }}>{tt('guideV2Title')}</span>
           <div data-testid="guide-mode" style={{ display: 'flex', gap: dp(4), padding: dp(4), borderRadius: 999, background: V2.surface3, border: '1px solid rgba(255,255,255,0.10)', marginLeft: dp(12), flexShrink: 0 }}>

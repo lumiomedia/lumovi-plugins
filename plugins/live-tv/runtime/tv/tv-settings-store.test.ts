@@ -26,6 +26,7 @@ describe('tv-settings-store', () => {
       groupOrder: 'playlist',
       hubLayout: 'experience',
       guideCategoryLayout: 'column',
+      guidePinHintSeen: false,
       heroTint: false,
       liveBackground: 'slate',
       liveBgColor: null,

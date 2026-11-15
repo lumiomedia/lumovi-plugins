@@ -92,18 +92,21 @@ describe('GuideNowSenView (TV-läge)', () => {
     expect(inits[0]).toBe(within(rowOf('C')).getByTestId('nowsen-empty'))
   })
 
-  it('◂ från Nu-cellen går till kategorikolumnen (onLeftEdge)', async () => {
+  it('◂ från Nu-cellen går till radens kanalcell, ◂ igen till kategorikolumnen (onLeftEdge)', async () => {
     await mount()
     const cell = within(rowOf('A')).getByTestId('nowsen-now')
     act(() => { cell.focus() })
     fireEvent.keyDown(cell, { key: 'ArrowLeft' })
+    const channelCell = within(rowOf('A')).getByTestId('guide-channel-v2')
+    expect(document.activeElement).toBe(channelCell)
+    fireEvent.keyDown(channelCell, { key: 'ArrowLeft' })
     expect(screen.getByTestId('guide-category-column').contains(document.activeElement)).toBe(true)
   })
 
-  it('chips-layout: ◂ från Nu-cellen lämnas åt appens fokusmotor', async () => {
+  it('chips-layout: ◂ från kanalcellen lämnas åt appens fokusmotor', async () => {
     writePluginJson(LIVE_TV_PLUGIN_ID, TV_SETTINGS_KEY, { guideCategoryLayout: 'chips' })
     await mount()
-    const cell = within(rowOf('A')).getByTestId('nowsen-now')
+    const cell = within(rowOf('A')).getByTestId('guide-channel-v2')
     act(() => { cell.focus() })
     const notPrevented = fireEvent.keyDown(cell, { key: 'ArrowLeft' })
     expect(notPrevented).toBe(true)

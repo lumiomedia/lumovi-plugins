@@ -48,4 +48,12 @@ export interface GuideViewProps {
   onWindowStart?(ms: number): void
   /** Guide v2: kolumnhuvudets kategorinamn ("Alla kategorier", "Sport" …). */
   categoryLabel?: string
+  /**
+   * Fäst kanal (`guide-pin.tsx`): kanalen som står överst och håller
+   * förhandsvisningen. Vyn ritar den som en egen rad före listan och tonar
+   * originalraden.
+   */
+  pinned?: M3uChannel | null
+  /** Klick/OK på en kanalcell: fäster kanalen, eller lossar den om den redan är fäst. */
+  onTogglePin?(channel: M3uChannel): void
 }

@@ -116,7 +116,7 @@ describe('GuideTimelineView (TV-läge)', () => {
     expect(screen.queryByTestId('tl-now-line')).not.toBeInTheDocument()
   })
 
-  it('◂ tillbaka över fönsterkanten flyttar fönstret bakåt; ◂ från första programmet går till kategorierna', async () => {
+  it('◂ tillbaka över fönsterkanten flyttar fönstret bakåt; ◂ från första programmet går till kanalcellen och sedan kategorierna', async () => {
     await mount()
     act(() => { blockOf('Show').focus() })
     fireEvent.keyDown(blockOf('Show'), { key: 'ArrowRight' })
@@ -129,6 +129,8 @@ describe('GuideTimelineView (TV-läge)', () => {
     expect(document.activeElement).toBe(blockOf('Show'))
     expect(windowStart()).toBe(at(14, 30))
     fireEvent.keyDown(blockOf('Show'), { key: 'ArrowLeft' })
+    expect(document.activeElement).toHaveAttribute('data-guide-channel-cell')
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' })
     expect(screen.getByTestId('guide-category-column').contains(document.activeElement)).toBe(true)
   })
 

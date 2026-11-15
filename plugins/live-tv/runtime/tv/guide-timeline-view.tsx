@@ -17,6 +17,8 @@ import { GuidePaginationRow, ROWS_STEP, useHoverSelect, withPointerLeave } from 
 import { V2 } from './v2-tokens'
 import { ACCENT, GUIDE_CELL_RADIUS, GUIDE_CHANNEL_W, GUIDE_ROW_GAP, GUIDE_ROW_H, ChannelCellV2, accentMix, ellipsis, useAutoSelection, useFocusNowOnTick, useLatest, useRemindersVersion, withLeftEdge } from './guide-nowsen-view'
 import type { GuideSelection, GuideViewProps } from './guide-types'
+import { GuidePinnedFrame, PIN_ORIGIN_OPACITY, guidePinKeyDown, inPinnedRow, type PinState } from './guide-pin'
+import { useSchedules } from '../hooks/useSchedules'
 import { displayTitle } from '../display-title'
 
 const MIN = 60_000
@@ -48,7 +50,8 @@ function clampWindow(ms: number, nowMs: number): number {
 }
 
 
-type Pending = { key: string; start: number }
+/** `pinned`: blocket ligger i den fästa raden överst (samma kanal finns också i listan). */
+type Pending = { key: string; start: number; pinned: boolean }
 
 /**
  * Tablå (handoff "Modes / Tablå"): 2-timmarsfönster, block placerade i
@@ -65,7 +68,7 @@ type Pending = { key: string; start: number }
  * Raderna kommer ur `useGridRows` (favoriter först, kategorifilter, högst
  * `ROWS_STEP` rader, tablålösa sist) — samma kapning som förut.
  */
-export function GuideTimelineView({ model, nav, category, categoryLabel, windowStart, nowTick, selection, onSelect, onFocusProgramme, onLeftEdge, onWindowStart, focusChannelKey, isTv }: GuideViewProps): JSX.Element {
+export function GuideTimelineView({ model, nav, category, categoryLabel, windowStart, nowTick, selection, onSelect, onFocusProgramme, onLeftEdge, onWindowStart, focusChannelKey, isTv, pinned, onTogglePin }: GuideViewProps): JSX.Element {
   const { tt, locale } = useTvText()
   const { nowMs } = model
   const focusProgramme = onFocusProgramme ?? onSelect
@@ -82,18 +85,27 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
   const { rows, withoutEpg, hasMore, schedulesLoading } = useGridRows(model, category, visibleRows, from, to)
   const total = useMemo(() => filterByGroup(model, category).length, [model, category])
 
+  // Den fästa kanalen kan ligga utanför kategorin/sidan: dess tablå hämtas
+  // för sig (modulcachen delar svaret när den redan finns bland raderna).
+  const pinnedKey = pinned ? channelKey(pinned) : null
+  const pinnedChannels = useMemo(() => (pinned ? [pinned] : []), [pinnedKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { schedules: pinnedSchedules } = useSchedules(pinnedChannels, from, to)
+
   // Per rad: hela dygnets program utan överlapp (för ◂▸) och fönstrets
   // block (för ritningen). En gång per rad och fönster, inte per rendering.
   const lanes = useMemo(() => {
     const map = new Map<string, { all: EpgProgramme[]; entries: EpgRowEntry<EpgProgramme>[] }>()
-    for (const row of rows) {
+    const extra = pinned && pinnedKey && !rows.some((r) => channelKey(r.channel) === pinnedKey) && (pinnedSchedules[pinnedKey]?.length ?? 0) > 0
+      ? [{ channel: pinned, programmes: pinnedSchedules[pinnedKey]! }]
+      : []
+    for (const row of [...rows, ...extra]) {
       map.set(channelKey(row.channel), {
         all: epgRowBoxes(row.programmes, from, to, 1).map((entry) => entry.programme),
         entries: epgRowBoxes(row.programmes, windowStart, windowEnd, PCT_PER_MIN, THRESHOLDS),
       })
     }
     return map
-  }, [rows, from, to, windowStart, windowEnd])
+  }, [rows, from, to, windowStart, windowEnd, pinned, pinnedKey, pinnedSchedules])
 
   const nothing = rows.length === 0 && (withoutEpg.length === 0 || schedulesLoading)
   const allRows = useMemo(() => [...rows.map((r) => r.channel), ...withoutEpg], [rows, withoutEpg])
@@ -116,7 +128,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
   const pending = useRef<Pending | null>(null)
   const focusBlock = (target: Pending): boolean => {
     const el = Array.from(rootRef.current?.querySelectorAll<HTMLElement>('[data-tl-block]') ?? [])
-      .find((b) => b.dataset.key === target.key && Number(b.dataset.start) === target.start)
+      .find((b) => b.dataset.key === target.key && Number(b.dataset.start) === target.start && inPinnedRow(b) === target.pinned)
     if (!el) return false
     el.focus()
     return true
@@ -126,7 +138,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
   })
 
   /** ◂▸: nästa/föregående program i raden; fönstret flyttas 30 min i taget tills det syns. */
-  const step = (channel: M3uChannel, programme: EpgProgramme, dir: 1 | -1): boolean => {
+  const step = (channel: M3uChannel, programme: EpgProgramme, dir: 1 | -1, origin: HTMLElement): boolean => {
     const key = channelKey(channel)
     const all = lanes.get(key)?.all ?? []
     const index = all.findIndex((p) => p.start === programme.start)
@@ -138,7 +150,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
     // före dess slut (ett långt program drar inte fönstret timmar bakåt).
     else if (target.start < ws) ws = Math.floor(Math.max(target.start, target.stop - 60 * MIN) / TICK_MS) * TICK_MS
     ws = clampWindow(ws, nowMs)
-    const next = { key, start: target.start }
+    const next = { key, start: target.start, pinned: inPinnedRow(origin) }
     if (ws === windowStart) return focusBlock(next) || true
     pending.current = next
     onWindowStart?.(ws)
@@ -163,7 +175,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
     return true
   }
 
-  const api = useLatest<TlApi>({ focusProgramme, nav, nowMs, tt, locale, step, vertical, onLeftEdge, hover })
+  const api = useLatest<TlApi>({ focusProgramme, nav, nowMs, tt, locale, step, vertical, onLeftEdge, hover, onTogglePin })
 
   const nowIn = nowMs >= windowStart && nowMs < windowEnd
   const nowFrac = (nowMs - windowStart) / TL_SPAN_MS
@@ -171,7 +183,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
   const earlier = windowStart > startOfLocalDay(nowMs)
 
   return (
-    <div ref={rootRef} data-testid="guide-timeline-view" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    <div ref={rootRef} data-testid="guide-timeline-view" onKeyDownCapture={(event) => guidePinKeyDown(event, rootRef.current, { onLeftEdge, rowJump: false })} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <div data-testid="tl-header" style={{ height: dp(44), flexShrink: 0, display: 'flex', gap: dp(GUIDE_ROW_GAP), fontSize: dp(15), letterSpacing: '0.1em', textTransform: 'uppercase', color: V2.text3 }}>
         {/* "◂ tidigare" bor i kanalkolumnens rubrik, efter etiketten (som kortas) — förut låg den absolut och skrev över "N KANALER". */}
         <div data-testid="tl-channel-head" style={{ width: dp(GUIDE_CHANNEL_W), flexShrink: 0, display: 'flex', alignItems: 'center', gap: dp(10), padding: `0 ${dp(10)}px 0 ${dp(16)}px`, boxSizing: 'border-box', minWidth: 0 }}>
@@ -191,6 +203,30 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
           ) : null}
         </div>
       </div>
+
+      {pinned && pinnedKey && !nothing ? (
+        <GuidePinnedFrame isTv={isTv} onUnpin={() => onTogglePin?.(pinned)}>
+          <TimelineRow
+            channel={pinned}
+            rowKey={pinnedKey}
+            entries={lanes.get(pinnedKey)?.entries ?? null}
+            selected={selectedKey === pinnedKey}
+            focusedStart={selectedKey === pinnedKey ? selection?.programme?.start ?? null : null}
+            init={false}
+            initStart={null}
+            number={model.channelNumber(pinned)}
+            pinned={model.pinnedSet.has(pinnedKey)}
+            locked={model.locked.has(pinnedKey)}
+            nowMs={nowMs}
+            windowStart={windowStart}
+            locale={locale}
+            remindersVersion={remindersVersion}
+            hoverEnabled={hover.enter !== undefined}
+            pinState="sticky"
+            api={api}
+          />
+        </GuidePinnedFrame>
+      ) : null}
 
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
         {nowIn && !nothing ? (
@@ -223,6 +259,7 @@ export function GuideTimelineView({ model, nav, category, categoryLabel, windowS
                 locale={locale}
                 remindersVersion={remindersVersion}
                 hoverEnabled={hover.enter !== undefined}
+                pinState={key === pinnedKey ? 'origin' : 'none'}
                 api={api}
               />
             )
@@ -243,10 +280,11 @@ interface TlApi {
   nowMs: number
   tt: ReturnType<typeof useTvText>['tt']
   locale: string
-  step(channel: M3uChannel, programme: EpgProgramme, dir: 1 | -1): boolean
+  step(channel: M3uChannel, programme: EpgProgramme, dir: 1 | -1, origin: HTMLElement): boolean
   vertical(origin: HTMLElement, anchor: number, dir: 1 | -1): boolean
   onLeftEdge?(): boolean
   hover: { enter?: (sel: GuideSelection) => void; leave?: () => void }
+  onTogglePin?(channel: M3uChannel): void
 }
 
 /** Pilar till `onArrow`; tar den tangenten stoppas den, annars får stationen den. */
@@ -271,7 +309,7 @@ function withArrows(props: StationProps, onArrow: (key: string, el: HTMLElement)
  * markeringen lämnar och raden den landar på. På en Mi Box S ritade varje
  * pil-tryck förut om alla 80 rader och 238 block (~2 s huvudtråd).
  */
-const TimelineRow = memo(function TimelineRow({ channel, rowKey: key, entries, selected, focusedStart, init, initStart, number, pinned, locked, nowMs, windowStart, locale, hoverEnabled, api }: {
+const TimelineRow = memo(function TimelineRow({ channel, rowKey: key, entries, selected, focusedStart, init, initStart, number, pinned, locked, nowMs, windowStart, locale, hoverEnabled, pinState, api }: {
   channel: M3uChannel
   rowKey: string
   entries: EpgRowEntry<EpgProgramme>[] | null
@@ -288,6 +326,8 @@ const TimelineRow = memo(function TimelineRow({ channel, rowKey: key, entries, s
   /** Bara för att rita om när påminnelser ändras (klockan i blocken). */
   remindersVersion: number
   hoverEnabled: boolean
+  /** Fäst kanal: `sticky` = raden överst, `origin` = originalraden i listan (tonas). */
+  pinState: PinState
   api: { readonly current: TlApi }
 }): JSX.Element {
   const { tt } = useTvText()
@@ -297,8 +337,8 @@ const TimelineRow = memo(function TimelineRow({ channel, rowKey: key, entries, s
   const leave = hoverEnabled ? () => api.current.hover.leave?.() : undefined
   const enter = (sel: GuideSelection) => (hoverEnabled ? () => api.current.hover.enter?.(sel) : undefined)
   return (
-    <div data-testid="tl-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0 }}>
-      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} />
+    <div data-testid="tl-row" data-guide-v2-row="" data-key={key} data-selected={selected ? '' : undefined} style={{ display: 'flex', gap: dp(GUIDE_ROW_GAP), height: dp(GUIDE_ROW_H), flexShrink: 0, opacity: pinState === 'origin' ? PIN_ORIGIN_OPACITY : undefined }}>
+      <ChannelCellV2 channel={channel} number={number} pinned={pinned} locked={locked} selected={selected} pinState={pinState} onPinToggle={api.current.onTogglePin ? () => api.current.onTogglePin?.(channel) : undefined} />
       {entries && entries.length > 0 ? (
         <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
           {entries.map(({ box, programme }) => {
@@ -313,8 +353,8 @@ const TimelineRow = memo(function TimelineRow({ channel, rowKey: key, entries, s
                 (element) => { const a = api.current; holdMenu({ channel, programme, nav: a.nav, nowMs: a.nowMs, element, tt: a.tt, locale: a.locale }) },
                 { 'data-v2f': 'inset', ...(init && programme.start === initStart ? { 'data-init': '' } : {}) },
               ),
-              (k, el) => (k === 'ArrowRight' ? api.current.step(channel, programme, 1)
-                : k === 'ArrowLeft' ? api.current.step(channel, programme, -1)
+              (k, el) => (k === 'ArrowRight' ? api.current.step(channel, programme, 1, el)
+                : k === 'ArrowLeft' ? api.current.step(channel, programme, -1, el)
                   : api.current.vertical(el, visibleMid(programme), k === 'ArrowDown' ? 1 : -1)),
             )
             const background = live ? (focused ? accentMix(34) : 'rgba(252,252,255,0.13)') : focused ? V2.surface5 : V2.surface2
