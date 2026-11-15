@@ -102,13 +102,13 @@
       "slug": "homekit",
       "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
       "name": {
-        "en": "HomeKit",
-        "sv": "HomeKit"
+        "en": "Apple Home",
+        "sv": "Apple Hem"
       },
       "version": "0.2.8",
       "description": {
-        "en": "Connect Lumio playback events to HomeKit scenes and automations.",
-        "sv": "Koppla Lumios uppspelningshändelser till HomeKit-scener och automationer."
+        "en": "Works with Apple Home: connect Lumio playback events to Apple Home scenes and automations.",
+        "sv": "Fungerar med Apple Hem: koppla Lumios uppspelningshändelser till scener och automationer i Apple Hem."
       },
       "path": "plugins/homekit",
       "runtimeBundlePath": "dist/runtime.js",

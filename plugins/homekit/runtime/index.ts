@@ -3,21 +3,21 @@ import { HomeKitSettingsSection } from './homekit-settings-section'
 
 export const HomeKitPlugin: LumioPlugin = {
   id: 'com.lumio.homekit',
-  name: { en: 'HomeKit', sv: 'HomeKit', de: 'HomeKit', fr: 'HomeKit', es: 'HomeKit' },
+  name: { en: 'Apple Home', sv: 'Apple Hem', de: 'Apple Home', fr: 'Apple Maison', es: 'Apple Casa' },
   version: '0.1.1',
   description: {
-    en: 'Connect Lumio playback events to HomeKit scenes and automations.',
-    sv: 'Koppla Lumios uppspelning till HomeKit-scener och automationer.',
-    de: 'Verbinde Lumio-Wiedergabeereignisse mit HomeKit-Szenen und -Automationen.',
-    fr: 'Associez les événements de lecture de Lumio aux scènes et automatisations HomeKit.',
-    es: 'Vincula los eventos de reproducción de Lumio con escenas y automatizaciones de HomeKit.',
+    en: 'Works with Apple Home: connect Lumio playback events to Apple Home scenes and automations.',
+    sv: 'Fungerar med Apple Hem: koppla Lumios uppspelningshändelser till scener och automationer i Apple Hem.',
+    de: 'Funktioniert mit Apple Home: Verbinde Lumio-Wiedergabeereignisse mit Szenen und Automationen in Apple Home.',
+    fr: 'Compatible avec Apple Maison : associez les événements de lecture de Lumio aux scènes et automatisations d’Apple Maison.',
+    es: 'Compatible con Apple Casa: vincula los eventos de reproducción de Lumio con escenas y automatizaciones de Apple Casa.',
   },
   preinstalled: true,
 
   register(ctx) {
     ctx.registerSettingsSection({
       id: 'homekit',
-      label: { en: 'HomeKit', sv: 'HomeKit', de: 'HomeKit', fr: 'HomeKit', es: 'HomeKit' },
+      label: { en: 'Apple Home', sv: 'Apple Hem', de: 'Apple Home', fr: 'Apple Maison', es: 'Apple Casa' },
       Section: HomeKitSettingsSection,
     })
   },
