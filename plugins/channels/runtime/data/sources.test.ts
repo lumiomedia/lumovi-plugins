@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { applySeasonRuntimes, librarySides, loadCloudItems, loadLibraryItems, loadPool, loadPoolProgressive, loadVodItems, loadWatchlistItems, type SourceDeps } from './sources'
+import { applySeasonRuntimes, librarySides, loadLibraryItems, loadPool, loadPoolProgressive, loadVodItems, loadWatchlistItems, type SourceDeps } from './sources'
 import { createSeasonsCache, type SeasonsEntry } from './meta-cache'
 import { createChannel, emptyDraft } from '../model/channel'
 
@@ -14,7 +14,6 @@ function deps(over: Partial<SourceDeps> = {}): SourceDeps {
     getMovieWatchlist: () => [{ tmdbId: 1, imdbId: 'tt1', title: 'Alien' }, { tmdbId: 3, imdbId: 'tt3', title: 'Heat' }],
     getWatchlist: () => [{ tmdbId: 4, imdbId: 'tt4', title: 'Dark' }],
     fetchSeasons: vi.fn(async () => [{ season: 1, episodes: [{ episode: 1, title: 'Secrets', runtime: 51 }] }]),
-    listCloud: vi.fn(async () => [{ kind: 'movie' as const, title: 'Unknown', year: null, files: [{ provider: 'torbox' as const, fileRef: '7|1' }] }]),
     meta: { get: (kind: 'movie' | 'tv', id: number) => (id === 1 ? { runtimeMin: 117, genres: ['Horror'], year: 1979, at: 0 } : id === 3 ? { runtimeMin: 170, genres: ['Crime'], year: 1995, imdbId: 'tt3', at: 0 } : null), ensure: vi.fn(async () => {}) },
     ...over,
   }
@@ -71,22 +70,16 @@ describe('källadaptrarna', () => {
     expect(items[2]).toMatchObject({ runtimeMin: 51, play: { type: 'stream', imdbId: 'tt4', mediaType: 'series', season: 1, episode: 1 } })
   })
 
-  it('cloud: omatchade titlar med standardlängd', async () => {
-    const items = await loadCloudItems(deps())
-    expect(items[0]).toMatchObject({ ref: 'db:torbox:7|1', runtimeMin: 100, runtimeKnown: false, play: { type: 'cloud', provider: 'torbox', fileRef: '7|1' } })
-  })
-
   it('loadPool laddar bara valda källor och slår ihop dubletter', async () => {
     const d = deps()
     const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist'], kind: 'movie' }, [], 1, () => 0.1)
     const pool = await loadPool(ch, d)
-    expect(d.listCloud).not.toHaveBeenCalled()
     expect(pool.map((i) => i.ref).sort()).toEqual(['lib:m1', 'wl:movie:3'])
   })
 
   it('en källa som kastar ger de andra källornas titlar', async () => {
-    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'cloud'] }, [], 1, () => 0.1)
-    const pool = await loadPool(ch, deps({ listCloud: vi.fn(async () => { throw new Error('nät') }) }))
+    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist'] }, [], 1, () => 0.1)
+    const pool = await loadPool(ch, deps({ getMovieWatchlist: () => { throw new Error('nät') } }))
     expect(pool.length).toBeGreaterThan(0)
   })
 
@@ -99,11 +92,11 @@ describe('källadaptrarna', () => {
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
 
-  it('cloud: avsnitt utan nummer från samma serie blir egna poolposter', async () => {
-    const f = (n: number) => ({ provider: 'torbox' as const, fileRef: `${n}|1` })
-    const d = deps({ listCloud: vi.fn(async () => [{ kind: 'tv' as const, title: 'Show', year: 2000, tmdbId: 11, files: [f(1), f(2)] }]) })
-    const pool = await loadPool(createChannel({ ...emptyDraft(), name: 'A', sources: ['cloud'] }, [], 1, () => 0.1), d)
-    expect(pool).toHaveLength(2)
+  it('en kanal utan källor (bara en källa som inte stöds längre) ger en tom pool utan anrop', async () => {
+    const d = deps()
+    const pool = await loadPool({ ...createChannel({ ...emptyDraft(), name: 'A' }, [], 1, () => 0.1), sources: [] }, d)
+    expect(pool).toEqual([])
+    expect(d.queryLibrary).not.toHaveBeenCalled()
   })
 
   it('bibliotek: längd ur egen runtime, annars metadata, annars standard', async () => {
@@ -130,9 +123,8 @@ describe('källadaptrarna', () => {
   })
 
   it('strict: källfel kastar i stället för tom lista; utan strict som förut', async () => {
-    const down = deps({ queryLibrary: vi.fn().mockRejectedValue(new Error('nät')), listCloud: vi.fn().mockRejectedValue(new Error('nät')) })
+    const down = deps({ queryLibrary: vi.fn().mockRejectedValue(new Error('nät')) })
     await expect(loadLibraryItems(down, { strict: true })).rejects.toThrow('nät')
-    await expect(loadCloudItems(down, { strict: true })).rejects.toThrow('nät')
     expect(await loadLibraryItems(down)).toEqual([])
     // En senare sida som faller är inget källfel.
     const page = Array.from({ length: 200 }, (_, i) => ({ key: `m${i}`, kind: 'movie' as const, title: 't', runtimeMin: 90 }))
@@ -145,15 +137,16 @@ describe('progressiv laddning', () => {
   it('första källan publiceras innan en långsam andra källa svarat', async () => {
     let release: () => void = () => {}
     const gate = new Promise<void>((r) => { release = r })
-    const d = deps({ listCloud: vi.fn(async () => { await gate; return [] }) })
-    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'cloud'] }, [], 1, () => 0.1)
+    // Watchlisten väntar på startgrinden; biblioteket gör det inte.
+    const d = deps({ waitForIdle: () => gate })
+    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist'], kind: 'movie' }, [], 1, () => 0.1)
     const updates: string[][] = []
     const done = loadPoolProgressive(ch, d, (pool) => updates.push(pool.map((i) => i.ref)))
     await new Promise((r) => setTimeout(r, 0))
     expect(updates.length).toBeGreaterThan(0)
-    expect(updates.at(-1)).toEqual(['lib:m1', 'lib:s1:e1'])
+    expect(updates.at(-1)).toEqual(['lib:m1'])
     release()
-    expect((await done).map((i) => i.ref)).toEqual(['lib:m1', 'lib:s1:e1'])
+    expect((await done).map((i) => i.ref).sort()).toEqual(['lib:m1', 'wl:movie:3'])
   })
 
   it('metadata ligger inte på den kritiska vägen: berikningen publicerar om en gång', async () => {
@@ -181,25 +174,23 @@ describe('progressiv laddning', () => {
   })
 
   it('slutpoolen är densamma oavsett vilken källa som svarar först', async () => {
-    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist', 'cloud'] }, [], 1, () => 0.1)
+    const ch = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist'] }, [], 1, () => 0.1)
     const slow = <T,>(ms: number, v: T) => new Promise<T>((r) => setTimeout(() => r(v), ms))
     const base = deps()
     const lib = await base.queryLibrary({})
-    const deb = await base.listCloud()
-    const a = await loadPoolProgressive(ch, deps({ queryLibrary: () => slow(1, lib), listCloud: () => slow(15, deb) }))
-    const b = await loadPoolProgressive(ch, deps({ queryLibrary: () => slow(15, lib), listCloud: () => slow(1, deb) }))
+    const a = await loadPoolProgressive(ch, deps({ queryLibrary: () => slow(1, lib), waitForIdle: () => slow(15, undefined) }))
+    const b = await loadPoolProgressive(ch, deps({ queryLibrary: () => slow(15, lib), waitForIdle: () => slow(1, undefined) }))
     expect(b).toEqual(a)
   })
 
   it('kanaler som laddar samtidigt delar en hämtning per källa', async () => {
     const d = deps()
-    const a = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist', 'cloud'] }, [], 1, () => 0.1)
-    const b = createChannel({ ...emptyDraft(), name: 'B', sources: ['library', 'cloud'], kind: 'movie' }, [], 2, () => 0.2)
+    const a = createChannel({ ...emptyDraft(), name: 'A', sources: ['library', 'watchlist'] }, [], 1, () => 0.1)
+    const b = createChannel({ ...emptyDraft(), name: 'B', sources: ['library'], kind: 'movie' }, [], 2, () => 0.2)
     const c = createChannel({ ...emptyDraft(), name: 'C', sources: ['watchlist'] }, [], 3, () => 0.3)
     const watch = vi.spyOn(d, 'getWatchlist')
     const [pa, pb, pc] = await Promise.all([loadPoolProgressive(a, d), loadPoolProgressive(b, d), loadPoolProgressive(c, d)])
     expect(d.queryLibrary).toHaveBeenCalledTimes(1)
-    expect(d.listCloud).toHaveBeenCalledTimes(1)
     expect(watch).toHaveBeenCalledTimes(1)
     expect(pa.length).toBeGreaterThan(0)
     expect(pb.every((i) => i.kind === 'movie')).toBe(true)

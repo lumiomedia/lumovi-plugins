@@ -14,7 +14,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ComponentType, type CSSProperties, type MutableRefObject, type ReactNode } from 'react'
 import { setAndroidImmersive, useTvMode } from '@/lib/plugin-sdk'
-import type { ChannelDef } from '../model/channel'
+import { unsupportedSourceOnly, type ChannelDef } from '../model/channel'
 import type { PoolItem } from '../data/pool'
 import { programmeAt } from '../model/schedule'
 import { createLatestGate } from '../play/resolve'
@@ -361,7 +361,7 @@ export function ChannelPlayer({ channels, initialChannelId, mode: initialMode, s
     return () => window.clearTimeout(id)
   }, [waitUntil])
 
-  // Grannkanalerna (CH ▲▼) förladdas när bilden stått en stund — bara bibliotek/cloud.
+  // Grannkanalerna (CH ▲▼) förladdas när bilden stått en stund — bara bibliotek.
   const framedNow = !!onScreen && state.framedSeq === onScreen.seq && onScreen.seq === request.seq
   useEffect(() => {
     if (!framedNow) return
@@ -867,7 +867,7 @@ export function ChannelPlayer({ channels, initialChannelId, mode: initialMode, s
         <p style={msgStyle}>{t('playerRest', { time: clock(rest.nextAir) })}</p>
       ) : status === 'empty' ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <p style={msgStyle}>{t('playerEmpty')}</p>
+          <p style={msgStyle}>{t(unsupportedSourceOnly(channel) ? 'sourceUnsupported' : 'playerEmpty')}</p>
           {onEditChannel ? <OsdButton onClick={() => onEditChannel(channel.id)} isTv={isTv}>{t('playerEdit')}</OsdButton> : null}
         </div>
       ) : status === 'nosignal' && noSignal ? (

@@ -7,11 +7,11 @@ import { canonGenres } from '../data/genres'
  */
 /**
  * Var titlarna kommer ifrån. 'vod' = IPTV/Xtream-VOD-katalogen i biblioteket
- * (källor med id xtream-vod:…), en egen källa som är AV som standard: de flesta
- * kör cloud, och VOD-katalogen är stor. Kanaler skapade före 0.1.5 med
- * 'library' räknas därför utan VOD — vill man ha den kryssar man i IPTV-VOD.
+ * (källor med id xtream-vod:…), en egen källa som är AV som standard:
+ * VOD-katalogen är stor. Kanaler skapade före 0.1.5 med 'library' räknas
+ * därför utan VOD — vill man ha den kryssar man i IPTV-VOD.
  */
-export type SourceId = 'library' | 'watchlist' | 'cloud' | 'vod'
+export type SourceId = 'library' | 'watchlist' | 'vod'
 export type Era = 'any' | '70s' | '80s' | '90s' | '80s90s' | '00s' | '10s' | '20s'
 export type LengthRule = 'any' | 'short' | 'episode' | 'feature'
 export type KindRule = 'any' | 'movie' | 'tv'
@@ -64,7 +64,7 @@ export const ERA_RANGES: Record<Exclude<Era, 'any'>, [number, number]> = {
 
 export function emptyDraft(): ChannelDraft {
   return {
-    name: '', sources: ['library', 'watchlist', 'cloud'], genres: [], era: 'any', length: 'any', kind: 'any',
+    name: '', sources: ['library', 'watchlist'], genres: [], era: 'any', length: 'any', kind: 'any',
     order: 'shuffle', airWindow: 'always', showOnHome: true,
   }
 }
@@ -107,35 +107,41 @@ export type DefaultChannelId =
   | 'movies-247' | 'series-in-order' | 'action-thrills' | 'comedy' | 'eighties-nineties'
   | 'evening-film' | 'after-midnight' | 'scifi-fantasy' | 'family-animation' | 'drama'
 
-const ALL_SOURCES: SourceId[] = ['library', 'watchlist', 'cloud']
+const ALL_SOURCES: SourceId[] = ['library', 'watchlist']
 
-/** Källor som alltid sparats under sitt eget id. Allt annat i en sparad kanal är molnkällan. */
-const PLAIN_SOURCES: SourceId[] = ['library', 'watchlist', 'vod', 'cloud']
+/** Källorna som finns. */
+const KNOWN_SOURCES: SourceId[] = ['library', 'watchlist', 'vod']
 
 /**
- * En sparad kanals källor i dagens form. Molnkällan sparades tidigare under
- * ett annat id; vilket spelar ingen roll här: ett id som inte är någon av de
- * övriga källorna är molnkällan.
+ * En sparad kanals källor i dagens form. Ett id som inte är någon av
+ * källorna ovan är en källa som inte stöds längre (molnkällan, borttagen ur
+ * pluginet, sparades som 'cloud' eller under ett annat id) och hoppas över.
+ * En kanal som bara hade den får inga källor kvar: den visar
+ * `sourceUnsupported` i stället för en tom tablå (se unsupportedSourceOnly).
  */
 export function sourcesFromStorage(raw: unknown): SourceId[] {
   if (!Array.isArray(raw)) return []
   const out: SourceId[] = []
   for (const value of raw) {
-    if (typeof value !== 'string' || !value) continue
-    const id = (PLAIN_SOURCES as string[]).includes(value) ? (value as SourceId) : 'cloud'
-    if (!out.includes(id)) out.push(id)
+    if (typeof value !== 'string' || !(KNOWN_SOURCES as string[]).includes(value)) continue
+    if (!out.includes(value as SourceId)) out.push(value as SourceId)
   }
   return out
 }
 
-/**
- * Källorna som de sparas. `cloudStorageId` är det id tjänstefilen anger för
- * molnkällan (det äldre versioner av pluginet läser, så en synkad kanal
- * fungerar även på en enhet som inte uppdaterat än); utan fil det nya id:t.
- */
-export function sourcesToStorage(sources: SourceId[], cloudStorageId: string | null): string[] {
-  return sources.map((id) => (id === 'cloud' && cloudStorageId ? cloudStorageId : id))
+/** Sparade källor som inte stöds längre (se sourcesFromStorage). */
+export function hasRetiredSources(raw: unknown): boolean {
+  return Array.isArray(raw) && raw.some((value) => typeof value === 'string' && !!value && !(KNOWN_SOURCES as string[]).includes(value))
 }
+
+/**
+ * Kanalen saknar källor: den byggdes bara av en källa som inte stöds längre
+ * (studion sparar aldrig en kanal utan källa). Tom tablå visas då som
+ * "Den här källan stöds inte längre".
+ */
+export const unsupportedSourceOnly = (c: { sources: readonly SourceId[]; titles?: readonly ChannelTitle[] | null }): boolean =>
+  c.sources.length === 0 && !hasTitles(c)
+
 const preset = (over: Partial<ChannelDraft>): Omit<ChannelDraft, 'name'> => {
   const { name: _name, ...base } = emptyDraft()
   return { ...base, sources: [...ALL_SOURCES], showOnHome: true, ...over }

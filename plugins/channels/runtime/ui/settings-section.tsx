@@ -9,8 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card, PillBtn, Section, Switch, TOKENS, requestOpenBrowsePage, type PluginSettingsRow, type SettingsSection } from '@/lib/plugin-sdk'
 import type { ChannelDef } from '../model/channel'
-import { cloudAccountName, cloudAccounts, forgetCloudAccount, onChannelsChanged, readChannels, refreshCloud, sourceCacheSetting } from '../host'
-import type { CloudServiceId } from '../data/cloud'
+import { onChannelsChanged, readChannels, sourceCacheSetting } from '../host'
 import { deleteChannel, readCachedPool, useChannels } from '../state/store'
 import { S } from '../strings'
 import { CHANNELS_PAGE_ID } from './guide-layout'
@@ -56,20 +55,6 @@ export function buildChannelRows(channels: ChannelDef[], actions: ChannelRowActi
     })
   }
   rows.push({ t: 'action', label: S.settingsNewRow, run: actions.create })
-  const accounts = cloudAccounts()
-  if (accounts.length > 0) {
-    rows.push({ t: 'eyebrow', label: S.settingsCloudTitle })
-    rows.push({ t: 'note', text: S.settingsCloudHint })
-    for (const id of accounts) {
-      rows.push({
-        t: 'action',
-        label: { en: cloudAccountName(id), sv: cloudAccountName(id), de: cloudAccountName(id), fr: cloudAccountName(id), es: cloudAccountName(id) },
-        danger: true,
-        confirm: { title: fill(S.settingsCloudRemoveTitle, { name: cloudAccountName(id) }), body: S.settingsCloudRemoveBody, confirmLabel: S.settingsCloudRemove },
-        run: () => removeCloudAccount(id),
-      })
-    }
-  }
   const cache = sourceCacheSetting()
   if (cache) {
     rows.push({ t: 'eyebrow', label: S.settingsCacheTitle })
@@ -118,50 +103,6 @@ export function useChannelList(): {
   return { sorted, counts, confirmId, requestDelete: onDelete }
 }
 
-/** Tar bort kontots nyckel och bygger om molnlistan, så filerna lämnar kanalerna. */
-function removeCloudAccount(id: CloudServiceId): void {
-  forgetCloudAccount(id)
-  void refreshCloud().catch(() => [])
-}
-
-/**
- * Sparade molnnycklar (bara konton med en nyckel i appen; tilläggens egna
- * nycklar och biblioteksservrar syns inte här, vilket texten säger). Appens egen inställningsflik för tjänsterna
- * finns inte längre, så ett gammalt konto (utgånget, oanvänt) gick inte att
- * ta bort och gav kanalposter som aldrig gick att spela (2026-10-19).
- */
-function CloudAccountsCard() {
-  const t = useText()
-  const [accounts, setAccounts] = useState(() => cloudAccounts())
-  const [confirm, setConfirm] = useState<CloudServiceId | null>(null)
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
-  if (accounts.length === 0) return null
-  const onRemove = (id: CloudServiceId) => {
-    if (timer.current) clearTimeout(timer.current)
-    if (confirm !== id) {
-      setConfirm(id)
-      timer.current = setTimeout(() => setConfirm(null), CONFIRM_MS)
-      return
-    }
-    setConfirm(null)
-    removeCloudAccount(id)
-    setAccounts(cloudAccounts())
-  }
-  return (
-    <Section title={t('settingsCloudTitle')} hint={t('settingsCloudHint')}>
-      {accounts.map((id) => (
-        <Card key={id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
-          <div data-cloud-account={id} style={{ color: TOKENS.text, fontWeight: 600 }}>{cloudAccountName(id)}</div>
-          <PillBtn size="sm" variant="danger" onClick={() => onRemove(id)}>
-            {t(confirm === id ? 'settingsCloudRemoveConfirm' : 'settingsCloudRemove')}
-          </PillBtn>
-        </Card>
-      ))}
-    </Section>
-  )
-}
-
 /** "Mellanlagra strömmar" — bara på Android, där valet finns. */
 function SourceCacheCard() {
   const t = useText()
@@ -185,7 +126,6 @@ export function ChannelsSettingsSection() {
   return (
     <>
       <ChannelListSection />
-      <CloudAccountsCard />
       <SourceCacheCard />
     </>
   )

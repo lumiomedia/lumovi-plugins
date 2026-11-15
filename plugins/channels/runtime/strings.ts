@@ -20,6 +20,8 @@ export const S = {
   playerThen: { en: 'then {title}', sv: 'sedan {title}', de: 'danach {title}', fr: 'puis {title}', es: 'luego {title}' },
   playerRest: { en: 'Back on air at {time}', sv: 'Sänder igen {time}', de: 'Wieder auf Sendung um {time}', fr: 'Retour à l’antenne à {time}', es: 'Vuelve a emitir a las {time}' },
   playerEmpty: { en: 'Nothing to broadcast', sv: 'Inget att sända', de: 'Nichts zu senden', fr: 'Rien à diffuser', es: 'Nada que emitir' },
+  /** En kanal som bara byggdes av en källa som tagits bort (model/channel unsupportedSourceOnly). */
+  sourceUnsupported: { en: 'This source is no longer supported', sv: 'Den här källan stöds inte längre', de: 'Diese Quelle wird nicht mehr unterstützt', fr: 'Cette source n’est plus prise en charge', es: 'Esta fuente ya no es compatible' },
   playerEdit: { en: 'Edit', sv: 'Redigera', de: 'Bearbeiten', fr: 'Modifier', es: 'Editar' },
   playerTuning: { en: 'Tuning in…', sv: 'Ställer in…', de: 'Sender wird eingestellt…', fr: 'Syntonisation…', es: 'Sintonizando…' },
   playerBetween: { en: 'The programme has ended', sv: 'Programmet är slut', de: 'Die Sendung ist zu Ende', fr: 'L’émission est terminée', es: 'El programa ha terminado' },
@@ -63,11 +65,11 @@ export const S = {
   guideEmpty: { en: 'Nothing to broadcast', sv: 'Inget att sända', de: 'Nichts zu senden', fr: 'Rien à diffuser', es: 'Nada que emitir' },
   emptyTitle: { en: 'No channels', sv: 'Inga kanaler', de: 'Keine Sender', fr: 'Aucune chaîne', es: 'Sin canales' },
   emptyLead: {
-    en: 'A channel is a few rules. Lumio builds a never-ending schedule from your library, watchlist and cloud accounts. Bring back the ten default channels.',
-    sv: 'En kanal är några regler. Lumio bygger en tablå som aldrig tar slut av ditt bibliotek, din watchlist och dina molnkonton. Ta tillbaka de tio standardkanalerna.',
-    de: 'Ein Sender besteht aus ein paar Regeln. Lumio baut aus deiner Bibliothek, deiner Merkliste und deinen Cloud-Konten ein endloses Programm. Hol dir die zehn Standardsender zurück.',
-    fr: 'Une chaîne, ce sont quelques règles. Lumio construit une grille sans fin à partir de votre bibliothèque, de votre liste et de vos comptes cloud. Récupérez les dix chaînes par défaut.',
-    es: 'Un canal son unas pocas reglas. Lumio crea una programación sin fin con tu biblioteca, tu lista y tus cuentas en la nube. Recupera los diez canales predeterminados.',
+    en: 'A channel is a few rules. Lumio builds a never-ending schedule from your library and watchlist. Bring back the ten default channels.',
+    sv: 'En kanal är några regler. Lumio bygger en tablå som aldrig tar slut av ditt bibliotek och din watchlist. Ta tillbaka de tio standardkanalerna.',
+    de: 'Ein Sender besteht aus ein paar Regeln. Lumio baut aus deiner Bibliothek und deiner Merkliste ein endloses Programm. Hol dir die zehn Standardsender zurück.',
+    fr: 'Une chaîne, ce sont quelques règles. Lumio construit une grille sans fin à partir de votre bibliothèque et de votre liste. Récupérez les dix chaînes par défaut.',
+    es: 'Un canal son unas pocas reglas. Lumio crea una programación sin fin con tu biblioteca y tu lista. Recupera los diez canales predeterminados.',
   },
   emptySettingsHint: {
     en: 'Create and edit your own channels under Settings → LumioTV.',
@@ -108,7 +110,6 @@ export const S = {
   fieldWindow: { en: 'Airs', sv: 'Sänder', de: 'Sendezeit', fr: 'Diffusion', es: 'Emisión' },
   sourceLibrary: { en: 'Library', sv: 'Bibliotek', de: 'Bibliothek', fr: 'Bibliothèque', es: 'Biblioteca' },
   sourceWatchlist: { en: 'Watchlist', sv: 'Watchlist', de: 'Merkliste', fr: 'Ma liste', es: 'Mi lista' },
-  sourceCloud: { en: 'Cloud', sv: 'Molnet', de: 'Cloud', fr: 'Cloud', es: 'Nube' },
   sourceVod: { en: 'IPTV VOD', sv: 'IPTV-VOD', de: 'IPTV-VOD', fr: 'VOD IPTV', es: 'VOD IPTV' },
   sourceRefresh: { en: 'Refresh', sv: 'Uppdatera', de: 'Aktualisieren', fr: 'Actualiser', es: 'Actualizar' },
   kindAny: { en: 'All', sv: 'Allt', de: 'Alle', fr: 'Tout', es: 'Todo' },
@@ -157,24 +158,6 @@ export const S = {
   studioDeleteConfirm: { en: 'Confirm deletion', sv: 'Bekräfta borttagning', de: 'Löschen bestätigen', fr: 'Confirmer la suppression', es: 'Confirmar eliminación' },
   // Inställningssektionen
   settingsTitle: { en: 'Your channels', sv: 'Dina kanaler', de: 'Deine Sender', fr: 'Vos chaînes', es: 'Tus canales' },
-  settingsCloudTitle: { en: 'Saved cloud keys', sv: 'Sparade molnnycklar', de: 'Gespeicherte Cloud-Schlüssel', fr: 'Clés cloud enregistrées', es: 'Claves de nube guardadas' },
-  settingsCloudHint: {
-    en: 'The channels play files straight from these accounts with a key saved in the app. Add-ons such as AIOStreams keep their own keys and are not listed here, and media servers such as Plex and Jellyfin reach the channels through your library. Remove a key you no longer use: its files leave the channels the next time they are built.',
-    sv: 'Kanalerna spelar filer direkt från de här kontona med en nyckel som sparats i appen. Tillägg som AIOStreams har egna nycklar och listas inte här, och medieservrar som Plex och Jellyfin når kanalerna via ditt bibliotek. Ta bort en nyckel du inte använder längre: kontots filer försvinner ur kanalerna nästa gång de byggs.',
-    de: 'Die Sender spielen Dateien direkt von diesen Konten mit einem in der App gespeicherten Schlüssel ab. Add-ons wie AIOStreams haben eigene Schlüssel und erscheinen hier nicht, und Medienserver wie Plex und Jellyfin erreichen die Sender über deine Bibliothek. Entferne einen Schlüssel, den du nicht mehr nutzt: Die Dateien des Kontos verschwinden beim nächsten Aufbau aus den Sendern.',
-    fr: 'Les chaînes lisent les fichiers directement depuis ces comptes grâce à une clé enregistrée dans l’app. Les extensions comme AIOStreams ont leurs propres clés et n’apparaissent pas ici, et les serveurs multimédias comme Plex et Jellyfin rejoignent les chaînes via votre bibliothèque. Retirez une clé que vous n’utilisez plus : les fichiers du compte disparaîtront des chaînes à leur prochaine construction.',
-    es: 'Los canales reproducen archivos directamente desde estas cuentas con una clave guardada en la app. Los complementos como AIOStreams tienen sus propias claves y no aparecen aquí, y los servidores multimedia como Plex y Jellyfin llegan a los canales a través de tu biblioteca. Quita una clave que ya no uses: los archivos de la cuenta desaparecerán de los canales la próxima vez que se generen.',
-  },
-  settingsCloudRemove: { en: 'Remove', sv: 'Ta bort', de: 'Entfernen', fr: 'Retirer', es: 'Quitar' },
-  settingsCloudRemoveConfirm: { en: 'Press again to remove', sv: 'Tryck igen för att ta bort', de: 'Nochmal drücken zum Entfernen', fr: 'Appuyez à nouveau pour retirer', es: 'Pulsa otra vez para quitar' },
-  settingsCloudRemoveTitle: { en: 'Remove {name}?', sv: 'Ta bort {name}?', de: '{name} entfernen?', fr: 'Retirer {name} ?', es: '¿Quitar {name}?' },
-  settingsCloudRemoveBody: {
-    en: 'The saved key is removed from this device. Its files leave the channels.',
-    sv: 'Den sparade nyckeln tas bort från den här enheten. Kontots filer försvinner ur kanalerna.',
-    de: 'Der gespeicherte Schlüssel wird von diesem Gerät entfernt. Die Dateien des Kontos verschwinden aus den Sendern.',
-    fr: 'La clé enregistrée est supprimée de cet appareil. Les fichiers du compte disparaissent des chaînes.',
-    es: 'La clave guardada se elimina de este dispositivo. Los archivos de la cuenta desaparecen de los canales.',
-  },
   settingsCacheTitle: { en: 'Playback', sv: 'Uppspelning', de: 'Wiedergabe', fr: 'Lecture', es: 'Reproducción' },
   settingsCacheLabel: { en: 'Faster channel switching (cache streams)', sv: 'Snabbare kanalbyten (mellanlagra strömmar)', de: 'Schnellerer Senderwechsel (Streams zwischenspeichern)', fr: 'Changement de chaîne plus rapide (mise en cache des flux)', es: 'Cambio de canal más rápido (almacenar streams en caché)' },
   settingsCacheHint: {

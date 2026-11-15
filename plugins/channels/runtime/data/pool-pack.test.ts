@@ -38,7 +38,7 @@ describe('packPool/unpackPool', () => {
       ...bigPool(1, 2),
       { ref: 'wl:movie:5', title: 'Alien', kind: 'movie', runtimeMin: 100, runtimeKnown: false, year: 1979, source: 'watchlist', genres: ['Horror'], tmdbId: 5, imdbId: 'tt0078748', posterUrl: POSTER, play: { type: 'stream', imdbId: 'tt0078748', mediaType: 'movie' } },
       { ref: 'wl:tv:9:1:2', title: 'Ep', seriesTitle: 'Show', kind: 'episode', seriesKey: 'wl:tv:9', season: 1, episode: 2, runtimeMin: 45, runtimeKnown: true, year: 2001, source: 'watchlist', genres: [], imdbId: 'tt9', play: { type: 'stream', imdbId: 'tt9', mediaType: 'series', season: 1, episode: 2 } },
-      { ref: 'db:torbox:7|1', title: 'X', kind: 'movie', runtimeMin: 100, runtimeKnown: false, year: null, source: 'cloud', genres: [], play: { type: 'cloud', provider: 'torbox', fileRef: '7|1' } },
+      { ref: 'lib:xtream-vod:1:9', title: 'V', kind: 'movie', runtimeMin: 90, runtimeKnown: true, year: 2001, source: 'vod', genres: [], play: { type: 'library', key: 'xtream-vod:1:9', mediaType: 'movie' } },
     ]
     const back = unpackPool(JSON.parse(JSON.stringify(packPool(items))))!
     const shown = (i: PoolItem) => ({ ref: i.ref, title: i.title, kind: i.kind, runtimeMin: i.runtimeMin, runtimeKnown: i.runtimeKnown, year: i.year, seriesKey: i.seriesKey, season: i.season, episode: i.episode, seriesTitle: i.seriesTitle, posterUrl: i.posterUrl, backdropUrl: i.backdropUrl, play: i.play, source: i.source })
@@ -54,6 +54,13 @@ describe('packPool/unpackPool', () => {
     const packed = JSON.parse(JSON.stringify(packPool(bigPool(1, 1)))) as { v: number }
     expect(packed.v).toBe(3)
     expect(unpackPool({ ...packed, v: 2 })).toBeNull()
+  })
+
+  it('molnfiler i en äldre cache hoppas över (källan stöds inte längre); resten står kvar', () => {
+    const packed = JSON.parse(JSON.stringify(packPool(bigPool(1, 1)))) as { v: number; i: unknown[] }
+    packed.i.push({ r: 'db:x:7|1', t: 'X', m: 100, y: null, u: 1, p: { d: 'x', f: '7|1' } })
+    const back = unpackPool(packed)!
+    expect(back.map((i) => i.ref)).toEqual(['lib:plex-1:1000:plex-1:50001'])
   })
 
   it('en gammal (opackad) cache räknas som kall', () => {

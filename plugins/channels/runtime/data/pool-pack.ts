@@ -35,10 +35,10 @@ interface PackedItem {
   p: PackedPlay
 }
 
+/** `d` (en fil ur molnkällan) finns i äldre cacher; den källan stöds inte längre och hoppas över vid uppackning. */
 type PackedPlay =
   | { l: string; tv?: 1; v?: 1 }
   | { i: string; tv?: 1 }
-  | { d: string; f: string }
 
 export interface PackedPool { v: typeof POOL_PACK_VERSION; g: PackedGroup[]; i: PackedItem[] }
 
@@ -48,18 +48,16 @@ function packPlay(play: PlayRef, source: SourceId): PackedPlay {
     const vod = source === 'vod' ? { v: 1 as const } : {}
     return play.mediaType === 'tv' ? { l: play.key, tv: 1, ...vod } : { l: play.key, ...vod }
   }
-  if (play.type === 'stream') return play.mediaType === 'series' ? { i: play.imdbId, tv: 1 } : { i: play.imdbId }
-  return { d: play.provider, f: play.fileRef }
+  return play.mediaType === 'series' ? { i: play.imdbId, tv: 1 } : { i: play.imdbId }
 }
 
-function unpackPlay(p: PackedPlay, season?: number, episode?: number): PlayRef {
+/** null för en spelreferens som inte stöds längre (molnkällans `d`). */
+function unpackPlay(p: PackedPlay | null | undefined, season?: number, episode?: number): PlayRef | null {
   const se = { ...(season != null ? { season } : {}), ...(episode != null ? { episode } : {}) }
-  if ('l' in p) return { type: 'library', key: p.l, mediaType: p.tv ? 'tv' : 'movie', ...(p.tv ? se : {}) }
-  if ('i' in p) return { type: 'stream', imdbId: p.i, mediaType: p.tv ? 'series' : 'movie', ...(p.tv ? se : {}) }
-  return { type: 'cloud', provider: p.d, fileRef: p.f }
+  if (p && 'l' in p) return { type: 'library', key: p.l, mediaType: p.tv ? 'tv' : 'movie', ...(p.tv ? se : {}) }
+  if (p && 'i' in p) return { type: 'stream', imdbId: p.i, mediaType: p.tv ? 'series' : 'movie', ...(p.tv ? se : {}) }
+  return null
 }
-
-const SOURCE_OF: Record<'l' | 'i' | 'd', SourceId> = { l: 'library', i: 'watchlist', d: 'cloud' }
 
 export function packPool(items: PoolItem[]): PackedPool {
   const groups: PackedGroup[] = []
@@ -101,11 +99,13 @@ export function unpackPool(value: unknown): PoolItem[] | null {
   const packed = value as Partial<PackedPool> | null
   if (!packed || packed.v !== POOL_PACK_VERSION || !Array.isArray(packed.i) || !Array.isArray(packed.g)) return null
   const groups = packed.g
-  return packed.i.map((it): PoolItem => {
-    const group = it.g != null ? groups[it.g] ?? {} : {}
+  const out: PoolItem[] = []
+  for (const it of packed.i) {
     const play = unpackPlay(it.p, it.s, it.n)
-    const source: SourceId = 'l' in it.p && it.p.v ? 'vod' : SOURCE_OF['l' in it.p ? 'l' : 'i' in it.p ? 'i' : 'd']
-    return {
+    if (!play) continue
+    const group = it.g != null ? groups[it.g] ?? {} : {}
+    const source: SourceId = play.type === 'stream' ? 'watchlist' : 'v' in it.p && it.p.v ? 'vod' : 'library'
+    out.push({
       ref: it.r, title: it.t, runtimeMin: it.m, year: it.y, kind: it.e ? 'episode' : 'movie',
       ...(group.sk ? { seriesKey: group.sk } : {}),
       ...(it.s != null ? { season: it.s } : {}),
@@ -117,6 +117,7 @@ export function unpackPool(value: unknown): PoolItem[] | null {
       ...(group.i ? { tmdbId: group.i } : {}),
       ...(play.type === 'stream' ? { imdbId: play.imdbId } : {}),
       play,
-    }
-  })
+    })
+  }
+  return out
 }

@@ -48,4 +48,11 @@ describe('hemradens komponent', () => {
     expect(onNavigate).toHaveBeenLastCalledWith({ pageId: 'channels' })
     await waitFor(() => expect(screen.getByText(/MIN KVAR/)).toBeTruthy())
   })
+
+  it('en sparad kanal som bara byggdes av molnkällan kraschar inte: kortet säger att källan inte stöds längre', async () => {
+    const ch = { ...createChannel({ ...emptyDraft(), name: 'Moln', sources: ['library'] }, [], 1, () => 0.1), id: 'k2', sources: ['older-cloud-id'] }
+    storage.set('channels', [ch])
+    render(<ChannelsHomeRow onNavigate={() => {}} />)
+    await waitFor(() => expect(screen.getByText('Den här källan stöds inte längre')).toBeTruthy())
+  })
 })

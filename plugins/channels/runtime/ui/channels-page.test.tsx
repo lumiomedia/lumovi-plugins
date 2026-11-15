@@ -40,7 +40,7 @@ vi.mock('@/lib/plugin-sdk', () => ({
 }))
 vi.mock('../host', () => ({
   hostReady: () => state.ready,
-  warmCloudServices: () => {},
+  retireCloudSource: () => {},
   readZapMemory: () => ({ lastChannelId: state.lastChannelId, previousChannelId: null }),
 }))
 vi.mock('../state/store', () => ({

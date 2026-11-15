@@ -8,17 +8,17 @@ const item = (ref: string, source: PoolItem['source'], play: PoolItem['play']): 
   ({ ref, title: ref, kind: 'movie', source, genres: [], year: null, runtimeMin: 600, runtimeKnown: true, play } as PoolItem)
 
 describe('guidens förvärmning', () => {
-  it('programmet just nu per kanal: bibliotek och moln, aldrig strömuppslag eller IPTV-VOD; en gång per plats', () => {
+  it('programmet just nu per kanal: bibliotek, aldrig strömuppslag eller IPTV-VOD; en gång per plats', () => {
     const channels = [ch('a'), ch('b'), ch('c'), ch('d')]
     const rundowns = {
       a: { rundown: [item('lib:x', 'library', { type: 'library', key: 'x', mediaType: 'movie' })] },
-      b: { rundown: [item('db:torbox:1|2', 'cloud', { type: 'cloud', provider: 'torbox', fileRef: '1|2' })] },
+      b: { rundown: [item('lib:y', 'library', { type: 'library', key: 'y', mediaType: 'tv' })] },
       c: { rundown: [item('wl:movie:5', 'watchlist', { type: 'stream', imdbId: 'tt1', mediaType: 'movie' })] },
       d: { rundown: [item('lib:xtream-vod:9', 'vod', { type: 'library', key: 'v', mediaType: 'movie' })] },
     }
     const now = Date.UTC(2026, 9, 20, 18, 0)
     const first = guideWarmTargets(channels, rundowns, now, new Set())
-    expect(first.map((t) => t.item.ref)).toEqual(['lib:x', 'db:torbox:1|2'])
+    expect(first.map((t) => t.item.ref)).toEqual(['lib:x', 'lib:y'])
     expect(guideWarmTargets(channels, rundowns, now, new Set(first.map((t) => t.key)))).toEqual([])
   })
 })

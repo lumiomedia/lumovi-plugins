@@ -18,8 +18,8 @@ describe('kanalmodellen', () => {
 
   it('validerar namn och källor och varnar för få titlar', () => {
     expect(validateDraft({ ...emptyDraft(), name: ' ', sources: [] }, 0)).toEqual({ errors: ['name', 'sources'], warnings: ['few-titles'] })
-    expect(validateDraft({ ...emptyDraft(), name: 'A', sources: ['cloud'] }, 12)).toEqual({ errors: [], warnings: [] })
-    expect(validateDraft({ ...emptyDraft(), name: 'A', sources: ['cloud'] }, null)).toEqual({ errors: [], warnings: [] })
+    expect(validateDraft({ ...emptyDraft(), name: 'A', sources: ['watchlist'] }, 12)).toEqual({ errors: [], warnings: [] })
+    expect(validateDraft({ ...emptyDraft(), name: 'A', sources: ['watchlist'] }, null)).toEqual({ errors: [], warnings: [] })
   })
 
   it('har tre förslag med giltiga regler', () => {
@@ -53,12 +53,12 @@ describe('standardkanalerna', () => {
     expect(made.map((c) => c.name)).toEqual(['Bio dygnet runt', 'Serier i följd', 'Action & spänning', 'Komedi', '80- & 90-tal', 'Kvällsfilm', 'Efter midnatt', 'Sci-fi & fantasy', 'Familj & animerat', 'Drama'])
     expect(buildDefaultChannels([], 'en', 99)).toEqual(buildDefaultChannels([], 'en', 99))
     expect(made[0]!.seed).toBe(presetSeed('movies-247'))
-    expect(made.every((c) => c.sources.length === 3 && c.showOnHome)).toBe(true)
+    expect(made.every((c) => c.sources.join() === 'library,watchlist' && c.showOnHome)).toBe(true)
     expect(ERA_RANGES['80s90s']).toEqual([1980, 1999])
   })
 
   it('läggs efter befintliga och hoppar över en kanal med samma regler', () => {
-    const own = { ...createChannel({ ...emptyDraft(), name: 'Evening film', kind: 'movie', length: 'feature', airWindow: 'evenings', sources: ['cloud', 'library', 'watchlist'] }, [], 1, () => 0.1) }
+    const own = { ...createChannel({ ...emptyDraft(), name: 'Evening film', kind: 'movie', length: 'feature', airWindow: 'evenings', sources: ['watchlist', 'library'] }, [], 1, () => 0.1) }
     const made = buildDefaultChannels([own], 'sv', 5)
     expect(made).toHaveLength(9)
     expect(made.some((c) => c.name === 'Kvällsfilm')).toBe(false)
@@ -68,18 +68,35 @@ describe('standardkanalerna', () => {
 })
 
 describe('källornas id i lagringen', () => {
-  it('molnkällan läses under vilket äldre id den än sparades med; kända källor står kvar', async () => {
+  it('molnkällan stöds inte längre: den hoppas över under vilket id den än sparades med; kända källor står kvar', async () => {
     const { sourcesFromStorage } = await import('./channel')
-    expect(sourcesFromStorage(['library', 'watchlist', 'older-cloud-id'])).toEqual(['library', 'watchlist', 'cloud'])
-    expect(sourcesFromStorage(['cloud', 'vod'])).toEqual(['cloud', 'vod'])
-    expect(sourcesFromStorage(['older-cloud-id', 'cloud', 'library', 'library'])).toEqual(['cloud', 'library'])
+    expect(sourcesFromStorage(['library', 'watchlist', 'older-cloud-id'])).toEqual(['library', 'watchlist'])
+    expect(sourcesFromStorage(['cloud', 'vod'])).toEqual(['vod'])
+    expect(sourcesFromStorage(['older-cloud-id', 'cloud', 'library', 'library'])).toEqual(['library'])
+    expect(sourcesFromStorage(['cloud'])).toEqual([])
     expect(sourcesFromStorage([null, 3, '', 'library'])).toEqual(['library'])
     expect(sourcesFromStorage(undefined)).toEqual([])
   })
 
-  it('skrivs med det id tjänstefilen anger, annars det nya', async () => {
-    const { sourcesToStorage } = await import('./channel')
-    expect(sourcesToStorage(['library', 'cloud'], 'older-cloud-id')).toEqual(['library', 'older-cloud-id'])
-    expect(sourcesToStorage(['library', 'cloud'], null)).toEqual(['library', 'cloud'])
+  it('hasRetiredSources känner igen sparade källor som inte stöds längre', async () => {
+    const { hasRetiredSources } = await import('./channel')
+    expect(hasRetiredSources(['library', 'cloud'])).toBe(true)
+    expect(hasRetiredSources(['older-cloud-id'])).toBe(true)
+    expect(hasRetiredSources(['library', 'watchlist', 'vod'])).toBe(false)
+    expect(hasRetiredSources(undefined)).toBe(false)
+  })
+
+  it('en kanal som bara hade molnkällan: inga källor, visas som källa som inte stöds (utom titelkanaler)', async () => {
+    const { sourcesFromStorage, unsupportedSourceOnly } = await import('./channel')
+    expect(unsupportedSourceOnly({ sources: sourcesFromStorage(['cloud']) })).toBe(true)
+    expect(unsupportedSourceOnly({ sources: [], titles: [{ kind: 'movie', tmdbId: 1, title: 'X' }] })).toBe(false)
+    expect(unsupportedSourceOnly({ sources: ['library'] })).toBe(false)
+  })
+
+  it('en standardkanal sparad med molnkällan räknas som samma regler som dagens förval (läggs inte till igen)', async () => {
+    const { sourcesFromStorage } = await import('./channel')
+    const made = buildDefaultChannels([], 'sv', 5)
+    const upgraded = made.map((c) => ({ ...c, id: `old-${c.id}`, sources: sourcesFromStorage([...c.sources, 'cloud']) }))
+    expect(buildDefaultChannels(upgraded, 'sv', 6)).toEqual([])
   })
 })

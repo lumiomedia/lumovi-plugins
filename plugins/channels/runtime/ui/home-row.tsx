@@ -9,7 +9,7 @@
  */
 import { memo, useCallback, useEffect, useState } from 'react'
 import { getPluginHomeRowTrackClass, useTvMode, type HomeRowProps } from '@/lib/plugin-sdk'
-import { hueTint, type ChannelDef } from '../model/channel'
+import { hueTint, unsupportedSourceOnly, type ChannelDef } from '../model/channel'
 import type { PoolItem } from '../data/pool'
 import { useChannelClock, useChannelPool, useChannels } from '../state/store'
 import { homeCardModel, homeChannels } from './home-row-logic'
@@ -96,7 +96,7 @@ const HomeCard = memo(function HomeCard({ channel, now, isTv, width, onRundown, 
   const m = homeCardModel(channel, rundown, now)
   const title = m.resting
     ? t('playerRest', { time: formatClock(m.restUntil ?? now) })
-    : m.title ?? (loading ? t('guideLoading') : t('playerEmpty'))
+    : m.title ?? (loading ? t('guideLoading') : t(unsupportedSourceOnly(channel) ? 'sourceUnsupported' : 'playerEmpty'))
   const hasTitle = m.title != null
   const badge = m.resting ? t('homeCardRest') : m.minsLeft != null ? t('playerMinsLeft', { n: m.minsLeft }) : ''
   // TV-herons spegling av kortet (data-tv-mirror, se hero-text.ts i appen):

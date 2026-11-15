@@ -12,7 +12,7 @@
  * live och Från början för vald kanal.
  */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import type { ChannelDef } from '../model/channel'
+import { unsupportedSourceOnly, type ChannelDef } from '../model/channel'
 import { programmeAt, type ProgrammeSlot } from '../model/schedule'
 import type { PoolItem } from '../data/pool'
 import type { PlayMode } from '../play/player-logic'
@@ -196,7 +196,7 @@ export function ChannelHero({ channel, rundown, loading, now, isTv, isMobile, ca
     meta = t('heroRestMeta', { time: formatClock(rest.nextAir), dur: duration(rest.nextAir - now, t) })
   } else {
     title = channel.name
-    meta = loading ? t('heroLoading') : t('playerEmpty')
+    meta = loading ? t('heroLoading') : t(unsupportedSourceOnly(channel) ? 'sourceUnsupported' : 'playerEmpty')
   }
   const pct = programme ? Math.min(1, Math.max(0, (now - programme.start) / Math.max(1, programme.stop - programme.start))) : 0
   // Stillastående och kompakt: ≈ en tredjedel av höjden på TV/skrivbord, mindre på mobil.

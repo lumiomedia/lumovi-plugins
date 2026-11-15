@@ -4,8 +4,8 @@
  * bytet till en kanal slipper rundresorna (7–9 s kallt mot ~2 s varmt,
  * 2026-10-20). En kanal i taget, varje programplats en gång.
  *
- * Med: bibliotek (egen server) och molnfiler — en upplåsning per kanal och
- * program, som bytet sedan återanvänder (resolverns cache). Inte med:
+ * Med: bibliotek (egen server) — ett uppslag per kanal och program, som
+ * bytet sedan återanvänder (resolverns cache). Inte med:
  * strömuppslag (resolverns anropsgräns) och IPTV-VOD (leverantörer tillåter
  * ofta en anslutning; en förvärmning kunde bryta pågående tittande). Ren logik.
  */

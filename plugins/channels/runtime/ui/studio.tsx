@@ -4,9 +4,9 @@
  * Kanalstudion: skapa eller redigera en kanals regler med live-förhandsvisning.
  *
  * Varje vald källa hämtas EN gång per öppning (via host.sourceDeps, så
- * metadata-, säsongs- och cloudcacharna delas med resten av pluginet); varje
+ * metadata- och säsongscacharna delas med resten av pluginet); varje
  * regeländring filtreras sedan lokalt. Förhandsvisningen gör aldrig ett
- * strömuppslag. Bara "Uppdatera" på cloudraden tvingar en ny cloudlista.
+ * strömuppslag.
  *
  * TV: alla fält är stationer (data-f) i rader, så fokusmotorns geometri ger
  * ▲▼ mellan fältrader och ◀▶ inom raden; OK växlar ett chip. Namnfältet
@@ -16,8 +16,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { Card, Switch, TOKENS, getTvKeyboardPanel, inputStyle, useLang } from '@/lib/plugin-sdk'
 import { channelTitleKey, emptyDraft, hasTitles, nextChannelNumber, createChannel, validateDraft, type ChannelDef, type ChannelDraft, type ChannelTitle, type SourceId } from '../model/channel'
 import type { PoolItem } from '../data/pool'
-import { loadCloudItems, loadLibraryItems, loadTitleFallback, loadVodItems, loadWatchlistItems } from '../data/sources'
-import { refreshCloud, sourceDeps } from '../host'
+import { loadLibraryItems, loadTitleFallback, loadVodItems, loadWatchlistItems } from '../data/sources'
+import { sourceDeps } from '../host'
 import { deleteChannel, saveChannel } from '../state/store'
 import { effectiveName, genreLabel, genreName, genreOptions, missingTitles, orderForTitles, previewFor, sourceCounts, type SourcePools } from './studio-logic'
 import { TitlePicker } from './title-picker'
@@ -32,14 +32,12 @@ type T = ReturnType<typeof useText>
 const LOADERS: Record<SourceId, (deps: typeof sourceDeps, opts: { strict?: boolean }) => Promise<PoolItem[]>> = {
   library: loadLibraryItems,
   watchlist: loadWatchlistItems,
-  cloud: loadCloudItems,
   vod: loadVodItems,
 }
 
 const SOURCES: Array<{ id: SourceId; label: TextKey }> = [
   { id: 'library', label: 'sourceLibrary' },
   { id: 'watchlist', label: 'sourceWatchlist' },
-  { id: 'cloud', label: 'sourceCloud' },
   // Av som standard; räknas ändå (lokalt index, billigt) så man ser vad som finns.
   { id: 'vod', label: 'sourceVod' },
 ]
@@ -92,7 +90,6 @@ export function ChannelStudio({ studio, channels, isTv, isMobile, t, onDone }: {
   const [attempted, setAttempted] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [kbOpen, setKbOpen] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
   const [now, setNow] = useState(Date.now)
   const [pools, setPools] = useState<Partial<Record<SourceId, PoolItem[]>>>({})
   const [failedSources, setFailedSources] = useState<Partial<Record<SourceId, boolean>>>({})
@@ -112,9 +109,8 @@ export function ChannelStudio({ studio, channels, isTv, isMobile, t, onDone }: {
     return () => { alive.current = false }
   }, [])
   const started = useRef(new Set<SourceId>())
-  // Generation per källa: bara den senaste hämtningen får skriva (en långsam
-  // första cloudladdning får inte skriva över en färskare Uppdatera).
-  const generation = useRef<Record<SourceId, number>>({ library: 0, watchlist: 0, cloud: 0, vod: 0 })
+  // Generation per källa: bara den senaste hämtningen får skriva.
+  const generation = useRef<Record<SourceId, number>>({ library: 0, watchlist: 0, vod: 0 })
   const load = useCallback((source: SourceId, run: () => Promise<PoolItem[]>) => {
     started.current.add(source)
     const gen = ++generation.current[source]
@@ -134,26 +130,13 @@ export function ChannelStudio({ studio, channels, isTv, isMobile, t, onDone }: {
     }
   }, [draft.sources, load])
 
-  const refreshCloudSource = useCallback(async () => {
-    if (refreshing) return
-    setRefreshing(true)
-    try {
-      await load('cloud', async () => {
-        await refreshCloud().catch(() => [])
-        return loadCloudItems(sourceDeps, { strict: true })
-      })
-    } finally {
-      if (alive.current) setRefreshing(false)
-    }
-  }, [refreshing, load])
-
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), CLOCK_MS)
     return () => clearInterval(timer)
   }, [])
 
   const full: SourcePools = useMemo(
-    () => ({ library: pools.library ?? [], watchlist: pools.watchlist ?? [], cloud: pools.cloud ?? [], vod: pools.vod ?? [] }),
+    () => ({ library: pools.library ?? [], watchlist: pools.watchlist ?? [], vod: pools.vod ?? [] }),
     [pools],
   )
   const loading = draft.sources.some((s) => pools[s] === undefined)
@@ -324,19 +307,7 @@ export function ChannelStudio({ studio, channels, isTv, isMobile, t, onDone }: {
             {t(s.label)}
           </Chip>
         )),
-        <button
-          type="button"
-          data-f=""
-          data-studio-refresh=""
-          disabled={refreshing}
-          onClick={() => void refreshCloudSource()}
-          style={{
-            background: 'none', border: 'none', padding: 0, cursor: refreshing ? 'default' : 'pointer', color: TOKENS.textDim,
-            fontSize: fs(11.5), textDecoration: 'underline', opacity: refreshing ? 0.5 : 1, fontFamily: 'inherit',
-          }}
-        >
-          {`${t('sourceCloud')}: ${t('sourceRefresh')}`}
-        </button>,
+        undefined,
         showError('sources') ? <p style={errorStyle}>{t('errorSources')}</p> : null,
       )}
       <TitlePicker selected={draft.titles ?? []} onChange={setTitles} pools={full} extra={extra} isTv={isTv} t={t} labelStyle={labelStyle} />

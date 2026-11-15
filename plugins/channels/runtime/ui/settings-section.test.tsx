@@ -8,9 +8,6 @@ const state = vi.hoisted(() => ({
   opened: [] as unknown[],
   deleted: [] as string[],
   cached: {} as Record<string, unknown[]>,
-  accounts: [] as string[],
-  forgotten: [] as string[],
-  refreshed: 0,
 }))
 
 vi.mock('@/lib/plugin-sdk', () => ({
@@ -25,10 +22,6 @@ vi.mock('@/lib/plugin-sdk', () => ({
 }))
 vi.mock('../host', () => ({
   readChannels: () => state.channels, onChannelsChanged: () => () => {}, sourceCacheSetting: () => null,
-  cloudAccounts: () => state.accounts,
-  cloudAccountName: (id: string) => ({ realdebrid: 'Real-Debrid', torbox: 'TorBox' } as Record<string, string>)[id] ?? id,
-  forgetCloudAccount: (id: string) => { state.forgotten.push(id); state.accounts = state.accounts.filter((a) => a !== id) },
-  refreshCloud: () => { state.refreshed += 1; return Promise.resolve([]) },
 }))
 vi.mock('../state/store', () => ({
   useChannels: () => state.channels,
@@ -45,9 +38,6 @@ beforeEach(() => {
   state.opened = []
   state.deleted = []
   state.cached = { k1: [{}, {}, {}] }
-  state.accounts = []
-  state.forgotten = []
-  state.refreshed = 0
 })
 afterEach(cleanup)
 
@@ -88,33 +78,11 @@ describe('inställningssektionen', () => {
     expect(state.deleted).toEqual(['k1'])
   })
 
-  it('molnkonton: syns bara med sparad nyckel, tvåstegs borttagning bygger om molnlistan', () => {
-    expect(render(<ChannelsSettingsSection />).container.querySelector('[data-cloud-account]')).toBeNull()
-    cleanup()
-    state.accounts = ['realdebrid', 'torbox']
+  it('inga molnkonton längre: varken kort på skrivbordet eller rader på TV', () => {
     const { container } = render(<ChannelsSettingsSection />)
-    expect([...container.querySelectorAll('[data-cloud-account]')].map((e) => e.textContent)).toEqual(['Real-Debrid', 'TorBox'])
-    const removeRd = () => container.querySelector('[data-cloud-account="realdebrid"]')!.parentElement!.querySelector('button')!
-    fireEvent.click(removeRd())
-    expect(state.forgotten).toEqual([])
-    fireEvent.click(removeRd())
-    expect(state.forgotten).toEqual(['realdebrid'])
-    expect(state.refreshed).toBe(1)
-    expect([...container.querySelectorAll('[data-cloud-account]')].map((e) => e.textContent)).toEqual(['TorBox'])
-  })
-
-  it('molnkonton på TV: en rad per konto med bekräftelse', () => {
-    state.accounts = ['torbox']
+    expect(container.querySelector('[data-cloud-account]')).toBeNull()
+    expect(container.textContent).not.toContain('molnnycklar')
     const rows = channelsSettingsSection.rows!()
-    const i = rows.findIndex((r) => r.t === 'eyebrow' && (r as { label: { sv: string } }).label.sv === 'Sparade molnnycklar')
-    const note = rows[i + 1] as { t: string; text: { sv: string } }
-    expect(note.t).toBe('note')
-    expect(note.text.sv).toContain('AIOStreams')
-    const row = rows[i + 2] as { label: { sv: string }; danger?: boolean; confirm?: { title: { sv: string } }; run(): void }
-    expect(row.label.sv).toBe('TorBox')
-    expect(row.danger).toBe(true)
-    expect(row.confirm!.title.sv).toBe('Ta bort TorBox?')
-    row.run()
-    expect(state.forgotten).toEqual(['torbox'])
+    expect((rows as Array<{ t: string; label?: { sv: string } }>).filter((r) => r.t === 'eyebrow').map((r) => r.label!.sv)).toEqual(['Dina kanaler'])
   })
 })

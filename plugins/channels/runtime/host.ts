@@ -1,10 +1,10 @@
 /**
  * Värdadapter: enda filen i logiklagret som rör @/lib/plugin-sdk. Kopplar
- * lagring, bibliotek, watchlist, cloud och TMDb-uppslag (via värdens egna
+ * lagring, bibliotek, watchlist och TMDb-uppslag (via värdens egna
  * endpoints) till de rena källadaptrarna. Alla TMDb-uppslag går via cache.
  */
 import {
-  channelClearSourceToken, channelMatchTitles, channelParseFileName, channelPrefetch, channelRememberStream, channelSourceCacheSetting, channelResolveLibraryPlayback, channelResolveTitleStream, channelSourceToken,
+  channelPrefetch, channelRememberStream, channelSourceCacheSetting, channelResolveLibraryPlayback, channelResolveTitleStream,
   fetchLibraryStatus, getMovieWatchlist, getWatchlist, hasChannelHost, onPluginStorageChanged, queryLibrary,
   readPluginJson, removePluginStorageItem, waitForStartIdle, writePluginJson,
 } from '@/lib/plugin-sdk'
@@ -13,10 +13,7 @@ import { createMetaCache, createSeasonsCache, createTitleMatchCache, type MatchR
 import type { SourceDeps } from './data/sources'
 import { MAX_POOL_ITEMS } from './data/pool'
 import { createResolver } from './play/resolve'
-import { createCloud, type CloudServiceId } from './data/cloud'
-import { createCloudServices, fetchCloudServicesCode, type StoredCloudServices } from './data/cloud-services'
-import { sourcesFromStorage, sourcesToStorage } from './model/channel'
-import { deadKey, isDeadUnlock, pruneDead } from './data/dead-files'
+import { hasRetiredSources, sourcesFromStorage } from './model/channel'
 import { trace } from './trace'
 
 export const PLUGIN_ID = 'com.lumio.channels'
@@ -26,35 +23,44 @@ export interface ZapMemory { lastChannelId: string | null; previousChannelId: st
 const object = <T>(value: unknown): Record<string, T> =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, T>) : {}
 
-/**
- * Tjänstefilen (data/cloud-services): vilka molntjänster som finns och hur
- * man talar med dem. Kopian i pluginets lagring gäller direkt vid start.
- */
-const cloudServices = createCloudServices({
-  read: () => {
-    const raw = readPluginJson<unknown>(PLUGIN_ID, 'cloudServices', null)
-    return raw && typeof raw === 'object' && typeof (raw as StoredCloudServices).code === 'string' ? (raw as StoredCloudServices) : null
-  },
-  write: (value) => writePluginJson(PLUGIN_ID, 'cloudServices', value, { emitChange: false }),
-  fetchCode: () => fetchCloudServicesCode(),
-})
-
-/** Hämtar tjänstefilen i bakgrunden (pluginets start). */
-export function warmCloudServices(): void {
-  try { cloudServices.get() } catch { /* nästa anrop försöker igen */ }
-}
-
 export function readChannels(): ChannelDef[] {
   const raw = readPluginJson<unknown>(PLUGIN_ID, 'channels', [])
   if (!Array.isArray(raw)) return []
-  // Molnkällan sparades tidigare under ett annat id (model/channel.ts).
+  // Källor som inte stöds längre (molnkällan) hoppas över (model/channel.ts).
   return (raw as ChannelDef[]).map((channel) =>
     channel && typeof channel === 'object' && Array.isArray(channel.sources) ? { ...channel, sources: sourcesFromStorage(channel.sources) } : channel)
 }
 
 export function writeChannels(next: ChannelDef[]): void {
-  const cloudId = cloudServices.get()?.sourceId ?? null
-  writePluginJson(PLUGIN_ID, 'channels', next.map((channel) => ({ ...channel, sources: sourcesToStorage(channel.sources, cloudId) })))
+  writePluginJson(PLUGIN_ID, 'channels', next)
+}
+
+/**
+ * Molnkällan är borttagen. Det den lämnat i pluginets lagring tas bort vid
+ * start: tjänstefilens kopia (`cloudServices`), minnet av döda filer
+ * (`deadFiles`) och poolcache + tablålås för kanaler som använde den.
+ * Kanalerna sparas om utan källan; en kanal som bara hade den blir kvar utan
+ * källor och visar "Den här källan stöds inte längre" (unsupportedSourceOnly).
+ * Nycklarna själva låg aldrig i pluginets lagring. Körs vid varje start men
+ * skriver bara när något finns kvar (t.ex. synkat från en enhet med en äldre
+ * version). Ett fel här får inte fälla pluginet.
+ */
+const RETIRED_KEYS = ['cloudServices', 'deadFiles']
+
+export function retireCloudSource(): void {
+  try {
+    for (const key of RETIRED_KEYS) {
+      if (readPluginJson<unknown>(PLUGIN_ID, key, null) != null) removePluginStorageItem(PLUGIN_ID, key, { emitChange: false })
+    }
+    const raw = readPluginJson<unknown>(PLUGIN_ID, 'channels', [])
+    if (!Array.isArray(raw)) return
+    const affected = (raw as ChannelDef[]).filter((channel) => channel && typeof channel === 'object' && hasRetiredSources(channel.sources))
+    if (affected.length === 0) return
+    for (const channel of affected) if (typeof channel.id === 'string') removePoolCache(channel.id)
+    writeChannels(readChannels())
+  } catch (err) {
+    trace(`molnkällans städning föll: ${String(err)}`)
+  }
 }
 
 /** Standardkanalerna skapas en gång per profil; borttagna kommer aldrig tillbaka av sig själva. */
@@ -149,7 +155,7 @@ const matchStore: MatchStore = {
 }
 
 /**
- * Värdens TMDb-sökning (samma som lokala mappen och cloud använder): tvättad
+ * Värdens TMDb-sökning (samma som lokala mappen använder): tvättad
  * titel + år, och utan år om det inte gav något. undefined = anropet föll.
  */
 async function searchTitle(ref: MatchRef): Promise<number | null | undefined> {
@@ -247,62 +253,9 @@ async function fetchSeasonRange(tmdbId: number, pick: (season: number) => boolea
   return out
 }
 
-/** Molnet (data/cloud): pluginets egen protokollkod med värdens neutrala hjälpare. */
-const cloud = createCloud({
-  services: () => cloudServices.get(),
-  servicesReady: () => cloudServices.ready(),
-  token: (provider) => channelSourceToken(provider),
-  onUnlockFailed: (provider, fileRef, status, body) => {
-    const dead = isDeadUnlock(status, body)
-    const why = typeof body === 'string' ? body : JSON.stringify(body ?? null).slice(0, 160)
-    trace(`upplåsning föll: ${provider} ${fileRef.split('|')[0]} status=${status} ${dead ? 'DÖD (ur tablån ett dygn)' : 'tillfälligt'} svar=${why}`)
-    if (dead) markDeadFile({ provider, fileRef })
-  },
-  parseFileName: (name, parent) => channelParseFileName(name, parent),
-  matchTitles: (wanted) => channelMatchTitles(wanted),
-})
-
 /** Direktströmning: spelaren förhämtar en upplöst fil (huvud + index). No-op på äldre värdar. */
 export function prefetchInPlayer(url: string, headers?: Record<string, string>): void {
   try { channelPrefetch(url, headers) } catch { /* äldre värd */ }
-}
-
-/** Döda molnfiler (data/dead-files): nyckel → när de sågs döda. */
-export function readDeadFiles(): Record<string, number> {
-  const raw = readPluginJson<unknown>(PLUGIN_ID, 'deadFiles', {})
-  const out: Record<string, number> = {}
-  if (raw && typeof raw === 'object') for (const [k, v] of Object.entries(raw as Record<string, unknown>)) if (typeof v === 'number') out[k] = v
-  return pruneDead(out, Date.now())
-}
-
-const deadListeners = new Set<() => void>()
-/** Poolerna filtreras om när en fil dör (tablån fyller platsen med nästa post). */
-export function onDeadFilesChanged(fn: () => void): () => void {
-  deadListeners.add(fn)
-  return () => { deadListeners.delete(fn) }
-}
-
-export function markDeadFile(file: { provider: string; fileRef: string }): void {
-  const next = { ...readDeadFiles(), [deadKey(file)]: Date.now() }
-  try { writePluginJson(PLUGIN_ID, 'deadFiles', pruneDead(next, Date.now()), { emitChange: false }) } catch { /* lagring full: gäller ändå inte */ }
-  for (const fn of [...deadListeners]) fn()
-}
-
-/** Ny genomgång av molnet förbi 6 h-cachen (studions Uppdatera). */
-export function refreshCloud() {
-  return cloud.listCloud({ force: true })
-}
-
-/** Molnkonton med sparad nyckel, och borttagning (gamla konton syns annars inte någonstans). */
-export function cloudAccounts(): CloudServiceId[] {
-  return (cloudServices.get()?.services ?? []).map((service) => service.id).filter((p) => !!channelSourceToken(p))
-}
-/** Tjänstens namn som tjänstefilen anger det; id:t om filen saknas. */
-export function cloudAccountName(provider: CloudServiceId): string {
-  return cloudServices.get()?.services.find((service) => service.id === provider)?.name ?? provider
-}
-export function forgetCloudAccount(provider: CloudServiceId): void {
-  channelClearSourceToken(provider)
 }
 
 export const sourceDeps: SourceDeps = {
@@ -311,7 +264,6 @@ export const sourceDeps: SourceDeps = {
   getWatchlist: () => getWatchlist().map((e) => ({ ...e, tmdbId: Number(e.tmdbId) })) as never,
   fetchSeasons: createSeasonsCache(seasonsStore, fetchSeasonsUncached),
   fetchRestSeasons: createSeasonsCache(seasonsStore, fetchRestSeasonsUncached, Date.now, 'seasonsRest'),
-  listCloud: () => cloud.listCloud(),
   meta: createMetaCache(metaStore, fetchMeta),
   waitForIdle: () => waitForStartIdle(),
   titleMatch: createTitleMatchCache(matchStore, searchTitle),
@@ -380,8 +332,6 @@ async function computeSourceSignatures(): Promise<Signatures> {
     // VOD läser samma index som biblioteket.
     vod: `${status?.total ?? 0}:${fullSync}:${changed}`,
     watchlist: `${movies.length}:${maxAdded(movies)}|${shows.length}:${maxAdded(shows)}`,
-    // Cloudlistan cachas av värden i 6 h; samma fönster här.
-    cloud: String(Math.floor(Date.now() / (6 * 3600e3))),
   }
 }
 
@@ -390,21 +340,7 @@ export const resolver = createResolver({
   // allowCatalog skickas bara när det är falskt (kanal utan IPTV-VOD); äldre värdar ignorerar fältet.
   library: (r, exclude, allowCatalog) => channelResolveLibraryPlayback({ ...r, ...(exclude?.length ? { exclude } : {}), ...(allowCatalog === false ? { allowCatalog: false } : {}) }),
   stream: (r, exclude) => channelResolveTitleStream(exclude?.length ? { ...r, exclude } : r),
-  cloud: (r) => cloud.unlockCloudFile(r),
-  cloudCaps: () => autoplayCaps(),
-  isDead: (file) => deadKey(file) in readDeadFiles(),
 })
-
-/** Autostartens tak ur värdens uppspelningsinställningar (Max storlek per stream, Max upplösning). */
-function autoplayCaps(): { maxBytes: number | null; maxResolution: number | null } {
-  try {
-    const settings = typeof window === 'undefined' ? null : window.__lumioPluginRuntime?.modules?.playbackSettings
-    const gb = settings?.getAutoPlayMaxStreamSizeGb?.() ?? null
-    return { maxBytes: gb ? gb * 1024 ** 3 : null, maxResolution: settings?.getAutoPlayMaxResolution?.() ?? null }
-  } catch {
-    return { maxBytes: null, maxResolution: null }
-  }
-}
 
 /**
  * Gör strömvalet bakom ett uppslag ihågkommet. Anropas när bilden syns —

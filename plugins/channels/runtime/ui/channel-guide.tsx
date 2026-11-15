@@ -13,7 +13,7 @@
  */
 import { memo, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { tvHoldHandlers } from '@/lib/plugin-sdk'
-import type { ChannelDef } from '../model/channel'
+import { unsupportedSourceOnly, type ChannelDef } from '../model/channel'
 import { listing, type Slot } from '../model/schedule'
 import type { PoolItem } from '../data/pool'
 import { useChannelPool } from '../state/store'
@@ -437,7 +437,7 @@ const GuideRow = memo(function GuideRow({ channel, selected, win, now, nowPct, c
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         {slots.length === 0 ? (
           <span style={{ position: 'absolute', left: dim(10, isTv), top: 0, bottom: 0, display: 'flex', alignItems: 'center', fontSize: fontSize(12, isTv), lineHeight: 1.2, color: C.textMute }}>
-            {loading ? t('guideLoading') : t('guideEmpty')}
+            {loading ? t('guideLoading') : t(unsupportedSourceOnly(channel) ? 'sourceUnsupported' : 'guideEmpty')}
           </span>
         ) : slots.map((slot) => <Block key={`${slot.kind}:${slot.start}`} slot={slot} win={win} now={now} lit={lit} isTv={isTv} t={t} />)}
         {nowPct != null ? (
