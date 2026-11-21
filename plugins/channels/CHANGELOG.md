@@ -1,3 +1,8 @@
+## 0.1.45
+
+- Heter nu LumoviTV (följer appens nya namn).
+- Molnkällan är borttagen; kvarvarande molndata rensas vid start.
+
 ## 0.1.44
 
 - Inställningar: "Molnkonton" heter nu "Sparade molnnycklar" och förklarar vad som visas: konton kanalerna spelar direkt med en nyckel sparad i appen. Tillägg som AIOStreams har egna nycklar och listas inte, och medieservrar som Plex och Jellyfin når kanalerna via biblioteket. Förklaringen visas även på TV.

@@ -112,7 +112,7 @@ describe('Kanaler-sidan', () => {
     expect(pages).toMatchObject([{ id: 'channels', hideHero: true }])
     expect(items).toMatchObject([{ id: 'channels', target: { pageId: 'channels' }, defaultEnabled: true }])
     expect(rows).toMatchObject([{ id: 'channels-now', showOnHome: true }])
-    expect(sections).toMatchObject([{ id: 'channels', label: { sv: 'LumioTV' } }])
+    expect(sections).toMatchObject([{ id: 'channels', label: { sv: 'LumoviTV' } }])
     expect(typeof sections[0]!.rows).toBe('function')
   })
 
@@ -207,7 +207,7 @@ describe('Kanaler-sidan', () => {
     state.channels = []
     const { container } = page()
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Inga kanaler')
-    expect(container.querySelector('[data-empty-hint]')!.textContent).toContain('Inställningar → LumioTV')
+    expect(container.querySelector('[data-empty-hint]')!.textContent).toContain('Inställningar → LumoviTV')
     expect(screen.queryByText('Skapa egen')).toBeNull()
     expect(screen.queryByText('‹ HEM')).toBeNull()
     fireEvent.click(screen.getByText('Återställ standardkanaler'))

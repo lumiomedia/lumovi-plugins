@@ -1,4 +1,4 @@
-# LumioTV
+# LumoviTV
 
 Personliga linjära TV-kanaler av ditt bibliotek (t.ex. Plex, Jellyfin, Emby, WebDAV), din watchlist och IPTV-VOD.
 Varje kanal är en uppsättning regler (genre, årtionde, längd, ordning, sändningstid);

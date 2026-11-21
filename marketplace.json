@@ -219,8 +219,8 @@
       "slug": "channels",
       "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
-        "en": "LumioTV",
-        "sv": "LumioTV"
+        "en": "LumoviTV",
+        "sv": "LumoviTV"
       },
       "version": "0.1.45",
       "description": {

@@ -20434,7 +20434,6 @@
   var COMPLETE_THRESHOLD;
   var init_barcode_model = __esm({
     "lib/barcode/barcode-model.ts"() {
-      "use strict";
       COMPLETE_THRESHOLD = 0.99;
     }
   });
@@ -43655,15 +43654,15 @@ ${cue.text}`).join("\n\n")}
 
   // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/channels/runtime/strings.ts
   var S = {
-    pluginName: { en: "LumioTV", sv: "LumioTV", de: "LumioTV", fr: "LumioTV", es: "LumioTV" },
+    pluginName: { en: "LumoviTV", sv: "LumoviTV", de: "LumoviTV", fr: "LumoviTV", es: "LumoviTV" },
     description: { en: "Personal linear TV channels", sv: "Personliga linj\xE4ra TV-kanaler", de: "Pers\xF6nliche lineare TV-Sender", fr: "Cha\xEEnes de t\xE9l\xE9vision lin\xE9aires personnelles", es: "Canales de televisi\xF3n lineal personales" },
-    menuLabel: { en: "LumioTV", sv: "LumioTV", de: "LumioTV", fr: "LumioTV", es: "LumioTV" },
-    homeRowTitle: { en: "On now on LumioTV", sv: "S\xE4nds nu p\xE5 LumioTV", de: "Jetzt auf LumioTV", fr: "En ce moment sur LumioTV", es: "Ahora en LumioTV" },
+    menuLabel: { en: "LumoviTV", sv: "LumoviTV", de: "LumoviTV", fr: "LumoviTV", es: "LumoviTV" },
+    homeRowTitle: { en: "On now on LumoviTV", sv: "S\xE4nds nu p\xE5 LumoviTV", de: "Jetzt auf LumoviTV", fr: "En ce moment sur LumoviTV", es: "Ahora en LumoviTV" },
     homeRowSubtitle: { en: "It is {time} \u2014 jump in where the channel is", sv: "Klockan {time} \u2014 hoppa in d\xE4r kanalen \xE4r", de: "Es ist {time} \u2013 steig ein, wo der Sender gerade ist", fr: "Il est {time} \u2014 rejoignez la cha\xEEne en cours de route", es: "Son las {time}: entra donde va el canal" },
     homeRowShowGuide: { en: "SHOW GUIDE \u203A", sv: "VISA TABL\xC5 \u203A", de: "PROGRAMM ZEIGEN \u203A", fr: "VOIR LE GUIDE \u203A", es: "VER GU\xCDA \u203A" },
     homeCardRest: { en: "Off air", sv: "Vila", de: "Sendepause", fr: "Hors antenne", es: "Sin emisi\xF3n" },
     homeCardNext: { en: "Next: {title}", sv: "Sedan: {title}", de: "Danach: {title}", fr: "Ensuite : {title}", es: "Despu\xE9s: {title}" },
-    settingsLabel: { en: "LumioTV", sv: "LumioTV", de: "LumioTV", fr: "LumioTV", es: "LumioTV" },
+    settingsLabel: { en: "LumoviTV", sv: "LumoviTV", de: "LumoviTV", fr: "LumoviTV", es: "LumoviTV" },
     // Spelaren
     playerClose: { en: "Close", sv: "St\xE4ng", de: "Schlie\xDFen", fr: "Fermer", es: "Cerrar" },
     playerFromStart: { en: "From start", sv: "Fr\xE5n b\xF6rjan", de: "Von vorn", fr: "Depuis le d\xE9but", es: "Desde el inicio" },
@@ -43728,11 +43727,11 @@ ${cue.text}`).join("\n\n")}
       es: "Un canal son unas pocas reglas. Lumio crea una programaci\xF3n sin fin con tu biblioteca y tu lista. Recupera los diez canales predeterminados."
     },
     emptySettingsHint: {
-      en: "Create and edit your own channels under Settings \u2192 LumioTV.",
-      sv: "Skapa och redigera egna kanaler under Inst\xE4llningar \u2192 LumioTV.",
-      de: "Erstelle und bearbeite eigene Sender unter Einstellungen \u2192 LumioTV.",
-      fr: "Cr\xE9ez et modifiez vos propres cha\xEEnes dans Param\xE8tres \u2192 LumioTV.",
-      es: "Crea y edita tus propios canales en Ajustes \u2192 LumioTV."
+      en: "Create and edit your own channels under Settings \u2192 LumoviTV.",
+      sv: "Skapa och redigera egna kanaler under Inst\xE4llningar \u2192 LumoviTV.",
+      de: "Erstelle und bearbeite eigene Sender unter Einstellungen \u2192 LumoviTV.",
+      fr: "Cr\xE9ez et modifiez vos propres cha\xEEnes dans Param\xE8tres \u2192 LumoviTV.",
+      es: "Crea y edita tus propios canales en Ajustes \u2192 LumoviTV."
     },
     emptyRestore: { en: "Restore default channels", sv: "\xC5terst\xE4ll standardkanaler", de: "Standardsender wiederherstellen", fr: "R\xE9tablir les cha\xEEnes par d\xE9faut", es: "Restaurar canales predeterminados" },
     // Kanalstudion

@@ -1,7 +1,7 @@
 {
   "id": "com.lumio.channels",
   "slug": "channels",
-  "name": { "en": "LumioTV", "sv": "LumioTV", "de": "LumioTV", "fr": "LumioTV", "es": "LumioTV" },
+  "name": { "en": "LumoviTV", "sv": "LumoviTV", "de": "LumoviTV", "fr": "LumoviTV", "es": "LumoviTV" },
   "version": "0.1.45",
   "minAppVersion": "0.1.637",
   "description": {
