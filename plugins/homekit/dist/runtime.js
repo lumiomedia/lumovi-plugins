@@ -5,6 +5,7 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __esm = (fn, res) => function __init() {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
@@ -32,6 +33,7 @@
     mod
   ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+  var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
   // ../../../../../../var/folders/lc/1hd2j0b57z10tx5mflylq4r80000gp/T/lumio-plugin-build/react-shim.ts
   var react_shim_exports = {};
@@ -140,16 +142,16 @@
   var require_tslib_es6 = __commonJS({
     "../../node_modules/@tauri-apps/api/external/tslib/tslib.es6.cjs"(exports) {
       "use strict";
-      function __classPrivateFieldGet(receiver, state, kind, f) {
+      function __classPrivateFieldGet(receiver, state2, kind, f) {
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+        if (typeof state2 === "function" ? receiver !== state2 || !f : !state2.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state2.get(receiver);
       }
-      function __classPrivateFieldSet(receiver, state, value, kind, f) {
+      function __classPrivateFieldSet(receiver, state2, value, kind, f) {
         if (kind === "m") throw new TypeError("Private method is not writable");
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+        if (typeof state2 === "function" ? receiver !== state2 || !f : !state2.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state2.set(receiver, value), value;
       }
       exports.__classPrivateFieldGet = __classPrivateFieldGet;
       exports.__classPrivateFieldSet = __classPrivateFieldSet;
@@ -179,17 +181,17 @@
           tslib_es6.__classPrivateFieldSet(this, _Channel_onmessage, onmessage || (() => {
           }), "f");
           this.id = transformCallback((rawMessage) => {
-            const index = rawMessage.index;
+            const index2 = rawMessage.index;
             if ("end" in rawMessage) {
-              if (index == tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f")) {
+              if (index2 == tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f")) {
                 this.cleanupCallback();
               } else {
-                tslib_es6.__classPrivateFieldSet(this, _Channel_messageEndIndex, index, "f");
+                tslib_es6.__classPrivateFieldSet(this, _Channel_messageEndIndex, index2, "f");
               }
               return;
             }
             const message = rawMessage.message;
-            if (index == tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f")) {
+            if (index2 == tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f")) {
               tslib_es6.__classPrivateFieldGet(this, _Channel_onmessage, "f").call(this, message);
               tslib_es6.__classPrivateFieldSet(this, _Channel_nextMessageIndex, tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f") + 1, "f");
               while (tslib_es6.__classPrivateFieldGet(this, _Channel_nextMessageIndex, "f") in tslib_es6.__classPrivateFieldGet(this, _Channel_pendingMessages, "f")) {
@@ -202,7 +204,7 @@
                 this.cleanupCallback();
               }
             } else {
-              tslib_es6.__classPrivateFieldGet(this, _Channel_pendingMessages, "f")[index] = message;
+              tslib_es6.__classPrivateFieldGet(this, _Channel_pendingMessages, "f")[index2] = message;
             }
           });
         }
@@ -419,8 +421,8 @@
         }
       }
       try {
-        for (let index = 0; index < localStorage.length; index += 1) {
-          const key = localStorage.key(index);
+        for (let index2 = 0; index2 < localStorage.length; index2 += 1) {
+          const key = localStorage.key(index2);
           if (key === null) continue;
           const value = localStorage.getItem(key);
           if (value !== null) seeded.set(key, value);
@@ -473,34 +475,40 @@
   });
 
   // lib/android-source-cache.ts
+  function noteTightDevice(tight) {
+    tightDevice = tight;
+  }
+  var tightDevice;
   var init_android_source_cache = __esm({
     "lib/android-source-cache.ts"() {
       init_app_storage();
+      tightDevice = null;
     }
   });
 
   // ../../../../../../var/folders/lc/1hd2j0b57z10tx5mflylq4r80000gp/T/lumio-plugin-build/profile-storage-shim.ts
-  var sdk, getActiveProfileId, getScopedStorageItem, setScopedStorageItem, onProfileChanged;
+  var sdk, getActiveProfileId, getScopedStorageItem, setScopedStorageItem, removeScopedStorageItem, onProfileChanged;
   var init_profile_storage_shim = __esm({
     "../../../../../../var/folders/lc/1hd2j0b57z10tx5mflylq4r80000gp/T/lumio-plugin-build/profile-storage-shim.ts"() {
       sdk = globalThis.__lumioPluginRuntime?.sdk;
       getActiveProfileId = () => sdk.getActiveProfileId();
       getScopedStorageItem = (baseKey) => sdk.getScopedStorageItem(baseKey);
       setScopedStorageItem = (baseKey, value) => sdk.setScopedStorageItem(baseKey, value);
+      removeScopedStorageItem = (baseKey) => sdk.removeScopedStorageItem(baseKey);
       onProfileChanged = (listener) => sdk.onProfileChanged(listener);
     }
   });
 
   // lib/plugin-state.ts
-  function normalizeState(state, fallback) {
+  function normalizeState(state2, fallback) {
     return {
       ...fallback,
-      ...state,
-      installed: state?.installed ?? fallback.installed,
-      active: state?.active ?? fallback.active,
-      order: state?.order ?? fallback.order,
-      sourceType: state?.sourceType ?? fallback.sourceType,
-      runtimeAvailable: state?.runtimeAvailable ?? fallback.runtimeAvailable
+      ...state2,
+      installed: state2?.installed ?? fallback.installed,
+      active: state2?.active ?? fallback.active,
+      order: state2?.order ?? fallback.order,
+      sourceType: state2?.sourceType ?? fallback.sourceType,
+      runtimeAvailable: state2?.runtimeAvailable ?? fallback.runtimeAvailable
     };
   }
   function readAll() {
@@ -523,16 +531,280 @@
       order: defaults.order ?? defaultOrder
     });
   }
-  function isPluginEnabled(pluginId, defaultOrder = 0, defaults = {}) {
-    const state = getPluginPersistedState(pluginId, defaultOrder, defaults);
-    return Boolean(state.installed && state.active);
+  function getAllPluginPersistedStates() {
+    const raw = readAll();
+    return Object.fromEntries(
+      Object.entries(raw).map(([pluginId, state2]) => [
+        pluginId,
+        normalizeState(state2, {
+          installed: true,
+          active: true,
+          order: 0,
+          sourceType: "builtin",
+          runtimeAvailable: true
+        })
+      ])
+    );
   }
-  var STORAGE_KEY;
+  function isPluginEnabled(pluginId, defaultOrder = 0, defaults = {}) {
+    const state2 = getPluginPersistedState(pluginId, defaultOrder, defaults);
+    return Boolean(state2.installed && state2.active);
+  }
+  function onPluginStateChanged(listener) {
+    if (typeof window === "undefined") return () => {
+    };
+    window.addEventListener(EVENT, listener);
+    return () => window.removeEventListener(EVENT, listener);
+  }
+  var STORAGE_KEY, EVENT;
   var init_plugin_state = __esm({
     "lib/plugin-state.ts"() {
       "use strict";
       init_profile_storage_shim();
       STORAGE_KEY = "lumio:plugin-state";
+      EVENT = "lumio-plugin-state-changed";
+    }
+  });
+
+  // lib/avatars/plugin-packs.ts
+  function changed() {
+    index = null;
+    revision += 1;
+    for (const listener of listeners) {
+      try {
+        listener();
+      } catch (error) {
+        console.warn("[avatars] listener failed", error);
+      }
+    }
+  }
+  function hasRecord(pluginId) {
+    try {
+      return Object.prototype.hasOwnProperty.call(getAllPluginPersistedStates(), pluginId);
+    } catch {
+      return false;
+    }
+  }
+  function httpUrl(value) {
+    if (typeof value !== "string" || !value) return null;
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.toString() : null;
+    } catch {
+      return null;
+    }
+  }
+  function text(value, fallback) {
+    if (typeof value === "string" && value.trim()) return value;
+    if (value && typeof value === "object") {
+      const out = {};
+      for (const [key, entry] of Object.entries(value)) {
+        if (typeof entry === "string" && entry.trim()) out[key] = entry;
+      }
+      if (Object.keys(out).length > 0) return out;
+    }
+    return fallback;
+  }
+  function sanitizeAvatarPack(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    const source = raw;
+    if (typeof source.id !== "string" || !source.id) return null;
+    const groups = [];
+    const seen = /* @__PURE__ */ new Set();
+    for (const group of Array.isArray(source.groups) ? source.groups : []) {
+      if (!group || typeof group !== "object" || typeof group.id !== "string") continue;
+      const items2 = [];
+      for (const item of Array.isArray(group.items) ? group.items : []) {
+        if (!item || typeof item !== "object" || typeof item.id !== "string" || !item.id) continue;
+        if (seen.has(item.id)) continue;
+        const url = httpUrl(item.url);
+        if (!url) continue;
+        seen.add(item.id);
+        items2.push({ id: item.id, name: text(item.name, item.id), url });
+      }
+      if (items2.length > 0) groups.push({ id: group.id, name: text(group.name, group.id), items: items2 });
+    }
+    if (groups.length === 0) return null;
+    return { id: source.id, name: text(source.name, source.id), groups };
+  }
+  function registerPluginAvatarPack(pluginId, pluginName, raw) {
+    const pack = sanitizeAvatarPack(raw);
+    if (!pack) {
+      console.warn(`[avatars] ${pluginId}: ignorerar ogiltigt avatarpaket`);
+      return () => {
+      };
+    }
+    ensurePluginStateListener();
+    const existing = packs.findIndex((entry2) => entry2.pluginId === pluginId && entry2.pack.id === pack.id);
+    const entry = { pluginId, pluginName, pack, hadRecord: hasRecord(pluginId) };
+    if (existing >= 0) packs[existing] = entry;
+    else packs.push(entry);
+    changed();
+    return () => {
+      const at = packs.indexOf(entry);
+      if (at < 0) return;
+      packs.splice(at, 1);
+      changed();
+    };
+  }
+  function ensurePluginStateListener() {
+    if (pluginStateUnsubscribe) return;
+    pluginStateUnsubscribe = onPluginStateChanged(() => changed());
+  }
+  var packs, index, revision, listeners, pluginStateUnsubscribe;
+  var init_plugin_packs = __esm({
+    "lib/avatars/plugin-packs.ts"() {
+      "use strict";
+      init_plugin_state();
+      packs = [];
+      index = null;
+      revision = 0;
+      listeners = /* @__PURE__ */ new Set();
+      pluginStateUnsubscribe = null;
+    }
+  });
+
+  // lib/supporter/api.ts
+  async function call(path, body) {
+    let response;
+    try {
+      response = await fetch(path, body === void 0 ? void 0 : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    } catch {
+      throw new SupporterApiError("network");
+    }
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new SupporterApiError(payload?.error ?? "http", response.status);
+    if (payload === null) throw new SupporterApiError("bad_response", response.status);
+    return payload;
+  }
+  var SupporterApiError, fetchSupporterStatus;
+  var init_api = __esm({
+    "lib/supporter/api.ts"() {
+      "use strict";
+      SupporterApiError = class extends Error {
+        constructor(code, httpStatus) {
+          super(`supporter: ${code}`);
+          __publicField(this, "code", code);
+          __publicField(this, "httpStatus", httpStatus);
+        }
+      };
+      fetchSupporterStatus = () => call("/api/supporter/status");
+    }
+  });
+
+  // lib/supporter/features.ts
+  function isSupporterFeature(id) {
+    return Object.prototype.hasOwnProperty.call(SUPPORTER_FEATURES, id);
+  }
+  function tierAllows(tier, required) {
+    if (!tier) return false;
+    return TIER_RANK[tier] >= TIER_RANK[required];
+  }
+  function tierHasFeature(tier, feature) {
+    if (feature === "supporter" || feature === "plus") return tierAllows(tier, feature);
+    if (!isSupporterFeature(feature)) return false;
+    return tierAllows(tier, SUPPORTER_FEATURES[feature]);
+  }
+  var SUPPORTER_FEATURES, TIER_RANK;
+  var init_features = __esm({
+    "lib/supporter/features.ts"() {
+      "use strict";
+      SUPPORTER_FEATURES = {
+        // ── Supporter ──
+        themes: "supporter",
+        customBackgrounds: "supporter",
+        avatarPacks: "supporter",
+        customProfilePhoto: "supporter",
+        tvHomeRowsCustomize: "supporter",
+        customPages: "supporter",
+        /** Gratis: högst FREE_MAX_PROFILES profiler. */
+        extraProfiles: "supporter",
+        couchMode: "supporter",
+        movieBarcodes: "supporter",
+        posterOfTheDay: "supporter",
+        cinemaNight: "supporter",
+        filmQuiz: "supporter",
+        yearInReview: "supporter",
+        extendedStats: "supporter",
+        watchDiaryWeather: "supporter",
+        momentRow: "supporter",
+        continueFrames: "supporter",
+        trickplay: "supporter",
+        supporterBadge: "supporter",
+        // ── Plus ──
+        playerLayoutEditor: "plus",
+        clipExport: "plus",
+        sportsMode: "plus",
+        dualSubtitles: "plus",
+        learnedSkip: "plus",
+        liveTvRecording: "plus"
+      };
+      TIER_RANK = { supporter: 1, plus: 2 };
+    }
+  });
+
+  // lib/supporter/store.ts
+  function getSupporterStatusSnapshot() {
+    return state.current;
+  }
+  function subscribeSupporterStatus(listener) {
+    state.listeners.add(listener);
+    return () => {
+      state.listeners.delete(listener);
+    };
+  }
+  function setSupporterStatus(next) {
+    state.current = next;
+    state.loadedAt = Date.now();
+    for (const listener of [...state.listeners]) listener();
+  }
+  function loadSupporterStatus({ force = false } = {}) {
+    if (!force && state.current && Date.now() - state.loadedAt < STALE_MS) return Promise.resolve(state.current);
+    if (state.inflight) return state.inflight;
+    state.inflight = fetchSupporterStatus().then((status) => {
+      setSupporterStatus(status);
+      return status;
+    }).catch(() => state.current).finally(() => {
+      state.inflight = null;
+    });
+    return state.inflight;
+  }
+  function hasFeature(feature) {
+    return tierHasFeature(state.current?.tier, feature);
+  }
+  var STORE_KEY, state, STALE_MS;
+  var init_store = __esm({
+    "lib/supporter/store.ts"() {
+      "use strict";
+      init_api();
+      init_features();
+      STORE_KEY = "__lumioSupporterStore";
+      state = (() => {
+        const holder = globalThis;
+        const existing = holder[STORE_KEY];
+        if (existing) return existing;
+        const created = { current: null, loadedAt: 0, inflight: null, listeners: /* @__PURE__ */ new Set() };
+        holder[STORE_KEY] = created;
+        return created;
+      })();
+      STALE_MS = 5 * 6e4;
+    }
+  });
+
+  // lib/supporter/plugin-api.ts
+  var pluginSupporterApi;
+  var init_plugin_api = __esm({
+    "lib/supporter/plugin-api.ts"() {
+      "use strict";
+      init_store();
+      pluginSupporterApi = {
+        status: () => {
+          const known = getSupporterStatusSnapshot();
+          return known ? Promise.resolve(known) : loadSupporterStatus();
+        },
+        hasFeature: (id) => hasFeature(id),
+        subscribe: (listener) => subscribeSupporterStatus(listener)
+      };
     }
   });
 
@@ -593,8 +865,10 @@
       notifyRegistryChanged();
     });
   }
-  function makeContext(pluginId) {
+  function makeContext(pluginId, pluginName = pluginId) {
     const ctx = {
+      // Värdens supporterstatus — plugin har ingen egen kopia av den (se plugin-api.ts).
+      supporter: pluginSupporterApi,
       registerStreamProvider(provider) {
         if (streamProviders.find((p) => p.id === provider.id)) return;
         streamProviders.push(provider);
@@ -714,6 +988,11 @@
       registerManagedAuthConsumer(consumer) {
         if (managedAuthConsumers.find((entry) => entry.id === consumer.id)) return;
         managedAuthConsumers.push(consumer);
+      },
+      // Avatarpaket bor i lib/avatars/plugin-packs.ts (ProfileAvatar läser dem
+      // utan att importera registret). Synligt bara medan pluginet är påslaget.
+      registerAvatarPack(pack) {
+        registerPluginAvatarPack(pluginId, pluginName, pack);
       }
     };
     for (const key of Object.keys(ctx)) {
@@ -732,7 +1011,7 @@
   function registerPlugin(plugin2, options = {}) {
     if (registeredPluginIds.has(plugin2.id)) return;
     registeredPluginIds.add(plugin2.id);
-    const ctx = makeContext(plugin2.id);
+    const ctx = makeContext(plugin2.id, plugin2.name);
     if (options.suppressStreamContributions) {
       const noop = () => {
       };
@@ -829,8 +1108,8 @@
   }
   function replaceMainMenuItems(owner, items2) {
     const previous = new Set(ownedMainMenuItemIds.get(owner) ?? []);
-    for (let index = mainMenuItems.length - 1; index >= 0; index -= 1) {
-      if (previous.has(mainMenuItems[index].id)) mainMenuItems.splice(index, 1);
+    for (let index2 = mainMenuItems.length - 1; index2 >= 0; index2 -= 1) {
+      if (previous.has(mainMenuItems[index2].id)) mainMenuItems.splice(index2, 1);
     }
     for (const item of items2) {
       if (!mainMenuItems.find((entry) => entry.id === item.id)) mainMenuItems.push(item);
@@ -863,7 +1142,9 @@
   var init_plugin_registry = __esm({
     "lib/plugin-registry.ts"() {
       "use strict";
+      init_plugin_packs();
       init_plugin_state();
+      init_plugin_api();
       streamProviders = [];
       libraryProviders = [];
       mediaStreamCatalogProviders = [];
@@ -1198,37 +1479,7 @@
         activeFiltersTitle: "Active filters",
         activeFiltersHintPrefix: "Provider availability is scoped to Sweden (",
         activeFiltersHintSuffix: "), and multiple selected chips match any of the chosen labels, not all of them at once.",
-        streamProviderGlobalDefaults: "Stream provider defaults",
-        streamProviderApiKey: "API key",
-        streamProviderApiKeyPlaceholder: "Your API key",
-        streamProviderApiKeyPerSource: "API key (per provider)",
-        streamProviderUsingGlobalKey: "Using global API key",
         apiKeyLabel: "API key",
-        streamProviderDefaultQualityFilter: "Default quality filter (exclude)",
-        streamProviderDefaultLanguages: "Default languages",
-        streamProviderDefaultSource: "Default stream provider",
-        streamProviderDefaultMaxResults: "Default max results per quality",
-        streamProviderQualityFilter: "Quality filter (exclude)",
-        streamProviderLanguages: "Languages",
-        streamProviderSources: "Providers (empty = all)",
-        streamProviderSelectQualities: "Select qualities",
-        streamProviderSelectLanguages: "Select languages",
-        streamProviderSelectSources: "Select providers",
-        streamProviderMaxResults: "Max results",
-        streamProviderMaxSize: "Max size (MB, 0 = no limit)",
-        streamProviderSelection: "Stream provider",
-        streamProviderCustomUrl: "Custom URL",
-        streamProviderNoUrl: "No URL set",
-        streamProviderAddComet: "+ Comet",
-        streamProviderAddJackettio: "+ Jackettio",
-        // boundary-exempt: pluginets UI-sträng, bundlas av pluginet; tas bort när pluginet bär egna strängar
-        streamProviderAddAiostreams: "+ AIOStreams",
-        // boundary-exempt: pluginets UI-sträng, bundlas av pluginet; tas bort när pluginet bär egna strängar
-        aiostreamsOpenConfig: "Open the configurator",
-        // boundary-exempt: pluginets UI-sträng, bundlas av pluginet; tas bort när pluginet bär egna strängar
-        aiostreamsManifestLabel: "Manifest URL",
-        // boundary-exempt: pluginets UI-sträng, bundlas av pluginet; tas bort när pluginet bär egna strängar
-        streamProviderAddCustom: "+ Custom URL",
         useGlobal: "Use global",
         clearFilters: "Clear filters",
         moviesOnly: "Movies only",
@@ -1237,8 +1488,6 @@
         ratingLabel: "Rating",
         ratingLabelTmdb: "TMDb",
         noStreamsYet: "Nothing streamed yet.",
-        noScrapersEnabled: "No stream providers enabled.",
-        streamNotCached: "Stream not cached \u2014 try another",
         streamUnreachable: "Stream URL unreachable \u2014 try another",
         downloadTimeout: "Download timeout \u2014 try another stream",
         openToContinue: "\u2014 open to continue",
@@ -1300,7 +1549,6 @@
         nextAirs: "Next",
         noOverview: "No description available.",
         cached: "Cached",
-        notCached: "not cached (will download)",
         play: "Play",
         noStreamsAvailable: "No streams",
         noStreamYet: "No stream yet",
@@ -1358,8 +1606,8 @@
         pairTooManyTries: "Too many attempts \u2014 wait a moment.",
         pairBadCode: "Wrong or expired code.",
         pairUnstable: "The connection is unstable right now \u2014 try again shortly.",
-        pairTitle: "Pair this device with Lumio",
-        pairIntro: "Create an invite code in Lumio on your computer (Settings \u2192 Remote access) and enter it here.",
+        pairTitle: "Pair this device with Lumovi",
+        pairIntro: "Create an invite code in Lumovi on your computer (Settings \u2192 Remote access) and enter it here.",
         watchUnknownTitle: "Unknown title",
         watchWaiting: "Waiting for playback\u2026",
         lanLocalAddrTip: "This .local address keeps working even when the computer\u2019s IP address changes. On iPhone: open the link in Safari and choose Share \u2192 Add to Home Screen for fullscreen.",
@@ -1412,7 +1660,7 @@
         externalPlayerPick: "Choose\u2026",
         licensesTitle: "Licenses",
         appUpdateTitle: "App update",
-        appUpdateDesc: "Check if a newer Lumio version is available.",
+        appUpdateDesc: "Check if a newer Lumovi version is available.",
         appUpdateCheck: "Check for update",
         appUpdateCheckFailed: "Could not fetch update information",
         appUpdateAvailable: "Update available:",
@@ -1420,20 +1668,22 @@
         appUpdateUpToDate: "You are on the latest version",
         appUpdateInstall: "Download & install",
         appUpdatePromptTitle: "Update available",
-        appUpdatePromptBody: "Lumio {version} is ready to install. Update now?",
+        appUpdatePromptBody: "Lumovi {version} is ready to install. Update now?",
         appUpdateNotesTitle: "What\u2019s new",
         appUpdatePromptInstall: "Update now",
         appUpdatePromptInstalling: "Updating\u2026",
         appUpdateDownloading: "Downloading update",
-        appUpdateInstallingStep: "Installing the update \u2013 Lumio will restart",
+        appUpdateInstallingStep: "Installing the update \u2013 Lumovi will restart",
         appUpdatePromptLater: "Not now",
-        appUpdateRestarting: "Update installed \u2014 Lumio is restarting\u2026",
-        appUpdateInstallerStarted: "Installing the update \u2014 Lumio closes and opens again on the new version\u2026",
-        appUpdateDmgOpened: "The installer was downloaded and opened \u2014 drag Lumio to Applications.",
-        appUpdateDmgOpenedWindows: "The installer was downloaded and started \u2014 follow it to update Lumio.",
+        appAnnouncementClose: "Close",
+        appAnnouncementOpen: "Open",
+        appUpdateRestarting: "Update installed \u2014 Lumovi is restarting\u2026",
+        appUpdateInstallerStarted: "Installing the update \u2014 Lumovi closes and opens again on the new version\u2026",
+        appUpdateDmgOpened: "The installer was downloaded and opened \u2014 drag Lumovi to Applications.",
+        appUpdateDmgOpenedWindows: "The installer was downloaded and started \u2014 follow it to update Lumovi.",
         appUpdateBrowserStarted: "The download started in the browser \u2014 open the APK to install.",
-        licensesDesc: "Open-source components and services Lumio is built on.",
-        licensesIntro: "Lumio bundles the following open-source software. GPL-licensed components include a pointer to their source code.",
+        licensesDesc: "Open-source components and services Lumovi is built on.",
+        licensesIntro: "Lumovi bundles the following open-source software. GPL-licensed components include a pointer to their source code.",
         remoteAccessTitle: "Remote access",
         remoteAccessDesc: "Reach your library from outside your home network over an encrypted peer-to-peer connection.",
         remoteConnectionTitle: "Remote connection",
@@ -1454,9 +1704,6 @@
         retry: "Retry",
         // Audiobook
         audiobooks: "Audiobook",
-        resumeAudiobook: "Resume audiobook",
-        searchingAudiobooks: "Searching for audiobooks\u2026",
-        noAudiobooks: "No audiobooks found for",
         dismiss: "Dismiss",
         // Filters
         filters: "Filters",
@@ -1549,6 +1796,7 @@
         subtitleLoadFile: "Open subtitle file\u2026",
         subtitleExternalGroup: "Own file",
         subtitleEmbeddedTrack: "Embedded track",
+        subtitleLibraryTrack: "From your server",
         subtitleFileUnsupported: "This format can only be shown by the built-in player on Mac (mpv). Use .srt or .vtt here.",
         subtitleFileUnsupportedWindows: "This format can only be shown by the built-in player (mpv). Use .srt or .vtt here.",
         subtitleFileLoadFailed: "Could not load the subtitle file. {message}",
@@ -1566,6 +1814,13 @@
         vpSecondarySubMissing: "No {lang} subtitle found",
         learningModeTitle: "Learning mode",
         learningModeHint: "Show a second subtitle language under the main one",
+        spokenSubtitlesGroup: "Spoken subtitles",
+        spokenSubtitles: "Read subtitles aloud",
+        spokenSubtitlesDesc: "Reads the current subtitle line aloud with the device's voice and lowers the film's sound while it speaks. Uses a voice for the subtitle's language when one is installed.",
+        spokenSubtitlesRate: "Reading speed",
+        spokenSubtitlesRateDesc: "How fast the voice reads the lines.",
+        spokenSubtitlesRateNormal: "Normal",
+        spokenSubtitlesRateFast: "Fast",
         subtitleSlotPrimary: "Main",
         subtitleSlotSecondary: "Second",
         subtitleSecondaryEmbeddedUnsupported: "Not supported on Android yet",
@@ -1601,7 +1856,7 @@
         size: "Size",
         verticalPosition: "Vertical Position",
         subtitlesLabel: "Subtitles",
-        subtitleProvider: "OpenSubtitles v3",
+        subtitleProvider: "Downloaded",
         undo: "Undo",
         audio: "Audio",
         audioLanguage: "Audio language",
@@ -1666,7 +1921,7 @@
         webhooksTest: "Test",
         webhooksTestOk: "Sent!",
         webhooksTestFailed: "Test failed",
-        webhooksTestMessage: "Lumio: webhook works \u{1F389}",
+        webhooksTestMessage: "Lumovi: webhook works \u{1F389}",
         webhooksWhatTitle: "What gets sent",
         webhooksSourceCalendar: "My release calendar",
         webhooksSourceCalendarDesc: "Titles you watch in the release calendar, the day they premiere.",
@@ -1684,9 +1939,9 @@
         settingsGroupSystem: "SYSTEM",
         settingsPageTvMode: "TV mode",
         tvKeyboardModeLabel: "Keyboard on TV",
-        tvKeyboardModeDesc: "Automatic uses Lumio\u2019s own keys for search and filters, and the system keyboard for long or secret fields \u2014 where you can type from your phone, use voice or a password manager.",
+        tvKeyboardModeDesc: "Automatic uses Lumovi\u2019s own keys for search and filters, and the system keyboard for long or secret fields \u2014 where you can type from your phone, use voice or a password manager.",
         tvKeyboardModeAuto: "Automatic",
-        tvKeyboardModeLumio: "Lumio\u2019s own",
+        tvKeyboardModeLumio: "Lumovi\u2019s own",
         tvKeyboardModeSystem: "System",
         tvHintModeLabel: "Help text in settings",
         tvHintModeDesc: "A switch, a segment and a slider already show where the row stands \u2014 a sentence below them that repeats it is a second line to read from ten feet away.",
@@ -1801,7 +2056,7 @@
         plResetPage: "Reset page to default",
         plTimeFormatDesc: "What the clock labels show on the seek bar.",
         plVolumeTitle: "Volume control",
-        plVolumeDesc: "How the volume widget renders in the control row.",
+        plVolumeDesc: "How the volume renders in the control row. Computer only: the TV always shows \u2212/+ buttons, and phones use the device volume.",
         plVolSlider: "Slider",
         plVolSliderDesc: "A horizontal slider next to the speaker.",
         plVolStepper: "Stepper",
@@ -1809,7 +2064,7 @@
         plVolIcon: "Icon only",
         plVolIconDesc: "Just the speaker \u2014 click toggles mute.",
         plEditorEyebrow: "Layout editor",
-        plEditorClickHint: "Click any control in the preview to move or hide it.",
+        plEditorClickHint: "Click any control in the preview to move or hide it. Order applies on computer and TV; phones keep a fixed order.",
         plEditorSummary: "{visible} visible, {hidden} hidden.",
         plEditorOpen: "Edit layout",
         plEditorSave: "Save",
@@ -1909,9 +2164,15 @@
         plSleepShort: "Sleep",
         plSleepOff: "Off",
         plSleepMinutes: "{n} min",
+        plSleepRemaining: "{n} min left",
         plSleepEnd: "End of episode or film",
         plSleepStillThere: "Are you still there?",
         plSleepStillThereBody: "The sleep timer paused playback. Move or press anything to keep watching.",
+        plSleepFade: "Fade out over the last 2 min",
+        incognitoBadge: "Incognito",
+        incognitoToggle: "Watch without it showing",
+        incognitoTurnOff: "Turn off incognito",
+        incognitoPlay: "Play incognito",
         plCompanions: "Who's watching",
         plWhoWatches: "Who's watching with you?",
         plCompanionsJustMe: "Just me",
@@ -1982,8 +2243,8 @@
         advAboutHint: "Version and platform \u2014 handy when reporting a bug.",
         advAboutVersion: "Version",
         advLegalEyebrow: "Legal",
-        advLegalP1: "Lumio is an independent media client. It is not affiliated with, endorsed by, sponsored by, or in any way associated with any streaming service, plugin or addon author, or trademark holder referenced inside the app. All names, logos and brand references are property of their respective owners and are used only for compatibility and identification.",
-        advLegalP2: "Lumio itself does not host, distribute, or index any media. All streams come from third-party sources, addons, or services that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.",
+        advLegalP1: "Lumovi is an independent media client. It is not affiliated with, endorsed by, sponsored by, or in any way associated with any streaming service, plugin or addon author, or trademark holder referenced inside the app. All names, logos and brand references are property of their respective owners and are used only for compatibility and identification.",
+        advLegalP2: "Lumovi itself does not host, distribute, or index any media. All streams come from third-party sources, addons, or services that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.",
         advAboutPlatform: "Platform",
         advAboutDisplay: "Display",
         subStyleEyebrow: "Subtitle style",
@@ -1993,7 +2254,7 @@
         langMetaTitle: "App & metadata language",
         langMetaHint: "What language the interface and the title information use.",
         langAppLanguage: "App language",
-        langAppLanguageDesc: "The interface language of Lumio itself.",
+        langAppLanguageDesc: "The interface language of Lumovi itself.",
         langMetadataLanguage: "Metadata language",
         langRegion: "Region",
         langRegionDesc: "The country that sets availability \u2014 which streaming services and release dates apply.",
@@ -2028,6 +2289,11 @@
         rtHwdecDesc: "GPU decoding \u2014 easier on the battery and CPU. Turn off only when troubleshooting.",
         allowSoftwareDecoding: "Allow software decoding",
         allowSoftwareDecodingDesc: "Lets the phone or TV box decode video in software when its hardware can't. Can play files the hardware can't, but may stutter on weak devices.",
+        blockMobileData: "Ask before streaming on mobile data",
+        blockMobileDataDesc: "When the phone is not on Wi-Fi, Lumovi asks before playback starts. Play anyway applies for the rest of the session.",
+        mobileDataPromptTitle: "You are on mobile data",
+        mobileDataPromptBody: "Streaming uses a lot of data. Do you want to play anyway?",
+        mobileDataPromptPlay: "Play anyway",
         dv7AsHdr10: "Play Dolby Vision profile 7 as HDR10",
         dv7AsHdr10Desc: "Plays the HDR10 base layer of Dolby Vision profile 7 (UHD Blu-ray remuxes) instead of Dolby Vision. Avoids wrong colours (green or purple tints, oversaturated skin) on devices that decode profile 7 poorly. Auto turns it on for Nvidia Shield.",
         dv7AsHdr10Auto: "Auto",
@@ -2074,6 +2340,7 @@
         deviceNoAudioDecoder: "This device cannot decode the lossless audio track (TrueHD/DTS-HD) \u2014 playing with another track, or without sound. Pick an AC3/EAC3/AAC version for audio.",
         deviceFormatUnsupported: "This device cannot decode that video format \u2014 try another version.",
         plTabNextEp: "Next episode",
+        plTabEnds: "When it ends",
         plNextEpHint: "Autoplay, the popup and outro behavior between episodes.",
         langAudioSubTab: "Audio & subtitles",
         langAudioSubTitle: "Audio & subtitle defaults",
@@ -2088,7 +2355,7 @@
         profilesWatchingEyebrow: "Who is watching now",
         profilesDeviceEyebrow: "On this device",
         profileColorDesc: "Used for the avatar ring and the initial.",
-        profileAvatarDesc: "621 avatars in the built-in catalog. Without one the profile shows its initial.",
+        profileAvatarDesc: "72 avatars in six packs \u2014 half free, half for supporters. Without one the profile shows its initial.",
         profilePinNoneDesc: "Optional \u2014 four digits. No PIN set.",
         profilePinSetDesc: "Optional \u2014 four digits. A PIN is set.",
         profileChooseAvatar: "Choose avatar",
@@ -2116,13 +2383,13 @@
         profileAvatarShowAll: "Show all avatars",
         srcCatalogs: "Catalogs",
         srcLibrary: "Library",
-        srcStremioAddons: "Stremio addons",
+        srcStremioAddons: "Stremio-compatible add-ons",
         srcCatalogsWord: "catalogs",
         srcCatalogsNote: "Catalogs from the community \u2014 add community addons that expose catalogs. Each catalog becomes selectable as the source of its own home row.",
         srcAddAddon: "Add addon",
         srcAddAddonHint: "Paste the addon manifest URL. Example: \u2026/manifest.json",
-        srcLibraryNote: "Pick a folder with video files. Lumio matches file names against TMDb and shows them in a library of its own.",
-        srcLibraryPathNote: "The path is read automatically when Lumio starts.",
+        srcLibraryNote: "Pick a folder with video files. Lumovi matches file names against TMDb and shows them in a library of its own.",
+        srcLibraryPathNote: "The path is read automatically when Lumovi starts.",
         pluginsCheckUpdates: "Check for updates",
         pluginsFindNew: "Find new plugins",
         pluginsMarketplace: "Official marketplace",
@@ -2159,7 +2426,7 @@
         pluginsPriorityOrder: "Priority order",
         pluginsPriorityOrderDesc: "Decides which source is asked first.",
         pluginsSignedOfficial: "Signed and listed in the official marketplace.",
-        pluginsNotSigned: "Not signed by Lumio.",
+        pluginsNotSigned: "Not signed by Lumovi.",
         pluginsRuntimeDownloaded: "Runtime downloaded from the maker repo on install.",
         pluginsBundledWithApp: "Bundled with the app.",
         yes: "Yes",
@@ -2171,7 +2438,7 @@
         pluginsUninstall: "Uninstall",
         pluginsBundled: "bundled",
         pluginsThirdParty: "third-party",
-        pluginsBundledCannotRemove: "Bundled plugins ship with Lumio and can only be turned off, not removed.",
+        pluginsBundledCannotRemove: "Bundled plugins ship with Lumovi and can only be turned off, not removed.",
         tvModeUse: "Use TV mode",
         tvModeUseDesc: "Bigger hit areas, remote-control focus and the side menu. On automatically on a TV. The view reloads when you change this.",
         tvModeAuto: "Auto",
@@ -2202,7 +2469,7 @@
         profileStartFromCurrent: "Everything as it looks now",
         profileStartFromDefaults: "Default settings",
         trackingSyncEyebrow: "What gets synced",
-        trackingSyncHint: "How Lumio and Trakt exchange playback and list changes.",
+        trackingSyncHint: "How Lumovi and Trakt exchange playback and list changes.",
         trackingCommunityEyebrow: "Community",
         trackingCommunityHint: "Public content from other Trakt users on your detail pages.",
         profileSharedHint: "Applies to the whole settings panel, not just this page.",
@@ -2244,6 +2511,29 @@
         dsLayoutInline: "Below the content",
         heroCast: "Cast",
         newSeasonBadge: "New season",
+        episodesLeftInSeason: "{n} episodes left in the season",
+        watchedThreshold: "Counts as watched",
+        watchedThresholdDesc: "When a movie or episode is marked as watched. Automatic: episodes at 92 % or 90 s left, movies at 97 % or 30 s left.",
+        watchedThresholdAuto: "Automatic",
+        snoozeSeries: "Snooze series",
+        snoozeWeek: "For a week",
+        snoozeMonth: "For a month",
+        snoozeNextSeason: "Until the next season",
+        snoozedSeriesCount: "{n} snoozed series",
+        snoozedUntil: "until {date}",
+        snoozeWake: "Show again",
+        snoozeWakeSeries: "Wake series",
+        snoozedChip: "Snoozed ({n})",
+        snoozedSeriesHeading: "Snoozed series",
+        episodesLeftShort: "{n} left",
+        lastEpisodeShort: "Last ep.",
+        catchUpOne: "Catch up: 1 episode a night until {date}",
+        catchUpMany: "Catch up: {n} episodes a night until {date}",
+        catchUpChip: "Catch up \xB7 {n}/night",
+        catchUpMeta: "Catch up: {n} a night until {date}",
+        catchUpDetail: "{remaining} episodes left before season {season} on {date}. That is {evenings} evenings.",
+        catchUpTitle: "Catch up before the premiere",
+        lastEpisodeOfSeason: "Last episode of the season",
         homeCardShape: "Card shape",
         homeCardShapeDesc: "Poster cards or wide backdrop cards on the home rows.",
         homeRowTitle: "Row name",
@@ -2307,6 +2597,8 @@
         performanceModeDesc: "For weaker TV boxes: removes blur and shadows behind menus and cards, and stops the hero trailer from playing by itself. Nothing disappears from the interface.",
         heroActionsExpanded: "Always show action labels",
         heroActionsExpandedDesc: "On the hero and on a title\u2019s details page, the icon buttons next to Play keep their names visible instead of revealing them on hover.",
+        tvHeroFull: "Hide the first row",
+        tvHeroFullDesc: "The hero fills the screen and its text sits lower; press down to bring up the rows in their usual place.",
         settingsPagePluginManage: "Manage plugins",
         settingsTabStatus: "Status",
         settingsTabQuick: "Quick settings",
@@ -2316,7 +2608,6 @@
         settingsTabAddons: "Addons",
         settingsTabSourcesMain: "Sources & addons",
         settingsTabFolders: "Folders & WebDAV",
-        settingsTabScrapers: "Scrapers",
         settingsTabPlugins: "Plugins",
         cardTagNew: "New",
         showCardTags: "Show tags on cards",
@@ -2530,11 +2821,7 @@
         activeProfile: "Active profile",
         switchProfile: "Switch profile",
         profileSwitcher: "Profile",
-        streamProviderTitle: "Stream provider",
         configure: "Configure",
-        customScraper: "Custom",
-        rdApiKeyLabel: "Stream provider API key",
-        streamProviderManifestPlaceholder: "Paste manifest URL here...",
         customManifestPlaceholder: "https://your-stream-provider.example.com/manifest.json",
         hevcTitle: "HEVC / H.265 Codec",
         hevcDesc: "Required to play MKV/HEVC streams in the browser. Installs the Microsoft HEVC Video Extension via PowerShell.",
@@ -2549,19 +2836,19 @@
         region: "Region",
         tmdbEnvNote: "",
         tmdbDefaultHint: "Using bundled default \u2014 fill in to override.",
-        homekitTitle: "HomeKit",
-        homekitDesc: "Expose Lumio as its own HomeKit accessory and manage pairing from here.",
-        homekitEnableAccessory: "Enable HomeKit accessory",
+        homekitTitle: "Apple Home",
+        homekitDesc: "Works with Apple Home: Lumovi appears as its own accessory in the Home app, and pairing is managed from here.",
+        homekitEnableAccessory: "Enable Home accessory",
         name: "Name",
         homekitStatusLabel: "Status",
         homekitNotConnected: "Not connected",
         homekitDisabled: "Disabled",
         homekitReady: "Ready for pairing",
         homekitNotPublished: "Not published",
-        homekitStatusFetchError: "Could not fetch HomeKit status",
-        homekitServerError: "Could not contact HomeKit server",
-        homekitActionFailed: "HomeKit operation failed",
-        homekitResetInfo: "Pairing reset and a new HomeKit identity created. Restart Lumio before adding it in the Home app -- the network advertisement only refreshes on startup.",
+        homekitStatusFetchError: "Could not fetch the Apple Home status",
+        homekitServerError: "Could not contact the Apple Home bridge",
+        homekitActionFailed: "The Apple Home operation failed",
+        homekitResetInfo: "Pairing reset and a new accessory identity created. Restart Lumovi before adding it in the Home app -- the network advertisement only refreshes on startup.",
         homekitPublishedInfo: "Accessory published. Add it in the Home app.",
         homekitSavedInfo: "Saved. The changes are live \u2014 no restart needed.",
         homekitSaveFailed: "Could not save the settings.",
@@ -2576,7 +2863,7 @@
         refreshStatus: "Refresh status",
         starting: "Publishing...",
         resetting: "Resetting...",
-        homekitGuideTitle: "HomeKit guide",
+        homekitGuideTitle: "Apple Home guide",
         homekitGuideStep1: "Press Start pairing.",
         homekitGuideStep2: "Add the accessory in the Home app and enter the PIN code from the field above.",
         homekitGuideStep3: "Name the switches the same as the event rules.",
@@ -2588,7 +2875,7 @@
         groqDescPrefix: "Enable AI search with natural language.",
         spotifyTitle: "Spotify",
         localFilesTitle: "Local files",
-        localFilesDesc: "Choose a folder with video files. Lumio matches filenames to TMDb and shows them in a separate library.",
+        localFilesDesc: "Choose a folder with video files. Lumovi matches filenames to TMDb and shows them in a separate library.",
         chooseFolder: "Choose folder",
         removeFolder: "Remove folder",
         playbackTitle: "Playback",
@@ -2601,7 +2888,7 @@
         uploadImages: "Upload images",
         enabled: "Enabled",
         uploadedImage: "Uploaded image",
-        localUploadStored: "Saved locally in Lumio",
+        localUploadStored: "Saved locally in Lumovi",
         remove: "Remove",
         drag: "Drag",
         moveUp: "Move up",
@@ -2935,7 +3222,7 @@
         pluginActivate: "Activate",
         pluginUninstall: "Uninstall",
         pluginMarketplaceTitle: "Official marketplace",
-        pluginMarketplaceIntro: "Install official Lumio plugins from the shared marketplace repository.",
+        pluginMarketplaceIntro: "Install official Lumovi plugins from the shared marketplace repository.",
         pluginMarketplaceFallback: "Using fallback marketplace data",
         pluginMarketplaceLive: "Live manifest",
         pluginMarketplaceStatic: "Fallback manifest",
@@ -2948,16 +3235,16 @@
         pluginNoChangelogPreview: "No changelog preview available.",
         pluginAllOfficialInstalled: "All official marketplace plugins are installed.",
         pluginAddSourceTitle: "Add plugin source",
-        pluginAddSourceIntro: "Add a GitHub repository that contains a Lumio plugin marketplace manifest, or upload a plugin ZIP. Discovered plugins will appear below as installable options.",
+        pluginAddSourceIntro: "Add a GitHub repository that contains a Lumovi plugin marketplace manifest, or upload a plugin ZIP. Discovered plugins will appear below as installable options.",
         pluginGithubRepoUrl: "GitHub repo URL",
         pluginAddGithubSource: "Add GitHub source",
         pluginChooseReleaseZip: "Choose a release ZIP",
-        pluginChooseReleaseZipHelp: "This repository has multiple release ZIPs. Pick which asset Lumio should inspect.",
+        pluginChooseReleaseZipHelp: "This repository has multiple release ZIPs. Pick which asset Lumovi should inspect.",
         pluginUploadZipTitle: "Upload plugin ZIP",
         pluginUploadZipHelp: "Import a plugin ZIP directly, for example a downloaded stream provider package or a zipped plugin repository. You can also drag and drop a ZIP here.",
         pluginUploadZip: "Upload ZIP",
         pluginLastZipPreview: "Last ZIP preview",
-        pluginSourceHelp: "GitHub sources should ideally expose a root marketplace.json. If that is missing, Lumio also tries the latest GitHub release ZIP automatically. ZIP imports can contain either a marketplace.json or one or more plugin.json files.",
+        pluginSourceHelp: "GitHub sources should ideally expose a root marketplace.json. If that is missing, Lumovi also tries the latest GitHub release ZIP automatically. ZIP imports can contain either a marketplace.json or one or more plugin.json files.",
         pluginAddedSources: "Added sources",
         pluginGithubSourceBadge: "GitHub source",
         pluginZipSourceBadge: "ZIP source",
@@ -2992,6 +3279,8 @@
         tvHeroFeatured: "Featured",
         tvHeroMyList: "My list",
         tvHeroPagerDot: "Featured title {n} of {total}",
+        tvHeroPrev: "Previous title",
+        tvHeroNext: "Next title",
         tvHeroRuntimeHm: "{h} h {m} min",
         tvHeroRuntimeM: "{m} min",
         tvHeroStreamsN: "{n} streams",
@@ -3077,10 +3366,10 @@
         liveTvChooseList: "Choose a Live TV list",
         homeMenuPremiereStar: "Premieres",
         traktTitle: "Trakt",
-        traktDesc: "Sign in with Trakt to sync watched TV episodes, watchlists, and your collection with Lumio.",
+        traktDesc: "Sign in with Trakt to sync watched TV episodes, watchlists, and your collection with Lumovi.",
         traktSignedInAs: "Signed in as",
         traktSignedInFallback: "Trakt user",
-        traktSyncDesc: "Sync pulls data from Trakt into Lumio and also pushes your local Lumio watchlists and watched episodes back to Trakt.",
+        traktSyncDesc: "Sync pulls data from Trakt into Lumovi and also pushes your local Lumovi watchlists and watched episodes back to Trakt.",
         traktImportData: "Sync Trakt data",
         traktImporting: "Syncing...",
         traktImportDone: "Trakt sync complete",
@@ -3091,14 +3380,14 @@
         traktStartLoginFailed: "Failed to start Trakt login",
         traktLoginFailed: "Trakt login failed",
         traktImportFailed: "Failed to sync with Trakt",
-        // Deliberately calm and not an error: the entries work everywhere in Lumio,
+        // Deliberately calm and not an error: the entries work everywhere in Lumovi,
         // only the Trakt mirror is incomplete. The calendar reads TMDB, not Trakt.
         traktMirrorIncomplete: "Trakt would not accept every item",
-        traktMirrorIncompleteBody: "Your Trakt watchlist is full, so {count} item(s) live only on this device. Everything works normally in Lumio \u2014 the calendar reads TMDB and is unaffected. Trakt announced a 250-item limit for free accounts, but their API still enforces 100; Lumio retries automatically, so the items sync themselves once Trakt raises it. To make room now, remove items from your watchlist on trakt.tv or upgrade to VIP.",
+        traktMirrorIncompleteBody: "Your Trakt watchlist is full, so {count} item(s) live only on this device. Everything works normally in Lumovi \u2014 the calendar reads TMDB and is unaffected. Trakt announced a 250-item limit for free accounts, but their API still enforces 100; Lumovi retries automatically, so the items sync themselves once Trakt raises it. To make room now, remove items from your watchlist on trakt.tv or upgrade to VIP.",
         traktMirrorLocalOnly: "On this device only",
         ovOpenSubsTitle: "Subtitles",
-        ovOpenSubsOkDesc: "OpenSubtitles key saved \u2014 subtitle search is available.",
-        ovOpenSubsMissingDesc: "No key \u2014 subtitle search is limited.",
+        ovOpenSubsOkDesc: "A subtitle source is set up \u2014 subtitle search works.",
+        ovOpenSubsMissingDesc: "No subtitle source \u2014 add OpenSubtitles under Integrations.",
         ovGroqTitle: "AI features",
         ovGroqOkDesc: "Groq key saved.",
         ovGroqMissingDesc: "No Groq key \u2014 AI features are off.",
@@ -3106,6 +3395,10 @@
         ovSpotifyOkDesc: "Spotify credentials saved.",
         ovSpotifyMissingDesc: "No credentials \u2014 soundtracks unavailable.",
         ovOpenSettings: "Open settings",
+        ovServiceConnectedDesc: "Connected.",
+        ovServiceConnectedAsDesc: "Connected as {name}.",
+        ovLibraryConnectedDesc: "Connected \u2014 its libraries are part of your library.",
+        ovServiceAttentionDesc: "Signed out \u2014 open its settings to connect again.",
         traktAutoRemoveMovies: "Remove watched movies from the watchlist",
         traktAutoRemoveMoviesHint: "A film you have seen leaves the list automatically \u2014 and frees a slot on Trakt.",
         traktAutoUnfollowSeries: "Unfollow series you have finished",
@@ -3113,12 +3406,12 @@
         // Named per operation: a 420 on history and a 420 on the watchlist are
         // different caps with different fixes, and a bare code taught us nothing.
         traktHistoryRefused: "Trakt would not accept your watch history",
-        traktHistoryRefusedBody: "Your watchlist synced fine \u2014 this only affects watch history. Trakt caps history at 100,000 plays. Your local history is intact and Lumio is unaffected.",
+        traktHistoryRefusedBody: "Your watchlist synced fine \u2014 this only affects watch history. Trakt caps history at 100,000 plays. Your local history is intact and Lumovi is unaffected.",
         traktRejectedBy: "Rejected by Trakt",
         traktCopyCode: "Copy code",
         traktCodeCopied: "Copied",
         traktOpenActivationPage: "Open trakt.tv/activate",
-        traktStepOpen: "Open the link \u2014 it opens in your browser, Lumio stays open.",
+        traktStepOpen: "Open the link \u2014 it opens in your browser, Lumovi stays open.",
         traktStepEnterCode: "Sign in to Trakt and enter the code above.",
         traktStepComeBack: "Come back here \u2014 we detect the approval automatically.",
         traktWaitingForApproval: "Waiting for your approval...",
@@ -3166,6 +3459,10 @@
         homeTopPicksSeriesSubtitle: "Curated top series",
         homeSourceFilmCollections: "Film collections",
         collectionsBackLabel: "Collections",
+        collectionRowSubtitle: "{n} collections",
+        homeStudiosSubtitle: "Films by studio",
+        homeStreamingServicesSubtitle: "Browse by service",
+        homeFilmCollectionsSubtitle: "Franchises and film series",
         collectionEmptyItems: "No titles right now",
         collectionRowsTitle: "Collection rows",
         collectionRowsDesc: "Rows of cards that unfold into their own titles, like Film collections \u2014 but yours.",
@@ -3199,6 +3496,7 @@
         collectionRowRemoveBody: "The row and all its collections are removed. Home rows that use it show a placeholder.",
         collectionCoverSuggestedEmpty: "No suggestions yet \u2014 the collection has no titles with images.",
         collectionHeroSummary: "{count} titles \xB7 {years} \xB7 {titles}",
+        collectionMetaFilms: "{count} films",
         collectionHeroHint: "Collection \u2014 press OK to see its titles.",
         collectionHeroBackdrop: "Background on TV",
         collectionHeroBackdropHint: "Animated covers are often low resolution \u2014 the titles give a sharp background.",
@@ -3279,13 +3577,19 @@
         appUpdateChannelHint: "Beta gets test builds before they are released to everyone.",
         exitOnCloseTitle: "Quit fully on close",
         exitOnCloseHint: "Android/TV: end the process when you leave the app instead of keeping it in the background. Frees memory on small boxes.",
-        exitAppAction: "Quit Lumio",
-        exitAppTitle: "Quit Lumio?",
+        launcherModeTitle: "Use Lumovi as home screen",
+        launcherModeHint: "The device starts in Lumovi and your other apps sit in a row at the bottom of the home page. Android asks which home screen to use.",
+        launcherModeNotChosen: "Lumovi is not the chosen home screen yet. Turn this off and on again to choose it.",
+        launcherModeBlocked: "This device doesn't let another app be the home screen (Google TV keeps its own). The apps row on the start page still works.",
+        launcherAppsRow: "Apps",
+        exitAppAction: "Quit Lumovi",
+        exitAppTitle: "Quit Lumovi?",
         exitAppConfirm: "Quit",
+        exitAppHoldHint: "Tip: hold Back anywhere to get here.",
         quizMenuLabel: "Film quiz",
         couchMenuLabel: "Couch mode",
         couchOpenButton: "Open Couch mode",
-        couchOpenHint: "Control your TV or computer running Lumio from this phone. Both must be on the same wifi.",
+        couchOpenHint: "Control your TV or computer running Lumovi from this phone. Both must be on the same wifi.",
         quizLobbyTitle: "Who knows their movies?",
         quizLobbyIntro: "Scan the code with your phone to join. The questions come from movies you have watched.",
         quizOrGoTo: "Or go to",
@@ -3456,6 +3760,9 @@
         creditsThresholdTvDesc: "Only when the season has ended and no next season exists.",
         advanceAtOutro: "Skip the credits and go straight to the next episode",
         advanceAtOutroDesc: "When an outro is detected, the next episode starts immediately instead of showing the next-episode card. Episodes without a detected outro still show the card.",
+        nextEpAfterLastSub: "Next episode after the last subtitle line",
+        nextEpAfterLastSubDesc: "For episodes without a detected outro, the next-episode card appears this long after the subtitle file's last line. Waiting a little leaves room for a closing scene without dialogue; the card can always be dismissed.",
+        nextEpAfterLastSubOff: "Off",
         stayFullscreenOnClose: "Stay fullscreen when the player closes",
         stayFullscreenOnCloseDesc: "The window keeps fullscreen instead of dropping back to windowed mode.",
         showTitleOnStart: "Show title when playback starts",
@@ -3497,8 +3804,11 @@
         autoplayMaxResolution: "Max resolution for auto-play",
         autoplayMaxResolutionDesc: "Skip sources above this resolution when auto-playing. Sources with an unknown resolution are still allowed.",
         autoplayMaxResolutionUnlimited: "Unlimited",
-        preferEmbeddedSubtitles: "Prefer embedded subtitles",
-        preferEmbeddedSubtitlesDesc: "When picking subtitles automatically, try tracks embedded in the video first \u2014 they are always in sync.",
+        subtitleOrder: "Subtitle order",
+        subtitleOrderDesc: "Which subtitles are picked first automatically. Best: your language comes first, and within a language the file's own full track goes before downloads \u2014 it is made for that file and always in sync.",
+        subtitleOrderBest: "Best",
+        subtitleOrderEmbedded: "File's own first",
+        subtitleOrderDownloads: "Downloads first",
         peekSeasonWord: "season",
         peekSeasonsWord: "seasons",
         peekOpenDetails: "More info",
@@ -3519,6 +3829,18 @@
         advMpvConfTitle: "Raw mpv.conf",
         advMpvConfHint: "One property=value per line, applied to the player after all managed settings. For power users.",
         advMpvConfNote: "Applies on the next playback start. Invalid lines are ignored.",
+        advCustomShadersTitle: "Custom shaders",
+        advCustomShadersHint: "Put .glsl or .hook files in the folder and choose which ones run. They run in the order you tick them, after Anime4K.",
+        advCustomShadersEmpty: "The folder is empty.",
+        advCustomShadersOpen: "Open folder",
+        advCustomShadersRefresh: "Refresh",
+        advCustomShadersNote: "Applies right away, also during playback. A glsl-shaders line in mpv.conf above replaces this list.",
+        advCustomShadersNoneOn: "No file is switched on yet \u2014 tick the ones that should run.",
+        rtShadersEmpty: "No files in the folder yet \u2014 drop .glsl files there.",
+        rtShadersActive: "Active in player: {list}",
+        rtShadersCustomCount: "{n} custom",
+        rtShadersNone: "No shaders active",
+        rtShadersMpvConf: "mpv.conf controls shaders",
         extraSubtitleLanguages: "More subtitle languages",
         extraSubtitleLanguagesDesc: "Ordered list of language codes tried after the default and fallback, comma-separated.",
         forcedSubtitlesWhenAudioMatches: "Forced subtitles when audio matches",
@@ -3615,8 +3937,8 @@
         hapticsPairCodeTitle: "{name} wants to feel the bass",
         hapticsPairCodeDesc: "Enter this code on the phone",
         hapticsConnectedNotice: "Bass is felt in {name}",
-        hapticsReceiverSearching: "Looking for Lumio on your Wi-Fi\u2026",
-        hapticsReceiverNone: "No Lumio found. Turn on \u201CAllow Feel the bass from a phone\u201D on the computer or TV.",
+        hapticsReceiverSearching: "Looking for Lumovi on your Wi-Fi\u2026",
+        hapticsReceiverNone: "No Lumovi found. Turn on \u201CAllow Feel the bass from a phone\u201D on the computer or TV.",
         hapticsReceiverConnect: "Connect",
         hapticsReceiverDisconnect: "Disconnect",
         hapticsReceiverForget: "Forget",
@@ -3643,9 +3965,9 @@
         hapticsNotifReconnecting: "Reconnecting\u2026",
         hapticsNotifStop: "Stop",
         advTransferTitle: "Move settings to another device",
-        advTransferHint: "Copy everything you have set up here \u2014 sources, keys, layout, lists \u2014 to another Lumio on the same Wi-Fi. Settings that belong to a particular device, like TV mode, audio output, gestures and autoplay limits, stay where they are.",
+        advTransferHint: "Copy everything you have set up here \u2014 sources, keys, layout, lists \u2014 to another Lumovi on the same Wi-Fi. Settings that belong to a particular device, like TV mode, audio output, gestures and autoplay limits, stay where they are.",
         advTransferReceiveTitle: "Receive from another device",
-        advTransferReceiveDesc: "Start here on the device that should get the settings. It shows a code and becomes visible to other Lumio devices on the network for ten minutes.",
+        advTransferReceiveDesc: "Start here on the device that should get the settings. It shows a code and becomes visible to other Lumovi devices on the network for ten minutes.",
         advTransferReceiveStart: "Receive",
         advTransferReceiveStop: "Stop",
         advTransferReceiveWaiting: "Waiting\u2026 On the other device, open Settings \u2192 Profiles \u2192 Send to another device, pick this one and enter the code:",
@@ -3661,11 +3983,11 @@
         advTransferCode: "Code shown on the other device",
         advTransferSend: "Send settings",
         advTransferSending: "Sending\u2026",
-        advTransferSent: "Sent. The other device is restarting with your settings.",
+        advTransferSent: "Sent. The other device takes the settings in and restarts \u2013 if it is in the setup guide, the guide continues first and the restart comes when it finishes.",
         advTransferFailed: "Could not send",
         advTransferWrongCode: "Wrong code. Attempts left: {n}.",
         syncWebdavTitle: "Cloud sync (WebDAV)",
-        syncWebdavHint: "Sync your settings and watch progress to a WebDAV server you already have \u2014 Nextcloud, ownCloud, Koofr, a NAS, or anything else that speaks WebDAV. Nothing is hosted by Lumio; you bring your own storage.",
+        syncWebdavHint: "Sync your settings and watch progress to a WebDAV server you already have \u2014 Nextcloud, ownCloud, Koofr, a NAS, or anything else that speaks WebDAV. Nothing is hosted by Lumovi; you bring your own storage.",
         syncWebdavServerLabel: "Server address",
         syncWebdavServerPlaceholder: "https://your-server/remote.php/dav/files/you/lumio/",
         syncWebdavUsernameLabel: "Username",
@@ -3686,11 +4008,11 @@
         syncWebdavSyncing: "Syncing\u2026",
         syncWebdavSynced: "Synced just now",
         syncWebdavError: "Could not reach the server. Check the address, username and password.",
-        appStarting: "Starting Lumio",
+        appStarting: "Starting Lumovi",
         // Splashens statusrad, tre steg i samma slot (se BootSpinner).
         splashStatusLibrary: "Loading your library",
         splashStatusAlmost: "Almost there",
-        remoteConnecting: "Connecting to Lumio at home\u2026",
+        remoteConnecting: "Connecting to Lumovi at home\u2026",
         clientStartFailed: "The client could not start",
         clientStartFailedHint: "This is the actual error from the app, not a generic fallback.",
         loadingPlayer: "Loading player\u2026",
@@ -3727,18 +4049,20 @@
         audioModeBest: "Best possible",
         audioModeBestDesc: "Keeps multichannel audio in the proxy when possible. Tauri/mpv continues to use the original track directly.",
         nightMode: "Night mode / DRC",
-        nightModeDesc: "Reduces loud peaks and makes dialogue easier to hear at lower volume.",
+        nightModeDesc: "Lifts dialogue and quiet passages without making loud scenes louder. For watching at low volume.",
         nightModeOff: "Off",
         nightModeMild: "Mild night mode",
+        nightModeMedium: "Medium night mode",
         nightModeStrong: "Strong night mode",
         dvColorLabel: "Dolby Vision",
         dvColorAuto: "Vivid (auto)",
         dvColorOff: "Off",
         nightModeMenuLabel: "Night mode",
         nightModeMenuMild: "Mild",
+        nightModeMenuMedium: "Medium",
         nightModeMenuStrong: "Strong",
         onboardingIntegrationsEyebrow: "Integrations",
-        onboardingIntegrationsTitle: "Make Lumio even better",
+        onboardingIntegrationsTitle: "Make Lumovi even better",
         onboardingIntegrationsDesc: "Optional connections that enhance the experience \u2014 nothing here is required. Everything is configured later under Settings \u2192 Integrations.",
         onboardingIntTrakt: "Sync watched history and watchlists. Sign in with a code right here.",
         onboardingTraktInlineHint: "Sign in without leaving setup: the link opens in your browser, setup stays exactly where it is.",
@@ -3754,7 +4078,7 @@
         onboardingKeySpotifyId: "Spotify Client ID",
         onboardingKeySpotifySecret: "Spotify Client Secret",
         onboardingKeyOptional: "All of these are optional and can be added later under Settings \u2192 API keys \u2014 the same fields, the same values.",
-        onboardingIntOpenSubtitles: "Works without an account. With one, files are matched by hash for better subtitles.",
+        onboardingIntOpenSubtitles: "Optional. Your own API key searches the full OpenSubtitles catalogue and matches your exact file.",
         defaultSubtitleLanguage: "Default subtitles language",
         defaultSubtitleLanguageDesc: "Selected automatically when subtitles are available.",
         fallbackSubtitleLanguage: "Fallback subtitles language",
@@ -3768,6 +4092,8 @@
         subtitleAutoSyncGroup: "Auto-sync",
         subtitleSyncFastReadAhead: "Faster sync (uses more data)",
         subtitleSyncFastReadAheadHint: "Reads up to 6 minutes of audio ahead instead of 3, so subtitles sync sooner in hard scenes like songs and music. Uses more mobile data. Never affects playback.",
+        styledAssSubtitles: "Styled ASS subtitles",
+        styledAssSubtitlesHint: "Draws ASS/SSA subtitles (anime and fansubs) with their own fonts, colours and positions. Turn off if heavy typesetting stutters on a slow box; they then show as plain text. Applies from the next playback.",
         subtitleAutoSyncAppliedOffset: "Subtitles synced ({offset})",
         subtitleAutoSyncSwapped: "Switched to a better-synced version of the same subtitles",
         subtitleAutoSyncSwappedEmbedded: "Switched to the subtitles built into this file",
@@ -3776,6 +4102,7 @@
         subtitleAutoSyncOtherEditKeep: "Keep",
         playerStarvedLighter: "The connection can\u2019t keep up with this version. Lighter: {stream}",
         playerStarvedSwitch: "Switch",
+        playerStreamLost: "The stream stopped at {time}. Pick a source to continue from there.",
         subtitleLanguageDetected: "language detected",
         subtitleForced: "Forced",
         subtitleSdh: "SDH",
@@ -3819,6 +4146,9 @@
         subtitleBold: "Bold text",
         subtitleBoldDesc: "Turned off when you pick an easier-to-read font, which reads better at normal weight.",
         skipIntro: "Skip intro",
+        skipLearned: "Skip (learned)",
+        plLearnSkips: "Learn my skips",
+        plForgetLearnedSkips: "Forget learned skips for this series",
         originalFirst: "Original / first",
         noFallback: "No fallback",
         autoplayNextEpisode: "Auto-play next episode",
@@ -3828,7 +4158,6 @@
         preloadBeforePopup: "Preload before popup",
         preloadBeforePopupDesc: "How many seconds before the popup we start fetching the next episode.",
         seconds: "seconds",
-        rdApiKey: "Stream provider API key",
         rdApiPlaceholder: "Your stream provider API key",
         rdApiNote: "Stored only in your browser (localStorage).",
         streamQuality: "Stream quality filters",
@@ -3850,17 +4179,8 @@
         homePosterGenreChipsToggleLabel: "Show category chips on posters",
         settingsNavSources: "Sources & Catalogs",
         settingsNavIntegrations: "Integrations",
-        stremioAddonsTitle: "Stremio addons",
-        stremioAddonsDesc: "Install community addons that expose catalogs (anime, public domain, your trakt list, \u2026). Each catalog becomes selectable as a custom home row source.",
-        stremioAddonsEmpty: "No Stremio addons installed yet.",
-        stremioAddonAdd: "Add",
-        stremioAddonAdding: "Fetching\u2026",
         stremioAddonAdded: "Installed {{name}}",
         stremioAddonNoCatalog: "This addon doesn't expose any catalogs.",
-        stremioAddonFetchFailed: "Could not fetch the manifest.",
-        stremioAddonOneCatalog: "catalog",
-        stremioAddonManyCatalogs: "catalogs",
-        stremioAddonsHelpFromUrl: "Paste the addon manifest URL. Example: {{url}}/manifest.json",
         shortcutsTitle: "Shortcuts",
         shortcutsGeneral: "General",
         shortcutsPlayer: "Player",
@@ -3875,7 +4195,6 @@
         save: "Save",
         checkKey: "Check Key",
         testingConnection: "Testing connection\u2026",
-        enterApiKeyFirst: "Enter an API key first.",
         connectedAs: "Connected as",
         // Calendar
         seriesCalendar: "Series Calendar",
@@ -3946,7 +4265,7 @@
         onboardingGoToStep: "Go to step",
         onboardingLanguageLabel: "Language",
         onboardingWelcomeEyebrow: "WELCOME",
-        onboardingWelcomeTitle: "Welcome to Lumio",
+        onboardingWelcomeTitle: "Welcome to Lumovi",
         onboardingWelcomeDesc: "Your media player and hub for movies and series \u2014 play your own library and keep everything you follow in one place.",
         onboardingLanguageEyebrow: "Language",
         onboardingLanguageTitle: "Choose your language.",
@@ -3955,18 +4274,18 @@
         onboardingLanguageHint: "Subtitles in your preferred language are selected automatically when available, with the fallback used when the primary is missing.",
         onboardingPluginsEyebrow: "PLUGINS",
         onboardingPluginsTitle: "Choose your plugins",
-        onboardingPluginsDesc: "Tick the plugins you want active. Built-in plugins are enabled right away and fetch their latest runtime when online; community plugins are fetched from their developer. Everything can be added or removed later under Settings \u2192 Plugins.",
+        onboardingPluginsDesc: "Built-in plugins are enabled right away. You can add or remove anything later under Settings \u2192 Plugins.",
         onboardingBundledBadge: "Built in",
         onboardingInstalledBadge: "Already active",
         onboardingOfficialGroup: "Official",
         onboardingExternalGroup: "External",
         onboardingThirdParty: "Third-party",
-        onboardingExternalDisclaimer: "External plugins are developed and maintained by their respective developers \u2014 not by Lumio. They are fetched from the developer's own repository and used at your own risk.",
+        onboardingExternalDisclaimer: "External plugins are developed and maintained by their respective developers \u2014 not by Lumovi. They are fetched from the developer's own repository and used at your own risk.",
         onboardingSyncEyebrow: "SYNC",
-        onboardingSyncTitle: "Already using Lumio?",
-        onboardingSyncDesc: "Bring over sources, keys, layout and lists from another device or from your own WebDAV storage. Nothing to bring? Press Next.",
-        onboardingSyncReceiveDesc: "Same Wi-Fi. This device shows a code you enter on the other one.",
-        onboardingSyncWebdavDesc: "Nextcloud, ownCloud, Koofr, a NAS \u2014 your own storage. Keeps devices in sync from now on.",
+        onboardingSyncTitle: "Already using Lumovi?",
+        onboardingSyncDesc: "Bring sources, keys, layout and lists from another device or your own WebDAV storage. New here? Pick the last one.",
+        onboardingSyncReceiveDesc: "This device shows a code that you enter on the other one.",
+        onboardingSyncWebdavDesc: "Nextcloud, ownCloud, Koofr, a NAS. Keeps your devices in sync from now on.",
         onboardingSyncVisible: "Visible on the network \xB7 {time} left",
         onboardingSyncReceivedFrom: "Settings received from {device}",
         onboardingSyncReceivedGeneric: "Settings received",
@@ -3996,6 +4315,80 @@
         onboardingHintSelect: "Select",
         onboardingHintBack: "Previous step",
         onboardingHintBackKey: "BACK",
+        onboardingRailSubs: "Subtitles",
+        onboardingRailAccounts: "Accounts",
+        onboardingSubsEyebrow: "Language",
+        onboardingSubsTitle: "Which subtitles do you want?",
+        onboardingSubsDesc: "Both can be changed any time in Settings.",
+        onboardingSubsPreferred: "Preferred language",
+        onboardingSubsFallback: "Fallback language",
+        onboardingSubsNone: "None",
+        onboardingSyncFreshKicker: "First time",
+        onboardingSyncFreshTitle: "No, I'm new",
+        onboardingSyncFreshDesc: "Start from scratch. You can sync later under Settings \u2192 Profiles.",
+        onboardingSyncReceiveKicker: "Same Wi-Fi",
+        onboardingSyncWebdavKicker: "Your own storage",
+        onboardingSyncCodeLabel: "Your code",
+        onboardingSyncStep1: "Open Settings \u2192 Profiles on your other device",
+        onboardingSyncStep2: "Choose Send to another device and this device",
+        onboardingSyncStep2Tv: "Choose Send to another device and this TV",
+        onboardingSyncStep3: "Enter the code",
+        onboardingSyncIpHint: "Not showing up? Enter the address",
+        onboardingSyncReceivedTitle: "Received \u2713",
+        onboardingSyncReceivedShort: "Sources, keys, layout and lists are in place. The plugins are pre-checked in the next step.",
+        onboardingAppPassword: "App password",
+        onboardingWebdavPhone: "Scan and fill it in on your phone instead",
+        onboardingAccountsEyebrow: "Accounts",
+        onboardingAccountsDesc: "Add your TMDB key for posters, and connect Trakt and keys for AI search, subtitles and soundtracks.",
+        onboardingTmdbCardTitle: "TMDB \u2014 posters and info",
+        onboardingTmdbCardDesc: "The key is free and takes a couple of minutes to create. Without it, posters and descriptions are missing.",
+        onboardingRecommended: "Recommended",
+        onboardingTmdbCreate: "Create a free key",
+        onboardingReplace: "Replace",
+        onboardingKeyAdd: "Add",
+        onboardingKeyAdded: "Added \u2713",
+        onboardingKeyGroqDesc: "AI search in plain words",
+        onboardingKeyOsDesc: "More accurate subtitles",
+        onboardingKeySpotifyDesc: "Soundtracks on detail pages \xB7 Client ID + Secret",
+        onboardingKeyOptionalShort: "Everything except TMDB is optional and stays under Settings \u2192 Integrations.",
+        onboardingViaPhone: "via your phone",
+        onboardingPhoneHint: "Scan with your phone and paste the key there. It shows up here right away.",
+        onboardingPhoneHintTmdb: "Scan with your phone. The steps to create the key are there \u2014 paste it, or an add-on link, and it shows up here right away.",
+        onboardingPhoneUnavailable: "Phone setup can't be reached right now \u2014 fill it in here instead.",
+        onboardingPhoneExpired: "The code has expired. Close and open it again.",
+        onboardingPhoneDone: "Done",
+        onboardingPhoneSend: "Send to the TV",
+        onboardingPhoneIntro: "Paste it and tap Send \u2014 it's saved on the TV right away.",
+        onboardingPhoneTmdbValue: "TMDB key or add-on link",
+        onboardingPhoneTmdbPassword: "Add-on password (only if the add-on has one)",
+        onboardingTraktDesc: "Sync watched titles and watchlists.",
+        onboardingTraktLogin: "Sign in",
+        onboardingTraktConnected: "Connected \u2014 {name}",
+        onboardingTraktScan: "Scan, or go to",
+        onboardingTraktAndType: "and enter",
+        onboardingTraktWaitingApproval: "Waiting for your approval\u2026",
+        onboardingOsAddonTitle: "Add OpenSubtitles as a subtitle source",
+        onboardingDoneDesc: "Here's how Lumovi is set up. Everything can be changed in Settings.",
+        onboardingEdit: "Edit",
+        onboardingSumAccounts: "Accounts",
+        onboardingSumNoneSelected: "None selected",
+        onboardingSumFresh: "New install",
+        onboardingSumSubsOn: "subtitles {lang}",
+        onboardingSumSubsOff: "subtitles off",
+        onboardingSumSubsFallback: ", fallback {lang}",
+        onboardingSumTmdbOn: "TMDB \u2713",
+        onboardingSumTmdbMissing: "TMDB missing",
+        onboardingSumTraktOn: "Trakt connected",
+        onboardingSumKeysOne: "1 key",
+        onboardingSumKeys: "{n} keys",
+        onboardingPerfMeasured: "Measured \u2248 {mbps} Mbit/s",
+        onboardingPerfMeasuringShort: "Measuring\u2026",
+        onboardingPerfFailedShort: "Couldn't be measured",
+        onboardingTrialNote: "Every feature is unlocked for 14 days.",
+        onboardingProgress: "{n} of {total}",
+        onboardingOpenApp: "Open Lumovi",
+        onboardingOpening: "Opening Lumovi\u2026",
+        onboardingHintPrev: "Previous",
         onboardingControlEyebrow: "READY",
         onboardingControlTitle: "You are in control",
         onboardingControlDesc: "Customise the start page, filters, language and layout exactly the way you want before you begin.",
@@ -4049,17 +4442,17 @@
         onboardingPerfNetFailed: "Could not measure the connection; the suggestion is based on the device alone.",
         onboardingWillInstall: "{count} plugin(s) will be enabled \u2014 latest runtime fetched \u2014 when you finish.",
         onboardingInstallFailed: "{names} could not be installed right now \u2014 you can find them under Settings \u2192 Plugins.",
-        onboardingOpenAppNow: "Open Lumio",
+        onboardingOpenAppNow: "Open Lumovi",
         startupOfflineNote: "No connection to TMDb \u2014 rows are empty until it is reachable. Settings, Plex, Jellyfin and Live TV work as usual.",
         onboardingInstallProgress: "Enabling plugins and fetching latest runtimes {done} / {total}",
         onboardingInstallQueued: "Queued",
         onboardingInstallWorking: "Enabling \xB7 fetching latest\u2026",
         onboardingInstallDone: "Done",
         onboardingInstallError: "Failed",
-        onboardingInstallBackground: "This continues in the background \u2014 you can open Lumio right away and check Settings \u2192 Plugins later.",
+        onboardingInstallBackground: "This continues in the background \u2014 you can open Lumovi right away and check Settings \u2192 Plugins later.",
         onboardingServicesEyebrow: "SERVICES",
         onboardingServicesTitle: "Connect services",
-        onboardingServicesDesc: "Lumio uses TMDb for movie and series metadata. Create a free account at themoviedb.org and paste your API token (Bearer) here \u2014 all artwork and details are fetched with it. More integrations can be configured later under Settings \u2192 Integrations.",
+        onboardingServicesDesc: "Lumovi uses TMDb for movie and series metadata. Create a free account at themoviedb.org and paste your API token (Bearer) here \u2014 all artwork and details are fetched with it. More integrations can be configured later under Settings \u2192 Integrations.",
         onboardingTmdbLabel: "TMDb API token (Bearer)",
         onboardingTmdbPlaceholder: "Paste your token here",
         onboardingTmdbSaved: "Saved \u2014 the token is stored on this device.",
@@ -4103,7 +4496,7 @@
         ptManageHint: "Enable, disable or drag to change priority order.",
         ptNonePlugins: "No plugins installed yet.",
         ptAvailableTitle: "Available",
-        ptAvailableHint: "Known plugins that are not installed. External plugins are fetched from each developer's own repository and are not maintained by Lumio.",
+        ptAvailableHint: "Known plugins that are not installed. External plugins are fetched from each developer's own repository and are not maintained by Lumovi.",
         ptInstalling: "Installing\u2026",
         ptInstall: "Install",
         ptFindNewTitle: "Find new plugins",
@@ -4161,6 +4554,7 @@
         coreStreamsCached: "Cached",
         coreStreamsLoading: "Checking sources\u2026",
         streamNotServingMedia: "The source did not deliver playable media. Try another stream.",
+        streamWrongFileNoneLeft: "The streams found look like the wrong file: far shorter than the film. Pick another stream from the list.",
         libraryServerUnreachable: "Could not get a playback address from {source}. Check that the server is running.",
         libraryRowSuffix: "in your library",
         libraryModeTab: "Library",
@@ -4204,7 +4598,7 @@
         webdavLibraryErrUrl: "Enter a full address starting with http:// or https://, without username or password in it.",
         webdavLibraryErrTooLarge: "The folder is too large to list in one go. Point the address at a subfolder.",
         webdavLibraryErrUpstream: "The server answered with an error. Try again in a while.",
-        webdavLibraryErrLocalOnly: "Network folders can only be changed on the device running Lumio.",
+        webdavLibraryErrLocalOnly: "Network folders can only be changed on the device running Lumovi.",
         libraryRowUnmatched: "Not identified",
         librarySourceNotIndexed: "Not indexed yet \u2014 build the index in the plugin's settings.",
         libraryModeOff: "No library is set as the home page. Turn it on under the library plugin's settings.",
@@ -4231,6 +4625,7 @@
         libraryEpisodeNotInLibrary: "This episode is not in your library",
         libraryRowNotLoaded: "not loaded yet",
         libraryRowRecent: "Recently added to your library",
+        libraryRowRecentShort: "Recently added",
         libraryRowMovies: "Movies in your library",
         tvLibraryTabRowsLabel: "Library tab",
         tvLibraryTabRowsDesc: "Edit the rows of a library in the menu instead of a page above.",
@@ -4247,7 +4642,7 @@
         libraryScanIndicatorHint: "Sorting, filters and library rows appear when it is done.",
         libraryScanUnreachable: "{name} is not responding \u2013 will try again later",
         plexIndexTitle: "Library index",
-        plexIndexDesc: "Lumio indexes your Plex libraries locally so the home page, recommendations and Zapp can run entirely on what you own.",
+        plexIndexDesc: "Lumovi indexes your Plex libraries locally so the home page, recommendations and Zapp can run entirely on what you own.",
         plexIndexEmpty: "No index yet.",
         plexIndexStatus: "{titles} titles \xB7 {unmatched} unmatched",
         plexIndexLastSync: "Last synced",
@@ -4258,36 +4653,36 @@
         plexIndexClear: "Remove index",
         plexIndexUseAsHome: "Use Plex as the home page",
         plexIndexUseAsHomeDesc: "Hero, rows, recommendations and Zapp come from your library only. Everything shown is playable.",
-        sourcesEmptyBody: "Lumio finds streams through sources you add yourself. Paste a source's manifest URL below \u2014 it usually ends in /manifest.json. Lumio does not host, index or recommend any source.",
+        sourcesEmptyBody: "Lumovi finds streams through sources you add yourself. Paste a source's manifest URL below \u2014 it usually ends in /manifest.json. Lumovi does not host, index or recommend any source.",
         sourceAddInvalid: "That URL did not return a valid manifest. Check the address and try again.",
         kpMetricActiveAddonsSub: "installed",
         kpMetricTotalCatalogs: "Total catalogs",
         kpMetricTotalCatalogsSub: "from all sources",
         kpMetricUsableRows: "Usable in rows",
         kpMetricUsableRowsSub: "as custom sources",
-        kpStremioEyebrow: "Stremio addons",
+        kpStremioEyebrow: "Stremio-compatible add-ons",
         kpCommunityTitle: "Catalogs from the community",
         kpCommunityHint: "Add community addons that expose catalogs. Each catalog becomes selectable as the source of its own home row.",
         kpManifestHint: "Paste the addon manifest URL. Example: \u2026/manifest.json",
         kpLocalFilesEyebrow: "Local files",
         kpLibraryTitle: "My own library",
-        kpLibraryHint: "Pick a folder with video files. Lumio matches file names against TMDb and shows them in a library of its own.",
+        kpLibraryHint: "Pick a folder with video files. Lumovi matches file names against TMDb and shows them in a library of its own.",
         kpFolderLabel: "Folder",
         kpFolderPlaceholder: "/Users/your-name/Movies",
         kpBrowse: "Browse",
         kpStorageAccessTitle: "Storage access",
-        kpStorageAccessHint: "Android needs all-files access before Lumio can read a folder you type here. Grant it once in system settings.",
+        kpStorageAccessHint: "Android needs all-files access before Lumovi can read a folder you type here. Grant it once in system settings.",
         kpStorageAccessAction: "Open settings",
         kpStorageAccessGranted: "Granted",
         kpFolderScanFailed: "Could not read that folder",
-        kpPathHint: "The path is read automatically when Lumio starts. Files are matched against TMDb in the background.",
+        kpPathHint: "The path is read automatically when Lumovi starts. Files are matched against TMDb in the background.",
         // Integrations panel
         ipCatAll: "All",
         ipCatNetwork: "Network",
-        ipDescTmdb: "Movies, series, posters and metadata. Required for most of Lumio.",
+        ipDescTmdb: "Movies, series, posters and metadata. Required for most of Lumovi.",
         ipDescGroq: 'Enables natural-language AI search. "Show cozy winter movies from the 90s" works.',
         ipDescSpotify: "Used to show soundtracks in the details panel. Create an app at developer.spotify.com.",
-        ipDescLan: "Share Lumio with other devices on the same network via a local web address.",
+        ipDescLan: "Share Lumovi with other devices on the same network via a local web address.",
         ipHide: "Hide",
         ipShow: "Show",
         ipTmdbTokenLabel: "API token (Bearer)",
@@ -4298,22 +4693,22 @@
         ipSecretStored: "A key is saved. Type a new one to replace it, or remove it to fall back to the built-in key.",
         ipSecretStoredPlaceholder: "Saved \u2014 type to replace",
         ipSecretRemove: "Remove saved key",
-        ipGroqKeyHint: "Get one from console.groq.com \u2014 the free tier is plenty for Lumio.",
+        ipGroqKeyHint: "Get one from console.groq.com \u2014 the free tier is plenty for Lumovi.",
         ipSaved: "Saved",
         ipSaveError: "Could not save",
         ipSaving: "Saving\u2026",
         ipUnsavedChanges: "Unsaved changes",
         ipNoUnsavedChanges: "No unsaved changes",
         ipLanEnable: "Enable LAN Streaming",
-        ipLanEnableDesc: "Makes Lumio reachable from other devices on your network",
+        ipLanEnableDesc: "Makes Lumovi reachable from other devices on your network",
         ipLanModeLabel: "Mode \u2014 what other devices see",
         ipLanModeApp: "Entire app",
         ipLanModePlayback: "Playback only",
         ipLanLocalUrl: "Local URL",
         ipLanFetchingIp: "Fetching IP address\u2026",
         ipCopy: "Copy",
-        ipLanRestartWarning: "Requires restarting Lumio to take effect. macOS may ask whether to allow incoming connections \u2014 click",
-        ipLanRestartWarningWindows: "Requires restarting Lumio to take effect. Windows Defender Firewall may ask whether Lumio may communicate on your networks \u2014 click",
+        ipLanRestartWarning: "Requires restarting Lumovi to take effect. macOS may ask whether to allow incoming connections \u2014 click",
+        ipLanRestartWarningWindows: "Requires restarting Lumovi to take effect. Windows Defender Firewall may ask whether Lumovi may communicate on your networks \u2014 click",
         ipLanAllow: "Allow",
         ipLanAllowWindows: "Allow access",
         ipConnected: "Connected",
@@ -4329,6 +4724,8 @@
         ipSectionHint: "Click a service to view or change its settings.",
         // Home panel (Hem)
         hpTabHero: "Hero & background",
+        hpTabNavigation: "Navigation",
+        clearCacheHint: "Clears the app\u2019s response caches",
         hpTabDisplay: "Display",
         hpGenreAll: "All categories",
         hpGenreAction: "Action",
@@ -4400,7 +4797,7 @@
         hpSliderCardsHint: "How many cards a slider shows at most, globally.",
         hpSliderCardsRowLabel: "Slider cards",
         hpSliderCardsGlobalOption: "Global ({count})",
-        ipDescOpenSubtitles: "Deeper subtitle search via your own OpenSubtitles API key (free at opensubtitles.com \u2192 API consumers). Without a key, only the community catalog is searched.",
+        ipDescOpenSubtitles: "Subtitles via the OpenSubtitles v3 addon (free) and, optionally, the official API with your own key and account.",
         tgSectionEyebrow: "Trailers page",
         tgColumnsLabel: "Columns",
         tgColumnsHint: "How many columns the trailer grid shows.",
@@ -4469,7 +4866,7 @@
         pluginUpdatedLess: "Less",
         pluginUpdatedClose: "OK",
         pluginUpdateNoticeLabel: "Show a notice when a plugin updates",
-        pluginUpdateNoticeHint: "Plugins update by themselves in the background. With this on, Lumio says which one and what changed, once per update.",
+        pluginUpdateNoticeHint: "Plugins update by themselves in the background. With this on, Lumovi says which one and what changed, once per update.",
         heroPageMinRatingShort: "Minimum rating (IMDb)",
         heroPageTitle: "Hero per page",
         heroPageHint: "Choose where the hero on Home, Movies and Series takes its titles from: Discover with its own category and minimum rating, or one of the page\u2019s rows or a collection \u2014 then the whole hero comes from there.",
@@ -4778,7 +5175,7 @@
         homekitAccessoryIdLabel: "Accessory ID (MAC format)",
         homekitPinLabel: "PIN",
         homekitPairingCodeLabel: "Pairing code",
-        homekitPairingCodeHint: "Add it in the Home app on your iPhone: Add Accessory -> More options -> Lumio Cinema Sync, then enter this code.",
+        homekitPairingCodeHint: "Add it in the Home app on your iPhone: Add Accessory -> More options -> Lumovi Cinema Sync, then enter this code.",
         homekitEventRulesHint: "Each switch is a trigger. Build an automation per switch in the Home app to decide what happens.",
         homekitSetupIdLabel: "Setup ID",
         homekitPortLabel: "Port",
@@ -4802,7 +5199,7 @@
         pluginYoutubeDesktopLoginStartFailed: "Could not start desktop YouTube login.",
         pluginYoutubeLoginSessionExpired: "YouTube login session expired. Start the connection again.",
         pluginYoutubeLoginFailed: "YouTube login failed.",
-        pluginYoutubeLoginTimedOut: "YouTube login timed out before Lumio received the session.",
+        pluginYoutubeLoginTimedOut: "YouTube login timed out before Lumovi received the session.",
         pluginYoutubeMissingClientId: "Add a Google OAuth client ID first.",
         pluginYoutubeMissingPlaylistId: "Playlist ID is missing.",
         pluginYoutubeMissingChannelId: "Channel ID is missing.",
@@ -4810,7 +5207,7 @@
         ptScanSummary: "{updated} updated, {uptodate} already current, {failed} failed.",
         ptScanNoUpdates: "All plugins are on the latest version.",
         // Profile page (profilsida)
-        profKicker: "Lumio \xB7 Profile",
+        profKicker: "Lumovi \xB7 Profile",
         profYourProfile: "Your profile",
         profSince: "Since {date} \xB7 {movies} films \xB7 {series} series",
         profSwitch: "Switch profile",
@@ -4820,7 +5217,7 @@
         profTabGalaxy: "Taste galaxy",
         profTabDiary: "Film diary",
         profTabHunt: "Filmography hunt",
-        profTabWrapped: "Wrapped",
+        profTabWrapped: "Your Year in Lumovi",
         profTvHelp: "\u25C0 \u25B2 \u25BC \u25B6 Move \xB7 OK Select \xB7 Back Close",
         profEmptyFirstStar: "Watch your first film and the first star lights up.",
         profGalaxyLine: "{stars} stars, {constellations} constellations and {zones} dark zones",
@@ -4829,7 +5226,7 @@
         profSecondViewing: "Second time",
         profDiaryList: "Diary",
         profDiaryBook: "Autobiography",
-        profDiaryNote: "Written from what you watch in Lumio.",
+        profDiaryNote: "Written from what you watch in Lumovi.",
         profDiaryEmpty: "Nothing here yet.",
         profApprox: "Approximate",
         profChapters: "Chapters",
@@ -4865,7 +5262,7 @@
         profBadgeComplete: "Complete",
         profBadgeInOrder: "In order",
         profWrappedTeaser: "{h} hours.\nAnd more.",
-        profWrappedKicker: "Lumio Wrapped {year}",
+        profWrappedKicker: "Your Year in Lumovi {year}",
         profWrappedPlay: "Play your year \u2192",
         profMoreAboutYou: "More about you",
         profClose: "Close",
@@ -4899,7 +5296,7 @@
         profModClockDesc: "Weekday against time of day for everything you started. Pick a day to see your habits.",
         profModClockNote: "From start times in the diary",
         profModCapsuleTitle: "Send a film to the future",
-        profModCapsuleDesc: "Pick a film today. Lumio brings it back in a few years, together with today's diary page.",
+        profModCapsuleDesc: "Pick a film today. Lumovi brings it back in a few years, together with today's diary page.",
         profModCapsuleNote: "Opens on the home screen",
         profModRecordsTitle: "Your personal records",
         profModRecordsDesc: "Longest marathon, latest night and more. New records are marked when they fall.",
@@ -4955,7 +5352,7 @@
         profColorShareTitle: "Colour year {year}",
         profColorFilms: "{n} films",
         profColorEmpty: "No movies watched this year yet.",
-        profColorNoBarcodeNote: "Grey stripes = films without a barcode yet. Play them in Lumio to fill in the colour.",
+        profColorNoBarcodeNote: "Grey stripes = films without a barcode yet. Play them in Lumovi to fill in the colour.",
         profShareSaved: "Image saved.",
         profShareFailed: "Couldn't create the image.",
         profShareNoLan: "No network address found for the phone.",
@@ -5032,7 +5429,7 @@
         settingsPageProfilePage: "Profile page",
         settingsPagePairedPhones: "Paired phones",
         couchEyebrow: "COUCH MODE",
-        couchTitle: "Phones that control Lumio",
+        couchTitle: "Phones that control Lumovi",
         couchHint: "Your phone becomes a remote, shows info about what's playing and sends ratings to the profile's Trakt. Home network only.",
         couchPairNew: "Pair new phone",
         couchColPhone: "PHONE",
@@ -5041,11 +5438,11 @@
         couchBadgePwa: "PWA",
         couchBadgeAndroid: "ANDROID APP",
         couchSubPwa: "iPhone \xB7 launched from the home screen",
-        couchSubAndroid: "Lumio for Android \xB7 Feel the bass",
+        couchSubAndroid: "Lumovi for Android \xB7 Feel the bass",
         couchRemove: "Remove",
         couchCancel: "Cancel",
         couchRemoveConfirm: "Remove {name}? The phone stops working right away and has to be paired again with a new code.",
-        couchFootnote: "The profile decides whose Trakt account ratings and history go to. Feel the bass is only available on phones with Lumio for Android.",
+        couchFootnote: "The profile decides whose Trakt account ratings and history go to. Feel the bass is only available on phones with Lumovi for Android.",
         couchHapticsTitle: "Feel the bass",
         couchHapticsHint: "The phone vibrates in time with the film's bass hits. Moved here from Playback.",
         couchHapticsSensHint: "How faint the bass hits that count.",
@@ -5055,7 +5452,7 @@
         couchHapticsLegacy: "Re-pair with Couch mode to control Feel the bass here",
         couchHapticsLiveHint: "Strength and timing apply when Couch mode is open on the phone.",
         couchEmptyTitle: "No phones paired yet",
-        couchDialogInstr: "**Scan with the phone camera** and open the page \u2014 on iPhone, add it to the Home Screen. **Lumio app on Android:** open Couch mode, pick this computer and enter the code.",
+        couchDialogInstr: "**Scan with the phone camera** and open the page \u2014 on iPhone, add it to the Home Screen. **Lumovi app on Android:** open Couch mode, pick this computer and enter the code.",
         couchWaiting: "Waiting for the phone \u2026",
         couchClosesIn: "Closes in {time}",
         couchNewCode: "New code",
@@ -5087,20 +5484,21 @@
         couchTvEmptyHint: "No phones paired yet",
         ppWeatherGroup: "Weather in the diary",
         ppWeatherToggle: "Record the weather",
-        ppWeatherToggleDesc: "When a film ends, Lumio looks up the current weather for your town once (Open-Meteo, no account). Off: no lookups at all.",
+        ppWeatherToggleDesc: "When a film ends, Lumovi looks up the current weather for your town once (MET Norway, no account). Off: no lookups at all.",
         ppWeatherPlace: "Town",
         ppWeatherNoPlace: "No town chosen yet.",
         ppWeatherSearchPh: "e.g. Gothenburg",
         ppWeatherSearch: "Search",
         ppWeatherSearching: "Searching\u2026",
         ppWeatherNoResults: "No town found.",
+        ppWeatherMinChars: "Type at least 3 characters.",
         ppWeatherFailed: "The search failed. Check the connection and try again.",
-        ppWeatherCredit: "Weather data by Open-Meteo.com (CC BY 4.0).",
-        profWrKicker: "Lumio Wrapped \xB7 {year}",
+        ppWeatherCredit: "Weather data from MET Norway (CC BY 4.0). Place search \xA9 OpenStreetMap contributors (ODbL).",
+        profWrKicker: "Your Year in Lumovi \xB7 {year}",
         profWrSoFar: "so far this year",
         profWrPrev: "Previous",
         profWrNext: "Next",
-        profWrNotEnough: "Wrapped needs at least 10 sessions in {year}. Keep watching!",
+        profWrNotEnough: "Your Year in Lumovi needs at least 10 sessions in {year}. Keep watching!",
         profWrIntroTitle: "Your year\nin film.",
         profWrIntroBody: "{n} stars later. Tap to begin.",
         profWrIntroBodyTv: "{n} stars later. Press \u25B6 to begin.",
@@ -5167,7 +5565,7 @@
         langExport: "Export",
         langImport: "Import",
         langExportDone: "Language file saved.",
-        langImportNotJson: "That file is not a Lumio language file.",
+        langImportNotJson: "That file is not a Lumovi language file.",
         langImportFailed: "Could not import: {reason}",
         langImportDone: "{n} texts imported, {skipped} skipped (placeholders did not match English).",
         langResetOverrides: "Reset corrections ({n})",
@@ -5175,9 +5573,9 @@
         langRemoveCustom: "Remove this language",
         langMetadataFollowApp: "Same as the app ({locale})",
         bugLogPhoneTitle: "Get the log on your phone",
-        bugLogPhoneHint: "Scan with a phone or computer on the same network. The log downloads straight from this device while Lumio is running.",
+        bugLogPhoneHint: "Scan with a phone or computer on the same network. The log downloads straight from this device while Lumovi is running.",
         srcStreamSourceOnly: "Stream source",
-        srcStreamSourceOnlyHint: "Lumio asks this source for links on every title, but it has no catalogs. Remove it to stop its links from appearing.",
+        srcStreamSourceOnlyHint: "Lumovi asks this source for links on every title, but it has no catalogs. Remove it to stop its links from appearing.",
         tvRowsTab: "Rows",
         tvInterfaceEyebrow: "TV interface",
         // TV editor: collection rows & custom pages
@@ -5420,7 +5818,240 @@
         tvEdTitlesRowStation: "Titles in the row \xB7 pin or hide",
         tvEdTitlesRowTitle: "Titles in the row",
         tvEdTitlesRefNote: "The titles come from the row this one points to \u2014 pin or hide them there.",
-        tvEdTemplateEyebrow: "Template for the theme"
+        tvEdTemplateEyebrow: "Template for the theme",
+        ratingRate: "Rate",
+        ratingRateEpisode: "Rate episode",
+        ratingRated: "Rated {n}/10",
+        ratingEyebrow: "Your rating \xB7 Trakt",
+        ratingNone: "Not rated yet",
+        ratingValue: "{stars} stars \xB7 {n}/10",
+        ratingRemove: "Remove rating",
+        ratingSaveFailed: "Couldn't save to Trakt. Try again.",
+        ratingExpired: "Your Trakt sign-in has expired. Connect Trakt again in Settings.",
+        ratingHint: "Pick a star \u2014 each half is one point on Trakt's 1\u201310 scale.",
+        cwWidgetMinutesLeft: "{n} min left",
+        castSeenIn: "You've seen them in {titles}",
+        personSeenIn: "You've seen them in",
+        personSeenInSorted: "Most recently watched first",
+        vpNoSubtitleSources: "No subtitle source is set up. Add OpenSubtitles v3 under Settings \u2192 Sources, or an OpenSubtitles API key under Integrations.",
+        subtitleAttributionOs: "Subtitles from OpenSubtitles.com",
+        osErrRateLimited: "OpenSubtitles is getting too many requests right now \u2014 wait a few seconds and try again.",
+        osErrQuotaExceeded: "Today's download quota at OpenSubtitles is used up. Log in with your OpenSubtitles account for a larger quota, or try again tomorrow.",
+        osErrUnauthorized: "OpenSubtitles did not accept the key or the login. Check the API key, username and password.",
+        osErrMissingKey: "An OpenSubtitles API key is needed for this.",
+        osErrGeneric: "OpenSubtitles did not respond. Try again in a moment.",
+        osAddonTitle: "OpenSubtitles v3 addon",
+        osAddonSuggestTitle: "Subtitles: OpenSubtitles v3",
+        osAddonSuggestEyebrow: "Suggested",
+        osAddonHint: "A free Stremio subtitle addon \u2014 no account needed. Added like any other addon and removable at any time.",
+        osAddonAdded: "Added",
+        onboardingSubtitleAddonHint: "Lumovi has no built-in subtitle source. One click adds OpenSubtitles v3, a free addon that finds subtitles in most languages.",
+        osApiKeyLabel: "OpenSubtitles API key",
+        osApiKeyHint: "Optional. Your own key (free at opensubtitles.com \u2192 API consumers) searches the full OpenSubtitles catalogue and finds subtitles made for your exact file.",
+        osApiKeyHintAppKey: "Optional. Lumovi includes a key already; your own key replaces it.",
+        osKeyRemoved: "Key removed.",
+        osAccountTitle: "OpenSubtitles account",
+        osAccountHint: "Log in to download from your account's own daily quota. Only a login token is stored \u2014 never your password.",
+        osAccountNeedsKey: "Logging in needs an OpenSubtitles API key first.",
+        osUsername: "Username",
+        osPassword: "Password",
+        osLogin: "Log in",
+        osLoggingIn: "Logging in\u2026",
+        osLogout: "Log out",
+        osLoggedInAs: "Logged in as {name}",
+        osLoggedInQuota: "Logged in \u2014 {count} downloads per day.",
+        osTvPasswordHint: "Enter the username above first. The password logs in right away and is not stored.",
+        osTvPhoneLogin: "Log in from your phone",
+        osTvPhoneLoginHint: "Scan with your phone and enter your username and password there. The password only logs in and is never stored.",
+        osAttribution: "Subtitles from OpenSubtitles.com. Lumovi is not affiliated with OpenSubtitles or Stremio.",
+        settingsPageSupporter: "Supporter",
+        supporterTitle: "Support Lumovi",
+        supporterIntro: "Lumovi is free. Supporters on Patreon keep it going and unlock extras.",
+        supporterStatusLabel: "Status",
+        supporterStateTrial: "Free trial \u2014 {days} days left",
+        supporterStateSupporter: "Supporter",
+        supporterStatePlus: "Supporter Plus",
+        supporterStateFree: "Free",
+        supporterFreeDetail: "Everything you need to watch is free. Supporter unlocks the extras below.",
+        supporterTrialIncluded: "Your trial includes everything in Plus.",
+        supporterTrialStillPlus: "Plus from your trial for {days} more days",
+        supporterLifetime: "Lifetime",
+        supporterValidUntil: "Valid until {date}",
+        supporterSignedInAs: "Signed in as {name}",
+        supporterSourcePatreon: "via Patreon",
+        supporterSourceGift: "gift license",
+        supporterSourceCode: "campaign code",
+        supporterUnavailable: "Supporter status is unavailable right now.",
+        supporterLinkPatreon: "Sign in with Patreon",
+        supporterLinkPatreonDesc: "Opens lumovi.se in your browser. Sign in there and this device is linked.",
+        supporterLinkTvDesc: "Scan the code with your phone, or go to {url} and enter the code.",
+        supporterLinkBrowserDesc: "Finish signing in in the browser. If it did not open, go to {url} and enter the code.",
+        supporterLinkCodeLabel: "CODE",
+        supporterLinkStarting: "Getting a code\u2026",
+        supporterLinkWaiting: "Waiting for sign-in\u2026",
+        supporterLinkOpenAgain: "Open the page again",
+        supporterLinkCancel: "Cancel",
+        supporterLinkRetry: "New code",
+        supporterLinkDone: "Linked! Thank you for supporting Lumovi.",
+        supporterLinkExpired: "The code expired. Get a new one.",
+        supporterLinkDenied: "No active membership was found on that Patreon account.",
+        supporterLinkError: "Could not reach lumovi.se. Check the connection and try again.",
+        supporterRedeemTitle: "Redeem code or license",
+        supporterRedeemDesc: "Gift licenses (LMVG-\u2026) and campaign codes.",
+        supporterRedeemPlaceholder: "Code or license",
+        supporterRedeemButton: "Redeem",
+        supporterRedeemOk: "Redeemed \u2014 thank you!",
+        supporterRedeemInvalid: "That code is not valid.",
+        supporterRedeemRevoked: "That code has been revoked.",
+        supporterRedeemUsed: "That code has already been used.",
+        supporterRedeemExpired: "That code has expired.",
+        supporterRedeemDeviceLimit: "That code is already used on the maximum number of devices.",
+        supporterLogout: "Sign out",
+        supporterLogoutDesc: "Removes the supporter link from this device and frees its slot.",
+        supporterLogoutConfirm: "Sign out of Supporter on this device?",
+        supporterRefresh: "Check again",
+        supporterRefreshDesc: "Fetches your current level from lumovi.se.",
+        supporterRefreshLapsed: "Your membership has ended. Thank you for your support!",
+        supporterPatreonLink: "Become a supporter on Patreon",
+        supporterPatreonDesc: "patreon.com/Lumovi",
+        supporterUnlocksSupporter: "Supporter unlocks",
+        supporterUnlocksPlus: "Plus also unlocks",
+        supporterAlwaysFree: "Always free: playback, subtitle auto-sync, readable subtitles, picture-in-picture and AirPlay.",
+        supporterLockedTitle: "This is a supporter feature",
+        supporterLockedTitlePlus: "This is a Plus feature",
+        supporterLockedBody: "Everyone can try everything free for 14 days. After that, {feature} is unlocked for supporters on Patreon.",
+        supporterLockedBecome: "Become a supporter",
+        supporterLockedHaveCode: "I have a code",
+        supporterFeatThemes: "Themes",
+        supporterFeatCustomBackgrounds: "Custom backgrounds",
+        supporterFeatAvatarPacks: "Avatar packs",
+        supporterFeatCustomProfilePhoto: "Your own profile photo",
+        supporterFeatTvHomeRowsCustomize: "Customise the TV home rows",
+        supporterFeatCustomPages: "Custom pages",
+        supporterFeatCustomStartup: "Custom start screen",
+        supporterFeatExtraProfiles: "More than 3 profiles",
+        supporterFeatCouchMode: "Couch mode",
+        supporterFeatMovieBarcodes: "Movie barcodes",
+        supporterFeatPosterOfTheDay: "Poster of the day",
+        supporterFeatCinemaNight: "Cinema night",
+        supporterFeatFilmQuiz: "Film quiz",
+        supporterFeatYearInReview: "Year in review",
+        supporterFeatExtendedStats: "Extended statistics",
+        supporterFeatWatchDiaryWeather: "Weather in the watch diary",
+        supporterFeatMomentRow: "Moments row",
+        supporterFeatContinueFrames: "Scene frames in Continue watching",
+        supporterFeatTrickplay: "Seek previews (trickplay)",
+        supporterFeatSupporterBadge: "Supporter badge",
+        supporterFeatPlayerLayoutEditor: "Player layout editor",
+        supporterFeatClipExport: "Clip export",
+        supporterFeatSportsMode: "Sports mode",
+        supporterFeatHrtf: "Binaural sound (HRTF)",
+        supporterFeatDualSubtitles: "Dual subtitles",
+        supporterFeatLearnedSkip: "Learned intro skipping",
+        supporterFeatLiveTvRecording: "Live TV recording",
+        // Egen TMDB-nyckel: guide, banner och autodetektering (lib/tmdb-key).
+        tkBannerText: "Add your free TMDB key to see posters and information",
+        tkBannerButton: "Show the guide",
+        tkLater: "Later",
+        tkDismiss: "Hide",
+        tkPromptTitle: "Lumovi needs your TMDB key",
+        tkPromptBody: "Posters, descriptions and rows come from TMDB. Lumovi can no longer ship a shared key, so everyone adds their own \u2014 it is free and takes a couple of minutes. Your library, Live TV and playback work without it.",
+        tkGuideTitle: "Your free TMDB key",
+        tkGuideIntro: "TMDB (The Movie Database) provides posters, descriptions and rows. A key for personal use is free.",
+        tkStep1: "Create a free account on themoviedb.org and sign in.",
+        tkStep2: "Go to Account settings \u2192 API (themoviedb.org/settings/api).",
+        tkStep3: 'Copy the "API Key" shown there.',
+        tkStep4: "Paste it below.",
+        tkOpenSite: "Open TMDB\u2019s API page",
+        tkInputLabel: "TMDB token or key",
+        tkCheck: "Check and save",
+        tkChecking: "Checking\u2026",
+        tkValid: "The key works and is saved.",
+        tkInvalid: "TMDB did not accept the key. Make sure you copied all of it.",
+        tkFormat: "That does not look like a TMDB key. The token starts with eyJ; the v3 key is 32 characters.",
+        tkUnreachable: "TMDB did not respond right now. Check the connection and try again.",
+        tkStorage: "The key works but could not be saved.",
+        tkActive: "Your own TMDB key is active.",
+        tkMissing: "No TMDB key yet.",
+        tkReplace: "Replace the key",
+        tkRemove: "Remove the key",
+        tkTvScanSite: "Open TMDB on your phone",
+        tkTvScanSiteHint: "Scan to create the account and the key on your phone.",
+        tkTvScanLan: "Paste the key from your phone",
+        tkAddonViaPhone: "Paste the link from your phone",
+        tkTvType: "Type the key with the remote",
+        tkAttribution: "This product uses the TMDB API but is not endorsed or certified by TMDB.",
+        tkFoundTitle: "Found a TMDB key",
+        tkFoundBody: "Found a TMDB key in your addon {source} \u2014 use it?",
+        tkFoundChecked: "Checked against TMDB \u2014 it works.",
+        tkFoundUse: "Use the key",
+        tkFoundSkip: "No thanks",
+        tkAioTitle: "Get the TMDB key from {source}?",
+        tkAioBody: "Your {source} configuration may hold a TMDB key, but it is encrypted in the link. Enter your {source} password once and Lumovi fetches it. The password is not stored.",
+        tkAioPassword: "Password",
+        tkAioFetch: "Get the key",
+        tkAioFetching: "Fetching\u2026",
+        tkAioAuth: "Wrong password, or the instance does not recognise this user.",
+        tkAioEmpty: "Your {source} configuration has no TMDB key of its own \u2014 the instance uses its own. Create your key with the guide instead.",
+        tkAioNetwork: "Could not reach {source}.",
+        tkAioRateLimited: "Wait a moment before trying again.",
+        tkAioNotFound: "The instance could not find your configuration.",
+        tkAddonTitle: "Already have a TMDB key in an add-on?",
+        tkAddonDesc: "Paste the add-on link here and we'll fetch your key.",
+        tkAddonLinkLabel: "Add-on link (stremio:// or \u2026/manifest.json)",
+        tkAddonFetch: "Fetch key",
+        tkAddonWorking: "Checking the link\u2026",
+        tkAddonSaved: "Key from {source} saved.",
+        tkAddonNoKey: "No TMDB key in that link \u2014 create a free one below.",
+        tkAddonBadLink: "That doesn't look like an add-on link.",
+        tkAddonRejected: "The key in {source} was not accepted by TMDB \u2014 create your own below.",
+        tkAddonPassword: "Your {source} password \u2014 used once and never saved",
+        tkAddonPasswordStep: "Added a TMDB key in {source}? Enter your password and we'll fetch it.",
+        tkAddonPasswordNote: "Used once and never saved.",
+        tkAddonInstalled: "{source} was also added under Sources.",
+        tkAddonTvPhone: 'Long link? Scan "Paste the key from your phone" below \u2014 the same shortcut is there, and what you paste on the phone is saved on this TV.',
+        tkAioInvalidKey: "TMDB did not accept the key from {source}.",
+        tkOpenGuide: "Open the guide",
+        tkClose: "Close",
+        tkOnboardingEyebrow: "Metadata",
+        tkOnboardingTitle: "Add your TMDB key",
+        tkOnboardingDesc: "Posters, descriptions and rows come from TMDB. The key is free \u2014 the guide takes a couple of minutes.",
+        tkOnboardingRail: "TMDB key",
+        tkOnboardingSkip: "You can skip this step and add the key later under Settings \u2192 Integrations \u2192 TMDb. Library, Live TV and playback work without it.",
+        tkSumLabel: "TMDB",
+        tkSumAdded: "Own key added",
+        tkSumMissing: "No key \u2014 add one later",
+        tkSettingsHint: "Paste a token or a v3 key \u2014 Lumovi checks it with TMDB and stores the right kind automatically.",
+        profilePhotoLabel: "Profile photo",
+        profilePhotoUpload: "Upload photo",
+        profilePhotoChange: "Change photo",
+        profilePhotoRemove: "Remove photo",
+        profilePhotoHint: "Your own photo replaces the avatar. It is stored on this device only.",
+        profilePhotoKeptLocked: "Your photo is kept and shows again when you become a supporter.",
+        profilePhotoCropTitle: "Crop photo",
+        profilePhotoCropHint: "Drag to move the photo, zoom with the slider.",
+        profilePhotoZoom: "Zoom",
+        profilePhotoSave: "Use photo",
+        profilePhotoSaving: "Saving\u2026",
+        profilePhotoUnreadable: "This image format can't be read here. Try a JPEG or PNG.",
+        profilePhotoTooLarge: "The image is too large.",
+        profilePhotoFailed: "Couldn't save the photo.",
+        profilePhotoFromPhone: "Photo from your phone",
+        profilePhotoFromPhoneHint: "Scan the code with your phone (same Wi-Fi) and pick a photo \u2014 it lands here on the TV.",
+        profilePhotoWaiting: "Waiting for the photo\u2026",
+        profilePhotoReceived: "Photo received.",
+        profilePhotoExpired: "The code has expired.",
+        profilePhotoNewCode: "New code",
+        profilePhotoNoLan: "Couldn't find the TV's network address. Check that it's on Wi-Fi or Ethernet.",
+        profilePhotoSet: "Own photo",
+        profilePhotoNone: "None",
+        avatarPackAnimals: "Animals",
+        avatarPackGenre: "Genres",
+        avatarPackCinema: "Cinema",
+        avatarPackMonster: "Monsters",
+        avatarPackRetro: "Retro",
+        avatarPackAbstract: "Abstract",
+        avatarPackLockedHint: "Avatars with a lock are for supporters. A chosen avatar is kept and comes back when you support."
       };
     }
   });
@@ -5448,11 +6079,15 @@
     if (typeof window === "undefined") return null;
     return window.__lumioLang ?? null;
   }
+  function windowsDesktop() {
+    if (windowsDesktopCache === null) windowsDesktopCache = isWindowsDesktop();
+    return windowsDesktopCache;
+  }
   function lookup(lang, key) {
     const current2 = loaded();
     const pack = lang !== "en" && current2?.lang === lang ? current2.pack : null;
     const base = en;
-    if (isWindowsDesktop()) {
+    if (windowsDesktop()) {
       const variant = pack?.[`${key}Windows`] ?? base[`${key}Windows`];
       if (variant) return variant;
     }
@@ -5503,7 +6138,7 @@
     if (!detached) return ctx;
     return detachedValue;
   }
-  var BUILTIN_LANGS, detachedLangContextValue, LangContext, LANG_CHANGED_EVENT, STORAGE_KEY2, DEFAULT_LANG, LANG_PACK_EVENT;
+  var BUILTIN_LANGS, windowsDesktopCache, detachedLangContextValue, LangContext, LANG_CHANGED_EVENT, STORAGE_KEY2, DEFAULT_LANG, LANG_PACK_EVENT;
   var init_i18n = __esm({
     "lib/i18n.tsx"() {
       "use strict";
@@ -5515,6 +6150,7 @@
       init_en();
       init_jsx_runtime_shim();
       BUILTIN_LANGS = ["en", "sv", "de", "fr", "es"];
+      windowsDesktopCache = null;
       detachedLangContextValue = {
         lang: "en",
         setLang: () => {
@@ -5535,10 +6171,18 @@
     }
   });
 
+  // lib/source-hints.ts
+  var init_source_hints = __esm({
+    "lib/source-hints.ts"() {
+      init_app_storage();
+    }
+  });
+
   // lib/parallel-ranges.ts
   var init_parallel_ranges = __esm({
     "lib/parallel-ranges.ts"() {
       init_app_storage();
+      init_source_hints();
     }
   });
 
@@ -5573,12 +6217,577 @@
     }
   });
 
+  // lib/custom-themes.ts
+  function getCustomThemes() {
+    try {
+      const raw = getScopedStorageItem(LIST_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((t) => Boolean(t && typeof t === "object" && typeof t.id === "string" && t.colors));
+    } catch {
+      return [];
+    }
+  }
+  function getActiveCustomThemeId() {
+    return getScopedStorageItem(ACTIVE_KEY) ?? "";
+  }
+  function hexToTriplet(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+    if (!m) return null;
+    const n = parseInt(m[1], 16);
+    return `${n >> 16 & 255} ${n >> 8 & 255} ${n & 255}`;
+  }
+  function shade(hex, pct2) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+    if (!m) return null;
+    const n = parseInt(m[1], 16);
+    const target = pct2 >= 0 ? 255 : 0;
+    const p = Math.abs(pct2);
+    const ch = (v) => Math.round(v + (target - v) * p);
+    return `${ch(n >> 16 & 255)} ${ch(n >> 8 & 255)} ${ch(n & 255)}`;
+  }
+  function applyCustomThemeVars(theme) {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    let styleTag = document.getElementById(STYLE_TAG_ID);
+    if (!theme) {
+      for (const name of ALL_VAR_NAMES) root.style.removeProperty(name);
+      styleTag?.remove();
+      return;
+    }
+    for (const [name, value] of TRIPLET_VARS(theme.colors)) {
+      if (value) root.style.setProperty(name, value);
+    }
+    for (const [name, value] of HEX_VARS(theme.colors)) {
+      root.style.setProperty(name, value);
+    }
+    if (theme.css.trim()) {
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.id = STYLE_TAG_ID;
+        document.head.appendChild(styleTag);
+      }
+      styleTag.textContent = theme.css;
+    } else {
+      styleTag?.remove();
+    }
+  }
+  var LIST_KEY, ACTIVE_KEY, STYLE_TAG_ID, TRIPLET_VARS, HEX_VARS, ALL_VAR_NAMES;
+  var init_custom_themes = __esm({
+    "lib/custom-themes.ts"() {
+      "use client";
+      init_profile_storage_shim();
+      LIST_KEY = "custom_themes";
+      ACTIVE_KEY = "custom_theme_active";
+      STYLE_TAG_ID = "lumio-custom-theme-css";
+      TRIPLET_VARS = (c) => [
+        ["--mesh-0", hexToTriplet(c.bg)],
+        ["--mesh-1", shade(c.bg, 0.06)],
+        ["--mesh-2", shade(c.bg, -0.3)],
+        ["--base-950", hexToTriplet(c.bg)],
+        ["--base-900", hexToTriplet(c.surface)],
+        ["--base-850", shade(c.surface, 0.05)],
+        ["--base-800", hexToTriplet(c.elevated)],
+        ["--tone-950", hexToTriplet(c.bg)],
+        ["--tone-900", hexToTriplet(c.surface)],
+        ["--tone-800", hexToTriplet(c.elevated)],
+        ["--accent-400", shade(c.accent, 0.18)],
+        ["--accent-500", hexToTriplet(c.accent)],
+        ["--accent-600", shade(c.accent, -0.15)]
+      ];
+      HEX_VARS = (c) => [
+        ["--tk-bg", c.bg],
+        ["--tk-surface0", c.surface],
+        ["--tk-surface1", c.surface],
+        ["--tk-surface2", c.elevated],
+        ["--tk-surface3", c.elevated],
+        ["--tk-border", c.border],
+        ["--tk-border-strong", c.border]
+      ];
+      ALL_VAR_NAMES = [
+        "--mesh-0",
+        "--mesh-1",
+        "--mesh-2",
+        "--base-950",
+        "--base-900",
+        "--base-850",
+        "--base-800",
+        "--tone-950",
+        "--tone-900",
+        "--tone-800",
+        "--accent-400",
+        "--accent-500",
+        "--accent-600",
+        "--tk-bg",
+        "--tk-surface0",
+        "--tk-surface1",
+        "--tk-surface2",
+        "--tk-surface3",
+        "--tk-border",
+        "--tk-border-strong"
+      ];
+    }
+  });
+
+  // lib/supporter/gate.ts
+  function isFeatureLocked(feature) {
+    if (getSupporterStatusSnapshot() === null) return false;
+    return !hasFeature(feature);
+  }
+  var RELOAD_MS;
+  var init_gate = __esm({
+    "lib/supporter/gate.ts"() {
+      init_store();
+      RELOAD_MS = 30 * 6e4;
+    }
+  });
+
+  // lib/appearance-settings.ts
+  var appearance_settings_exports = {};
+  __export(appearance_settings_exports, {
+    ACCENT_PRESETS: () => ACCENT_PRESETS,
+    CARD_RADIUS_OPTIONS: () => CARD_RADIUS_OPTIONS,
+    CORNER_SCALE_OPTIONS: () => CORNER_SCALE_OPTIONS,
+    FONT_PAIRS: () => FONT_PAIRS,
+    MENU_SCALE_OPTIONS: () => MENU_SCALE_OPTIONS,
+    TRAILER_OVERRIDE_KEYS: () => TRAILER_OVERRIDE_KEYS,
+    TV_BUTTON_SCALE_OPTIONS: () => TV_BUTTON_SCALE_OPTIONS,
+    TV_FONT_SCALE_OPTIONS: () => TV_FONT_SCALE_OPTIONS,
+    TV_MENU_SCALE_OPTIONS: () => TV_MENU_SCALE_OPTIONS,
+    UI_SCALE_OPTIONS: () => UI_SCALE_OPTIONS,
+    applyAppearance: () => applyAppearance,
+    getAccent: () => getAccent,
+    getAppTheme: () => getAppTheme,
+    getCardRadius: () => getCardRadius,
+    getCardSheen: () => getCardSheen,
+    getCornerScale: () => getCornerScale,
+    getFontPair: () => getFontPair,
+    getHeroActionsExpanded: () => getHeroActionsExpanded,
+    getMenuScale: () => getMenuScale,
+    getPerformanceMode: () => getPerformanceMode,
+    getReduceMotion: () => getReduceMotion,
+    getTvButtonScale: () => getTvButtonScale,
+    getTvFontScale: () => getTvFontScale,
+    getTvHeroFull: () => getTvHeroFull,
+    getTvMenuScale: () => getTvMenuScale,
+    getTvMenuVariant: () => getTvMenuVariant,
+    getUiScale: () => getUiScale,
+    getVhsCardsMode: () => getVhsCardsMode,
+    isPerformanceModeExplicit: () => isPerformanceModeExplicit,
+    notePerformanceModeDefault: () => notePerformanceModeDefault,
+    onAppearanceChanged: () => onAppearanceChanged,
+    setAccent: () => setAccent,
+    setAppTheme: () => setAppTheme,
+    setCardRadius: () => setCardRadius,
+    setCardSheen: () => setCardSheen,
+    setCornerScale: () => setCornerScale,
+    setFontPair: () => setFontPair,
+    setHeroActionsExpanded: () => setHeroActionsExpanded,
+    setMenuScale: () => setMenuScale,
+    setPerformanceMode: () => setPerformanceMode,
+    setReduceMotion: () => setReduceMotion,
+    setTvButtonScale: () => setTvButtonScale,
+    setTvFontScale: () => setTvFontScale,
+    setTvHeroFull: () => setTvHeroFull,
+    setTvMenuScale: () => setTvMenuScale,
+    setTvMenuVariant: () => setTvMenuVariant,
+    setUiScale: () => setUiScale,
+    setVhsCardsMode: () => setVhsCardsMode,
+    startAppearance: () => startAppearance
+  });
+  function getAppTheme() {
+    if (typeof window === "undefined") return "pitch";
+    const raw = getScopedStorageItem(THEME_KEY);
+    return raw === "midnight" || raw === "system" || raw === "custom" ? raw : "pitch";
+  }
+  function setAppTheme(value) {
+    setScopedStorageItem(THEME_KEY, value);
+    applyAppearance();
+    emitChanged();
+  }
+  function getMenuScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(MENU_SCALE_KEY));
+    return MENU_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setMenuScale(value) {
+    setScopedStorageItem(MENU_SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getTvFontScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(TV_FONT_SCALE_KEY));
+    return TV_FONT_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setTvFontScale(value) {
+    setScopedStorageItem(TV_FONT_SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getTvMenuScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(TV_MENU_SCALE_KEY));
+    return TV_MENU_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setTvMenuScale(value) {
+    setScopedStorageItem(TV_MENU_SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getTvButtonScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(TV_BUTTON_SCALE_KEY));
+    return TV_BUTTON_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setTvButtonScale(value) {
+    setScopedStorageItem(TV_BUTTON_SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getTvMenuVariant() {
+    if (typeof window === "undefined") return "pill";
+    return getScopedStorageItem(TV_MENU_VARIANT_KEY) === "rail" ? "rail" : "pill";
+  }
+  function setTvMenuVariant(value) {
+    setScopedStorageItem(TV_MENU_VARIANT_KEY, value);
+    applyAppearance();
+    emitChanged();
+  }
+  function getCornerScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(CORNER_SCALE_KEY));
+    return CORNER_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setCornerScale(value) {
+    setScopedStorageItem(CORNER_SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getUiScale() {
+    if (typeof window === "undefined") return 100;
+    const raw = Number(getScopedStorageItem(SCALE_KEY));
+    return UI_SCALE_OPTIONS.includes(raw) ? raw : 100;
+  }
+  function setUiScale(value) {
+    setScopedStorageItem(SCALE_KEY, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function getReduceMotion() {
+    if (typeof window === "undefined") return false;
+    return getScopedStorageItem(MOTION_KEY) === "1";
+  }
+  function getPerformanceMode() {
+    if (typeof window === "undefined") return false;
+    const stored = getScopedStorageItem(PERF_KEY);
+    if (stored === "1") return true;
+    if (stored === "0") return false;
+    return perfDefault && document.documentElement.getAttribute("data-tv") === "1";
+  }
+  function isPerformanceModeExplicit() {
+    if (typeof window === "undefined") return false;
+    return getScopedStorageItem(PERF_KEY) === "1";
+  }
+  function notePerformanceModeDefault(tight) {
+    if (perfDefault === tight) return;
+    perfDefault = tight;
+    if (getScopedStorageItem(PERF_KEY) == null) {
+      applyAppearance();
+      emitChanged();
+    }
+  }
+  function clearTrailerOverrides() {
+    for (const key of Object.values(TRAILER_OVERRIDE_KEYS)) removeScopedStorageItem(key);
+  }
+  function setPerformanceMode(value) {
+    if (value && !getPerformanceMode()) clearTrailerOverrides();
+    setScopedStorageItem(PERF_KEY, value ? "1" : "0");
+    applyAppearance();
+    emitChanged();
+  }
+  function getCardSheen() {
+    if (typeof window === "undefined") return true;
+    return getScopedStorageItem(SHEEN_KEY) !== "0";
+  }
+  function setCardSheen(value) {
+    setScopedStorageItem(SHEEN_KEY, value ? "1" : "0");
+    applyAppearance();
+    emitChanged();
+  }
+  function getVhsCardsMode() {
+    if (typeof window === "undefined") return "off";
+    const value = getScopedStorageItem(VHS_KEY);
+    if (value === "1" || value === "focus") return "focus";
+    return value === "shelf" ? "shelf" : "off";
+  }
+  function setVhsCardsMode(value) {
+    setScopedStorageItem(VHS_KEY, value);
+    applyAppearance();
+    emitChanged();
+  }
+  function setReduceMotion(value) {
+    if (value && !getReduceMotion()) clearTrailerOverrides();
+    setScopedStorageItem(MOTION_KEY, value ? "1" : "0");
+    applyAppearance();
+    emitChanged();
+  }
+  function getHeroActionsExpanded() {
+    if (typeof window === "undefined") return false;
+    return getScopedStorageItem(HERO_ACTIONS_KEY) === "1";
+  }
+  function setHeroActionsExpanded(value) {
+    setScopedStorageItem(HERO_ACTIONS_KEY, value ? "1" : "0");
+    applyAppearance();
+    emitChanged();
+  }
+  function getTvHeroFull() {
+    if (typeof window === "undefined") return false;
+    return getScopedStorageItem(TV_HERO_FULL_KEY) === "1";
+  }
+  function setTvHeroFull(value) {
+    setScopedStorageItem(TV_HERO_FULL_KEY, value ? "1" : "0");
+    applyAppearance();
+    emitChanged();
+  }
+  function getAccent() {
+    if (typeof window === "undefined") return "sunset";
+    const raw = getScopedStorageItem(ACCENT_KEY);
+    return raw && raw in ACCENT_PRESETS ? raw : "sunset";
+  }
+  function setAccent(value) {
+    setScopedStorageItem(ACCENT_KEY, value);
+    applyAppearance();
+    emitChanged();
+  }
+  function getFontPair() {
+    if (typeof window === "undefined") return "lumio";
+    const raw = getScopedStorageItem(FONT_KEY);
+    return raw && raw in FONT_PAIRS ? raw : "lumio";
+  }
+  function setFontPair(value) {
+    setScopedStorageItem(FONT_KEY, value);
+    applyAppearance();
+    emitChanged();
+  }
+  function getCardRadius() {
+    if (typeof window === "undefined") return 8;
+    const storedV2 = getScopedStorageItem(RADIUS_KEY_V2);
+    const stored = storedV2 ?? (() => {
+      const legacy = getScopedStorageItem(RADIUS_KEY);
+      return legacy && legacy !== "0" ? legacy : null;
+    })();
+    if (stored == null || stored === "") return 8;
+    const raw = Number(stored);
+    return CARD_RADIUS_OPTIONS.includes(raw) ? raw : 8;
+  }
+  function setCardRadius(value) {
+    setScopedStorageItem(RADIUS_KEY_V2, String(value));
+    applyAppearance();
+    emitChanged();
+  }
+  function emitChanged() {
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENT2));
+  }
+  function onAppearanceChanged(listener) {
+    if (typeof window === "undefined") return () => {
+    };
+    window.addEventListener(EVENT2, listener);
+    return () => window.removeEventListener(EVENT2, listener);
+  }
+  function resolveTheme(theme) {
+    if (theme === "custom") return "midnight";
+    if (theme !== "system") return theme;
+    if (typeof window === "undefined" || !window.matchMedia) return "midnight";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "pitch" : "midnight";
+  }
+  function applyAppearance() {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const themesLocked = isFeatureLocked("themes");
+    const storedTheme = getAppTheme();
+    const theme = themesLocked && storedTheme === "custom" ? "pitch" : storedTheme;
+    const accentId = themesLocked ? "sunset" : getAccent();
+    const resolved = resolveTheme(theme);
+    if (resolved === "pitch") root.dataset.theme = "pitch";
+    else delete root.dataset.theme;
+    const scale = getUiScale();
+    root.style.fontSize = "";
+    if (scale === 100) root.style.removeProperty("--ui-scale");
+    else root.style.setProperty("--ui-scale", String(scale / 100));
+    const menuScale = getMenuScale();
+    if (menuScale === 100) root.style.removeProperty("--menu-scale");
+    else root.style.setProperty("--menu-scale", String(menuScale / 100));
+    const tvFontScale = getTvFontScale();
+    if (tvFontScale === 100) root.style.removeProperty("--tv-font-scale");
+    else root.style.setProperty("--tv-font-scale", String(tvFontScale / 100));
+    const tvMenuScale = getTvMenuScale();
+    if (tvMenuScale === 100) root.style.removeProperty("--tv-menu-scale");
+    else root.style.setProperty("--tv-menu-scale", String(tvMenuScale / 100));
+    const tvButtonScale = getTvButtonScale();
+    if (tvButtonScale === 100) {
+      root.style.removeProperty("--tv-button-scale");
+      delete root.dataset.tvButtonScale;
+    } else {
+      root.style.setProperty("--tv-button-scale", String(tvButtonScale / 100));
+      root.dataset.tvButtonScale = String(tvButtonScale);
+    }
+    const cornerScale = getCornerScale();
+    if (cornerScale === 100) root.style.removeProperty("--corner-scale");
+    else root.style.setProperty("--corner-scale", String(cornerScale / 100));
+    if (getReduceMotion()) root.dataset.reduceMotion = "1";
+    else delete root.dataset.reduceMotion;
+    if (getPerformanceMode()) root.dataset.perf = "1";
+    else delete root.dataset.perf;
+    if (getCardSheen()) delete root.dataset.cardSheen;
+    else root.dataset.cardSheen = "0";
+    const vhs = getVhsCardsMode();
+    if (vhs === "off") delete root.dataset.vhs;
+    else root.dataset.vhs = vhs;
+    if (getHeroActionsExpanded()) root.dataset.heroActionLabels = "open";
+    else delete root.dataset.heroActionLabels;
+    if (getTvHeroFull()) root.dataset.tvHeroFull = "1";
+    else delete root.dataset.tvHeroFull;
+    if (theme === "custom") {
+      const active2 = getCustomThemes().find((theme2) => theme2.id === getActiveCustomThemeId());
+      applyCustomThemeVars(active2 ?? null);
+    } else {
+      applyCustomThemeVars(null);
+    }
+    const pair = FONT_PAIRS[getFontPair()];
+    if (getFontPair() === "lumio") {
+      root.style.removeProperty("--font-sans");
+      root.style.removeProperty("--font-display");
+    } else {
+      root.style.setProperty("--font-sans", pair.sans);
+      root.style.setProperty("--font-display", pair.display);
+    }
+    const radius = getCardRadius();
+    if (radius === 8) root.style.removeProperty("--card-radius");
+    else root.style.setProperty("--card-radius", `${radius}px`);
+    const accent = ACCENT_PRESETS[accentId];
+    const [a400, a500, a600] = accent.shades;
+    if (accentId === "sunset") {
+      root.style.removeProperty("--accent-400");
+      root.style.removeProperty("--accent-500");
+      root.style.removeProperty("--accent-600");
+    } else {
+      root.style.setProperty("--accent-400", a400);
+      root.style.setProperty("--accent-500", a500);
+      root.style.setProperty("--accent-600", a600);
+    }
+  }
+  function startAppearance() {
+    if (typeof window === "undefined") return;
+    applyAppearance();
+    if (systemWatcherStarted || !window.matchMedia) return;
+    systemWatcherStarted = true;
+    subscribeSupporterStatus(() => applyAppearance());
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (getAppTheme() === "system") applyAppearance();
+    });
+  }
+  var THEME_KEY, SCALE_KEY, MOTION_KEY, PERF_KEY, SHEEN_KEY, VHS_KEY, ACCENT_KEY, FONT_KEY, RADIUS_KEY, RADIUS_KEY_V2, EVENT2, UI_SCALE_OPTIONS, MENU_SCALE_KEY, MENU_SCALE_OPTIONS, TV_FONT_SCALE_KEY, TV_FONT_SCALE_OPTIONS, TV_MENU_SCALE_KEY, TV_MENU_SCALE_OPTIONS, TV_BUTTON_SCALE_KEY, TV_BUTTON_SCALE_OPTIONS, TV_MENU_VARIANT_KEY, CORNER_SCALE_KEY, CORNER_SCALE_OPTIONS, perfDefault, TRAILER_OVERRIDE_KEYS, HERO_ACTIONS_KEY, TV_HERO_FULL_KEY, ACCENT_PRESETS, FONT_PAIRS, CARD_RADIUS_OPTIONS, systemWatcherStarted;
+  var init_appearance_settings = __esm({
+    "lib/appearance-settings.ts"() {
+      "use strict";
+      "use client";
+      init_profile_storage_shim();
+      init_custom_themes();
+      init_gate();
+      THEME_KEY = "appearance_theme_v2";
+      SCALE_KEY = "appearance_ui_scale";
+      MOTION_KEY = "appearance_reduce_motion";
+      PERF_KEY = "appearance_performance_mode";
+      SHEEN_KEY = "appearance_card_sheen";
+      VHS_KEY = "appearance_vhs_cards";
+      ACCENT_KEY = "appearance_accent";
+      FONT_KEY = "appearance_font_pair";
+      RADIUS_KEY = "appearance_card_radius";
+      RADIUS_KEY_V2 = "appearance_card_radius_v2";
+      EVENT2 = "lumio-appearance-changed";
+      UI_SCALE_OPTIONS = [75, 85, 90, 100, 110, 125, 140, 150];
+      MENU_SCALE_KEY = "appearance_menu_scale";
+      MENU_SCALE_OPTIONS = [70, 80, 90, 100];
+      TV_FONT_SCALE_KEY = "appearance_tv_font_scale";
+      TV_FONT_SCALE_OPTIONS = [90, 100, 110, 120, 135];
+      TV_MENU_SCALE_KEY = "appearance_tv_menu_scale";
+      TV_MENU_SCALE_OPTIONS = [100, 115, 130, 150];
+      TV_BUTTON_SCALE_KEY = "appearance_tv_button_scale";
+      TV_BUTTON_SCALE_OPTIONS = [80, 90, 100, 115, 130, 150];
+      TV_MENU_VARIANT_KEY = "appearance_tv_menu_variant";
+      CORNER_SCALE_KEY = "appearance_corner_scale";
+      CORNER_SCALE_OPTIONS = [100, 115, 130, 150];
+      perfDefault = false;
+      TRAILER_OVERRIDE_KEYS = {
+        hero: "hero_trailer_over_appearance",
+        details: "details_trailer_over_appearance"
+      };
+      HERO_ACTIONS_KEY = "appearance_hero_actions_expanded";
+      TV_HERO_FULL_KEY = "appearance_tv_hero_full";
+      ACCENT_PRESETS = {
+        sunset: { label: "Sunset", shades: ["247 178 103", "244 132 95", "231 111 81"] },
+        ocean: { label: "Ocean", shades: ["96 165 250", "59 130 246", "37 99 235"] },
+        aurora: { label: "Aurora", shades: ["167 139 250", "139 92 246", "124 58 237"] },
+        mint: { label: "Mint", shades: ["52 211 153", "16 185 129", "5 150 105"] },
+        ruby: { label: "Ruby", shades: ["248 113 113", "239 68 68", "220 38 38"] },
+        gold: { label: "Gold", shades: ["251 191 36", "245 158 11", "217 119 6"] }
+      };
+      FONT_PAIRS = {
+        lumio: { label: "Lumovi", sans: "'Avenir Next', 'Segoe UI Variable', 'Segoe UI', 'Trebuchet MS', sans-serif", display: "Georgia, 'Times New Roman', serif" },
+        system: { label: "System", sans: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", display: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
+        classic: { label: "Klassisk", sans: "'Helvetica Neue', Helvetica, Arial, sans-serif", display: "Didot, 'Bodoni 72', 'Bodoni MT', Georgia, serif" },
+        editorial: { label: "Editorial", sans: "Palatino, 'Palatino Linotype', Georgia, serif", display: "Palatino, 'Palatino Linotype', Georgia, serif" },
+        mono: { label: "Terminal", sans: "'SF Mono', Menlo, Monaco, Consolas, monospace", display: "'SF Mono', Menlo, Monaco, Consolas, monospace" }
+      };
+      CARD_RADIUS_OPTIONS = [0, 8, 12, 18];
+      systemWatcherStarted = false;
+    }
+  });
+
   // lib/tauri-native-player.ts
-  var isAndroidTauriEnv;
+  async function np(cmd, timeoutMs) {
+    const controller = timeoutMs ? new AbortController() : null;
+    const timer2 = controller ? window.setTimeout(() => controller.abort(), timeoutMs) : void 0;
+    try {
+      const res = await fetch("/api/native-player", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(cmd),
+        signal: controller?.signal
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    } finally {
+      if (timer2 !== void 0) window.clearTimeout(timer2);
+    }
+  }
+  async function getDeviceCapabilities() {
+    if (!isAndroidTauriEnv) return null;
+    if (deviceCapsCache) return deviceCapsCache;
+    if (!deviceCapsPromise) {
+      deviceCapsPromise = np({ cmd: "getCapabilities" }).then((value) => {
+        const caps = value;
+        if (caps && typeof caps.dolbyVision === "boolean") deviceCapsCache = caps;
+        if (deviceCapsCache && typeof deviceCapsCache.tightMemory === "boolean") {
+          const tight = deviceCapsCache.tightMemory;
+          noteTightDevice(tight);
+          void Promise.resolve().then(() => (init_appearance_settings(), appearance_settings_exports)).then((m) => m.notePerformanceModeDefault(tight)).catch(() => {
+          });
+        }
+        return deviceCapsCache;
+      });
+    }
+    return deviceCapsPromise;
+  }
+  var isAndroidTauriEnv, deviceCapsCache, deviceCapsPromise;
   var init_tauri_native_player = __esm({
     "lib/tauri-native-player.ts"() {
       "use strict";
       init_parallel_ranges();
+      init_source_hints();
       init_timing();
       init_react_shim();
       init_tauri_mpv();
@@ -5586,6 +6795,9 @@
       init_android_source_cache();
       init_android_direct_stream();
       isAndroidTauriEnv = isTauriEnv && typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+      deviceCapsCache = null;
+      deviceCapsPromise = null;
+      if (isAndroidTauriEnv) void getDeviceCapabilities();
     }
   });
 
@@ -5595,13 +6807,14 @@
     "lib/player-layout.ts"() {
       "use client";
       init_profile_storage_shim();
+      init_gate();
       DESKTOP_CHROME_QUERY = "(min-width: 768px) and (min-height: 520px)";
     }
   });
 
   // lib/pip.ts
   function notify() {
-    for (const fn of listeners) fn();
+    for (const fn of listeners2) fn();
   }
   function isTvDocument() {
     if (typeof document === "undefined") return false;
@@ -5653,7 +6866,7 @@
     }
     return false;
   }
-  var backendOverride, current, active, listeners;
+  var backendOverride, current, active, listeners2;
   var init_pip = __esm({
     "lib/pip.ts"() {
       "use strict";
@@ -5665,7 +6878,7 @@
       backendOverride = null;
       current = null;
       active = false;
-      listeners = /* @__PURE__ */ new Set();
+      listeners2 = /* @__PURE__ */ new Set();
       if (typeof window !== "undefined") {
         ;
         window.__lumioPip = onNative;
@@ -5790,24 +7003,6 @@
     }
   });
 
-  // lib/custom-themes.ts
-  var init_custom_themes = __esm({
-    "lib/custom-themes.ts"() {
-      "use client";
-      init_profile_storage_shim();
-    }
-  });
-
-  // lib/appearance-settings.ts
-  var init_appearance_settings = __esm({
-    "lib/appearance-settings.ts"() {
-      "use strict";
-      "use client";
-      init_profile_storage_shim();
-      init_custom_themes();
-    }
-  });
-
   // lib/plugin-storage.ts
   var init_plugin_storage = __esm({
     "lib/plugin-storage.ts"() {
@@ -5832,6 +7027,7 @@
       "use strict";
       "use client";
       init_profile_storage_shim();
+      init_gate();
     }
   });
 
@@ -5877,11 +7073,36 @@
     }
   });
 
+  // lib/watched-threshold.ts
+  var init_watched_threshold = __esm({
+    "lib/watched-threshold.ts"() {
+      init_app_storage();
+    }
+  });
+
+  // lib/progress-finished.ts
+  var init_progress_finished = __esm({
+    "lib/progress-finished.ts"() {
+      init_watched_threshold();
+    }
+  });
+
+  // lib/tracker-watched-echo.ts
+  var TRACKER_ECHO_SLACK_MS;
+  var init_tracker_watched_echo = __esm({
+    "lib/tracker-watched-echo.ts"() {
+      init_profile_storage_shim();
+      init_progress_finished();
+      TRACKER_ECHO_SLACK_MS = 15 * 6e4;
+    }
+  });
+
   // lib/watched-episodes.ts
   var init_watched_episodes = __esm({
     "lib/watched-episodes.ts"() {
       "use strict";
       init_profile_storage_shim();
+      init_tracker_watched_echo();
     }
   });
 
@@ -5890,6 +7111,7 @@
     "lib/watched-movies.ts"() {
       "use strict";
       "use client";
+      init_tracker_watched_echo();
       init_profile_storage_shim();
     }
   });
@@ -6087,7 +7309,7 @@
       calculatedImageSettings
     };
   }
-  var __defProp2, __getOwnPropSymbols, __hasOwnProp2, __propIsEnum, __defNormalProp, __spreadValues, __objRest, qrcodegen, qrcodegen_default, ERROR_LEVEL_MAP, DEFAULT_SIZE, DEFAULT_LEVEL, DEFAULT_BGCOLOR, DEFAULT_FGCOLOR, DEFAULT_INCLUDEMARGIN, DEFAULT_MINVERSION, SPEC_MARGIN_SIZE, DEFAULT_MARGIN_SIZE, DEFAULT_IMG_SCALE, SUPPORTS_PATH2D, QRCodeCanvas, QRCodeSVG;
+  var __defProp2, __getOwnPropSymbols, __hasOwnProp2, __propIsEnum, __defNormalProp2, __spreadValues, __objRest, qrcodegen, qrcodegen_default, ERROR_LEVEL_MAP, DEFAULT_SIZE, DEFAULT_LEVEL, DEFAULT_BGCOLOR, DEFAULT_FGCOLOR, DEFAULT_INCLUDEMARGIN, DEFAULT_MINVERSION, SPEC_MARGIN_SIZE, DEFAULT_MARGIN_SIZE, DEFAULT_IMG_SCALE, SUPPORTS_PATH2D, QRCodeCanvas, QRCodeSVG;
   var init_esm = __esm({
     "../../node_modules/qrcode.react/lib/esm/index.js"() {
       init_react_shim();
@@ -6095,15 +7317,15 @@
       __getOwnPropSymbols = Object.getOwnPropertySymbols;
       __hasOwnProp2 = Object.prototype.hasOwnProperty;
       __propIsEnum = Object.prototype.propertyIsEnumerable;
-      __defNormalProp = (obj, key, value) => key in obj ? __defProp2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+      __defNormalProp2 = (obj, key, value) => key in obj ? __defProp2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
       __spreadValues = (a, b) => {
         for (var prop in b || (b = {}))
           if (__hasOwnProp2.call(b, prop))
-            __defNormalProp(a, prop, b[prop]);
+            __defNormalProp2(a, prop, b[prop]);
         if (__getOwnPropSymbols)
           for (var prop of __getOwnPropSymbols(b)) {
             if (__propIsEnum.call(b, prop))
-              __defNormalProp(a, prop, b[prop]);
+              __defNormalProp2(a, prop, b[prop]);
           }
         return a;
       };
@@ -6171,8 +7393,8 @@
           // Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
           // QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
           // ecl argument if it can be done without increasing the version.
-          static encodeText(text, ecl) {
-            const segs = qrcodegen2.QrSegment.makeSegments(text);
+          static encodeText(text2, ecl) {
+            const segs = qrcodegen2.QrSegment.makeSegments(text2);
             return _QrCode2.encodeSegments(segs, ecl);
           }
           // Returns a QR Code representing the given binary data at the given error correction level.
@@ -6685,31 +7907,31 @@
           // Returns a segment representing the given text string encoded in alphanumeric mode.
           // The characters allowed are: 0 to 9, A to Z (uppercase only), space,
           // dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-          static makeAlphanumeric(text) {
-            if (!_QrSegment2.isAlphanumeric(text))
+          static makeAlphanumeric(text2) {
+            if (!_QrSegment2.isAlphanumeric(text2))
               throw new RangeError("String contains unencodable characters in alphanumeric mode");
             let bb = [];
             let i;
-            for (i = 0; i + 2 <= text.length; i += 2) {
-              let temp = _QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
-              temp += _QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
+            for (i = 0; i + 2 <= text2.length; i += 2) {
+              let temp = _QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i)) * 45;
+              temp += _QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i + 1));
               appendBits(temp, 11, bb);
             }
-            if (i < text.length)
-              appendBits(_QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6, bb);
-            return new _QrSegment2(_QrSegment2.Mode.ALPHANUMERIC, text.length, bb);
+            if (i < text2.length)
+              appendBits(_QrSegment2.ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i)), 6, bb);
+            return new _QrSegment2(_QrSegment2.Mode.ALPHANUMERIC, text2.length, bb);
           }
           // Returns a new mutable list of zero or more segments to represent the given Unicode text string.
           // The result may use various segment modes and switch modes to optimize the length of the bit stream.
-          static makeSegments(text) {
-            if (text == "")
+          static makeSegments(text2) {
+            if (text2 == "")
               return [];
-            else if (_QrSegment2.isNumeric(text))
-              return [_QrSegment2.makeNumeric(text)];
-            else if (_QrSegment2.isAlphanumeric(text))
-              return [_QrSegment2.makeAlphanumeric(text)];
+            else if (_QrSegment2.isNumeric(text2))
+              return [_QrSegment2.makeNumeric(text2)];
+            else if (_QrSegment2.isAlphanumeric(text2))
+              return [_QrSegment2.makeAlphanumeric(text2)];
             else
-              return [_QrSegment2.makeBytes(_QrSegment2.toUtf8ByteArray(text))];
+              return [_QrSegment2.makeBytes(_QrSegment2.toUtf8ByteArray(text2))];
           }
           // Returns a segment representing an Extended Channel Interpretation
           // (ECI) designator with the given assignment value.
@@ -6731,14 +7953,14 @@
           }
           // Tests whether the given string can be encoded as a segment in numeric mode.
           // A string is encodable iff each character is in the range 0 to 9.
-          static isNumeric(text) {
-            return _QrSegment2.NUMERIC_REGEX.test(text);
+          static isNumeric(text2) {
+            return _QrSegment2.NUMERIC_REGEX.test(text2);
           }
           // Tests whether the given string can be encoded as a segment in alphanumeric mode.
           // A string is encodable iff each character is in the following set: 0 to 9, A to Z
           // (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-          static isAlphanumeric(text) {
-            return _QrSegment2.ALPHANUMERIC_REGEX.test(text);
+          static isAlphanumeric(text2) {
+            return _QrSegment2.ALPHANUMERIC_REGEX.test(text2);
           }
           /*-- Methods --*/
           // Returns a new copy of the data bits of this segment.
@@ -7131,48 +8353,12 @@
     }
   });
 
-  // lib/media-stream/config.ts
-  var SCRAPER_PRESETS, DEFAULT_SCRAPER_URL;
-  var init_config = __esm({
-    "lib/media-stream/config.ts"() {
-      init_addon_url();
+  // lib/media-stream/source-list.ts
+  var init_source_list = __esm({
+    "lib/media-stream/source-list.ts"() {
       init_app_storage();
+      init_addon_url();
       init_profile_storage_shim();
-      SCRAPER_PRESETS = [
-        {
-          id: "torrentio",
-          name: "Torrentio",
-          url: "https://torrentio.strem.fun",
-          type: "torrentio",
-          description: "Publik scraper, stabil och snabb. Kr\xE4ver Real-Debrid API-nyckel.",
-          configUrl: "https://torrentio.strem.fun/configure"
-        },
-        {
-          id: "comet",
-          name: "Comet",
-          url: "",
-          type: "preconfigured",
-          description: "Snabb scraper med bra tr\xE4ffar. Kr\xE4ver konfiguration med RD-nyckel.",
-          configUrl: "https://comet.elfhosted.com"
-        },
-        {
-          id: "jackettio",
-          name: "Jackettio",
-          url: "",
-          type: "preconfigured",
-          description: "Jackett-baserad scraper med breda indexers. Kr\xE4ver Real-Debrid eller AllDebrid.",
-          configUrl: "https://jackettio.elfhosted.com/configure"
-        },
-        {
-          id: "aiostreams",
-          name: "AIOStreams",
-          url: "",
-          type: "preconfigured",
-          description: "Aggregerar m\xE5nga addons och debrid-tj\xE4nster bakom en enda konfiguration.",
-          configUrl: "https://aiostreams-nightly.fortheweak.cloud/stremio/configure"
-        }
-      ];
-      DEFAULT_SCRAPER_URL = SCRAPER_PRESETS[0].url;
     }
   });
 
@@ -7182,7 +8368,57 @@
       "use client";
       init_addon_url();
       init_profile_storage_shim();
-      init_config();
+      init_source_list();
+    }
+  });
+
+  // lib/core-streams/stream-utils.ts
+  var SIZE_UNITS;
+  var init_stream_utils = __esm({
+    "lib/core-streams/stream-utils.ts"() {
+      "use strict";
+      "use client";
+      init_profile_storage_shim();
+      SIZE_UNITS = {
+        kb: 1e3,
+        mb: 1e3 ** 2,
+        gb: 1e3 ** 3,
+        tb: 1e3 ** 4,
+        kib: 1024,
+        mib: 1024 ** 2,
+        gib: 1024 ** 3,
+        tib: 1024 ** 4
+      };
+    }
+  });
+
+  // lib/core-streams/addon-episode-numbering.ts
+  var SAME_TTL_MS, NO_DATA_TTL_MS, EPISODE_TTL_MS, SERIES_MEMO_MS, FAILURE_MEMO_MS;
+  var init_addon_episode_numbering = __esm({
+    "lib/core-streams/addon-episode-numbering.ts"() {
+      "use strict";
+      "use client";
+      SAME_TTL_MS = 7 * 24 * 36e5;
+      NO_DATA_TTL_MS = 24 * 36e5;
+      EPISODE_TTL_MS = 7 * 24 * 36e5;
+      SERIES_MEMO_MS = 6 * 36e5;
+      FAILURE_MEMO_MS = 5 * 6e4;
+    }
+  });
+
+  // lib/core-streams/lookup.ts
+  var FRESH_SOURCE_MS;
+  var init_lookup = __esm({
+    "lib/core-streams/lookup.ts"() {
+      "use client";
+      init_core_addons();
+      init_addon_url();
+      init_plugin_sdk();
+      init_async_utils();
+      init_stream_utils();
+      init_mode();
+      init_addon_episode_numbering();
+      FRESH_SOURCE_MS = 10 * 6e4;
     }
   });
 
@@ -7207,6 +8443,7 @@
       init_plugin_sdk();
       init_availability_throttle();
       init_core_addons();
+      init_lookup();
       init_source_request();
       init_watched_episodes();
       STREAM_CACHE_TTL_MS = 30 * 60 * 1e3;
@@ -7416,6 +8653,57 @@
     }
   });
 
+  // lib/native-alerts.ts
+  var init_native_alerts = __esm({
+    "lib/native-alerts.ts"() {
+      "use client";
+      init_tauri_native_player();
+    }
+  });
+
+  // lib/plugins/bootstrap-signal.ts
+  var init_bootstrap_signal = __esm({
+    "lib/plugins/bootstrap-signal.ts"() {
+      "use client";
+    }
+  });
+
+  // lib/system-notification.ts
+  var init_system_notification = __esm({
+    "lib/system-notification.ts"() {
+      "use strict";
+      "use client";
+      init_open_item_runtime();
+      init_native_alerts();
+      init_bootstrap_signal();
+      init_tauri_native_player();
+    }
+  });
+
+  // lib/start-title.ts
+  var init_start_title = __esm({
+    "lib/start-title.ts"() {
+    }
+  });
+
+  // lib/core-streams/start-watchdog.ts
+  var SILENT_RELOAD_AFTER_AUDIO_MS, DEFAULT_START_BUDGETS;
+  var init_start_watchdog = __esm({
+    "lib/core-streams/start-watchdog.ts"() {
+      SILENT_RELOAD_AFTER_AUDIO_MS = 3e3;
+      DEFAULT_START_BUDGETS = { resolvingMs: 8e3, openingMs: 2e4, audioOnlyMs: SILENT_RELOAD_AFTER_AUDIO_MS + 4e3 };
+    }
+  });
+
+  // lib/mobile-data-guard.ts
+  var init_mobile_data_guard = __esm({
+    "lib/mobile-data-guard.ts"() {
+      "use client";
+      init_app_storage();
+      init_start_watchdog();
+    }
+  });
+
   // components/player/player-control-icons.tsx
   var init_player_control_icons = __esm({
     "components/player/player-control-icons.tsx"() {
@@ -7439,6 +8727,14 @@
   // lib/playback-speed-store.ts
   var init_playback_speed_store = __esm({
     "lib/playback-speed-store.ts"() {
+      "use client";
+      init_profile_storage_shim();
+    }
+  });
+
+  // lib/series-track-store.ts
+  var init_series_track_store = __esm({
+    "lib/series-track-store.ts"() {
       "use client";
       init_profile_storage_shim();
     }
@@ -8070,8 +9366,8 @@
         async listen(event$1, handler) {
           if (this._handleTauriEvent(event$1, handler)) {
             return () => {
-              const listeners2 = this.listeners[event$1];
-              listeners2.splice(listeners2.indexOf(handler), 1);
+              const listeners3 = this.listeners[event$1];
+              listeners3.splice(listeners3.indexOf(handler), 1);
             };
           }
           return event.listen(event$1, handler, {
@@ -8100,8 +9396,8 @@
         async once(event$1, handler) {
           if (this._handleTauriEvent(event$1, handler)) {
             return () => {
-              const listeners2 = this.listeners[event$1];
-              listeners2.splice(listeners2.indexOf(handler), 1);
+              const listeners3 = this.listeners[event$1];
+              listeners3.splice(listeners3.indexOf(handler), 1);
             };
           }
           return event.once(event$1, handler, {
@@ -9330,10 +10626,10 @@
          *
          * @return A promise indicating the success or failure of the operation.
          */
-        async setProgressBar(state) {
+        async setProgressBar(state2) {
           return core.invoke("plugin:window|set_progress_bar", {
             label: this.label,
-            value: state
+            value: state2
           });
         }
         /**
@@ -9739,6 +11035,12 @@
     }
   });
 
+  // lib/incognito.ts
+  var init_incognito = __esm({
+    "lib/incognito.ts"() {
+    }
+  });
+
   // lib/library/progress.ts
   var TITLE_TTL_MS;
   var init_progress = __esm({
@@ -9747,6 +11049,8 @@
       init_client();
       init_mode();
       init_source_provider();
+      init_watched_threshold();
+      init_incognito();
       TITLE_TTL_MS = 5 * 6e4;
     }
   });
@@ -9787,7 +11091,8 @@
   function read() {
     if (typeof window === "undefined") return [];
     try {
-      return JSON.parse(getScopedStorageItem(KEY) ?? "[]");
+      const parsed = JSON.parse(getScopedStorageItem(KEY) ?? "[]");
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -9803,7 +11108,8 @@
     if (typeof window === "undefined") return [];
     try {
       const raw = getScopedStorageItem(HISTORY_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
+      const decoded = raw ? JSON.parse(raw) : [];
+      const parsed = Array.isArray(decoded) ? decoded : [];
       if (parsed.length > 0) return parsed;
       const seed = read();
       if (seed.length > 0) {
@@ -9855,7 +11161,7 @@
     mirror.at = Date.now();
     appendHistoryEntry(entry);
   }
-  var EVENT, KEY, HISTORY_KEY, HISTORY_EVENT, HISTORY_MAX, historyMirror;
+  var EVENT3, KEY, HISTORY_KEY, HISTORY_EVENT, HISTORY_MAX, historyMirror;
   var init_video_progress = __esm({
     "lib/video-progress.ts"() {
       init_progress();
@@ -9863,11 +11169,13 @@
       init_continue_frames();
       init_watched_episodes();
       init_playback_availability();
-      EVENT = "lumio-stream-progress-changed";
+      init_incognito();
+      init_progress_finished();
+      EVENT3 = "lumio-stream-progress-changed";
       if (typeof window !== "undefined") {
         void Promise.resolve().then(() => (init_plugin_registry(), plugin_registry_exports)).then(({ subscribePluginRegistry: subscribePluginRegistry2 }) => {
           subscribePluginRegistry2(() => {
-            window.dispatchEvent(new CustomEvent(EVENT));
+            window.dispatchEvent(new CustomEvent(EVENT3));
             window.dispatchEvent(new CustomEvent(HISTORY_EVENT));
           });
         }).catch(() => {
@@ -10075,7 +11383,7 @@
     }
   }
   var JOURNAL_CHANGED_EVENT, JOURNAL_SYNC_WORTHY_EVENT, sessions, pending, loadedFor, version2, flushQueued, RETRY_MS, retryTimer;
-  var init_store = __esm({
+  var init_store2 = __esm({
     "lib/watch-journal/store.ts"() {
       "use strict";
       init_profile_storage_shim();
@@ -10116,12 +11424,56 @@
     }
   }
   function forecastUrl(lat, lon) {
-    return `${FORECAST_URL}?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=weather_code,temperature_2m`;
+    return `${FORECAST_URL}?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
   }
-  function parseForecast(json) {
-    const c = json?.current;
-    if (!c || typeof c.weather_code !== "number" || typeof c.temperature_2m !== "number") return null;
-    return { code: c.weather_code, tempC: c.temperature_2m };
+  function metSymbolToWmo(symbol) {
+    const s = symbol.replace(/_(day|night|polartwilight)$/, "");
+    if (s.includes("thunder")) return 95;
+    const heavy = s.startsWith("heavy");
+    const light = s.startsWith("light");
+    const base = s.replace(/^(heavy|light)/, "");
+    switch (base) {
+      case "clearsky":
+        return 0;
+      case "fair":
+        return 1;
+      case "partlycloudy":
+        return 2;
+      case "cloudy":
+        return 3;
+      case "fog":
+        return 45;
+      case "rain":
+        return heavy ? 65 : light ? 61 : 63;
+      case "rainshowers":
+        return heavy ? 82 : light ? 80 : 81;
+      case "sleet":
+        return heavy ? 69 : light ? 68 : 69;
+      case "sleetshowers":
+        return heavy ? 84 : light ? 83 : 84;
+      case "snow":
+        return heavy ? 75 : light ? 71 : 73;
+      case "snowshowers":
+        return heavy ? 86 : 85;
+      default:
+        return null;
+    }
+  }
+  function parseForecast(json, nowMs = Date.now()) {
+    const series = json?.properties?.timeseries;
+    if (!Array.isArray(series) || series.length === 0) return null;
+    let step = series[0];
+    for (const raw of series) {
+      const t = typeof raw?.time === "string" ? Date.parse(raw.time) : NaN;
+      if (!Number.isFinite(t) || t > nowMs) break;
+      step = raw;
+    }
+    const d = step?.data;
+    const tempC = d?.instant?.details?.air_temperature;
+    const symbol = d?.next_1_hours?.summary?.symbol_code ?? d?.next_6_hours?.summary?.symbol_code ?? d?.next_12_hours?.summary?.symbol_code;
+    if (typeof tempC !== "number" || typeof symbol !== "string") return null;
+    const code = metSymbolToWmo(symbol);
+    return code == null ? null : { code, tempC };
   }
   function schedule(ms) {
     if (timer) return;
@@ -10141,7 +11493,7 @@
       return;
     }
     const prefs = getWeatherPrefs();
-    if (!prefs.enabled || !prefs.place) {
+    if (!prefs.enabled || !prefs.place || isFeatureLocked("watchDiaryWeather")) {
       pending2.length = 0;
       return;
     }
@@ -10160,7 +11512,7 @@
   }
   function queueSessionWeather(s) {
     const prefs = getWeatherPrefs();
-    if (!prefs.enabled || !prefs.place || s.weather || s.seeded) return;
+    if (!prefs.enabled || !prefs.place || s.weather || s.seeded || isFeatureLocked("watchDiaryWeather")) return;
     if (!pending2.some((p) => p.id === s.id)) pending2.push(s);
     schedule(0);
   }
@@ -10168,12 +11520,13 @@
   var init_weather = __esm({
     "lib/watch-journal/weather.ts"() {
       "use strict";
+      init_gate();
       init_i18n();
       init_profile_storage_shim();
       init_player_open();
-      init_store();
+      init_store2();
       WEATHER_PREFS_KEY = "profile_weather_v1";
-      FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+      FORECAST_URL = "/api/weather/forecast";
       WEATHER_RETRY_MS = 6e4;
       WEATHER_MAX_AGE_MS = 3 * 36e5;
       OFF = { enabled: false, place: null };
@@ -10200,8 +11553,9 @@
     "lib/watch-journal/recorder.ts"() {
       init_profile_storage_shim();
       init_recorder_core();
-      init_store();
+      init_store2();
       init_weather();
+      init_incognito();
       LAST_COMPANIONS_KEY = "journal_last_companions_v1";
       last = null;
       if (typeof window !== "undefined") {
@@ -10236,9 +11590,118 @@
   });
 
   // lib/avatars/catalog.ts
-  var PROFILE_COLORS;
+  var ITEMS, PACK_LABEL_KEYS, PACK_ORDER, AVATAR_CATALOG, AVATAR_COUNT, PACK_BY_AVATAR, ITEM_BY_ID, PROFILE_COLORS;
   var init_catalog = __esm({
     "lib/avatars/catalog.ts"() {
+      ITEMS = {
+        animals: [
+          { id: "animals_fox", name: { en: "Fox", sv: "R\xE4v" }, free: true },
+          { id: "animals_owl", name: { en: "Owl", sv: "Uggla" }, free: true },
+          { id: "animals_raccoon", name: { en: "Raccoon", sv: "Tv\xE4ttbj\xF6rn" }, free: true },
+          { id: "animals_panda", name: { en: "Panda", sv: "Panda" }, free: true },
+          { id: "animals_cat", name: { en: "Cat", sv: "Katt" }, free: true },
+          { id: "animals_dog", name: { en: "Dog", sv: "Hund" }, free: true },
+          { id: "animals_seal", name: { en: "Seal", sv: "S\xE4l" } },
+          { id: "animals_frog", name: { en: "Frog", sv: "Groda" } },
+          { id: "animals_tiger", name: { en: "Tiger", sv: "Tiger" } },
+          { id: "animals_axolotl", name: { en: "Axolotl", sv: "Axolotl" } },
+          { id: "animals_capybara", name: { en: "Capybara", sv: "Kapybara" } },
+          { id: "animals_penguin", name: { en: "Penguin", sv: "Pingvin" } }
+        ],
+        genre: [
+          { id: "genre_noir_detective", name: { en: "Noir Detective", sv: "Noirdetektiv" }, free: true },
+          { id: "genre_astronaut", name: { en: "Astronaut", sv: "Astronaut" }, free: true },
+          { id: "genre_robot", name: { en: "Robot", sv: "Robot" }, free: true },
+          { id: "genre_wizard", name: { en: "Wizard", sv: "Trollkarl" }, free: true },
+          { id: "genre_cowboy", name: { en: "Cowboy", sv: "Cowboy" }, free: true },
+          { id: "genre_pirate", name: { en: "Pirate", sv: "Pirat" }, free: true },
+          { id: "genre_vampire", name: { en: "Vampire", sv: "Vampyr" } },
+          { id: "genre_ninja", name: { en: "Ninja", sv: "Ninja" } },
+          { id: "genre_explorer", name: { en: "Explorer", sv: "Uppt\xE4cktsresande" } },
+          { id: "genre_alien", name: { en: "Alien", sv: "Rymdvarelse" } },
+          { id: "genre_superhero", name: { en: "Superhero", sv: "Superhj\xE4lte" } },
+          { id: "genre_knight", name: { en: "Knight", sv: "Riddare" } }
+        ],
+        cinema: [
+          { id: "cinema_popcorn", name: { en: "Popcorn", sv: "Popcorn" }, free: true },
+          { id: "cinema_film_reel", name: { en: "Film Reel", sv: "Filmrulle" }, free: true },
+          { id: "cinema_directors_chair", name: { en: "Director\u2019s Chair", sv: "Regiss\xF6rsstol" }, free: true },
+          { id: "cinema_projector", name: { en: "Projector", sv: "Projektor" }, free: true },
+          { id: "cinema_3d_glasses", name: { en: "3D Glasses", sv: "3D-glas\xF6gon" }, free: true },
+          { id: "cinema_clapperboard", name: { en: "Clapperboard", sv: "Clapperboard" }, free: true },
+          { id: "cinema_ticket", name: { en: "Ticket", sv: "Biljett" } },
+          { id: "cinema_soda_cup", name: { en: "Soda Cup", sv: "L\xE4skmugg" } },
+          { id: "cinema_nachos", name: { en: "Nachos", sv: "Nachos" } },
+          { id: "cinema_spotlight", name: { en: "Spotlight", sv: "Str\xE5lkastare" } },
+          { id: "cinema_camera", name: { en: "Camera", sv: "Kamera" } },
+          { id: "cinema_statuette", name: { en: "Statuette", sv: "Statyett" } }
+        ],
+        monster: [
+          { id: "monster_ghost", name: { en: "Ghost", sv: "Sp\xF6ke" }, free: true },
+          { id: "monster_dragon", name: { en: "Little Dragon", sv: "Liten drake" }, free: true },
+          { id: "monster_yeti", name: { en: "Yeti", sv: "Yeti" }, free: true },
+          { id: "monster_slime", name: { en: "Slime Monster", sv: "Slemmonster" }, free: true },
+          { id: "monster_mummy", name: { en: "Mummy", sv: "Mumie" }, free: true },
+          { id: "monster_werewolf_pup", name: { en: "Werewolf Pup", sv: "Varulvsvalp" }, free: true },
+          { id: "monster_cyclops", name: { en: "Cyclops", sv: "Cyklop" } },
+          { id: "monster_mushroom", name: { en: "Mushroom", sv: "Svamp" } },
+          { id: "monster_cactus", name: { en: "Cactus", sv: "Kaktus" } },
+          { id: "monster_cloud", name: { en: "Cloud", sv: "Moln" } },
+          { id: "monster_star", name: { en: "Star", sv: "Stj\xE4rna" } },
+          { id: "monster_moon", name: { en: "Moon", sv: "M\xE5ne" } }
+        ],
+        retro: [
+          { id: "retro_vhs", name: { en: "VHS Tape", sv: "VHS-kassett" }, free: true },
+          { id: "retro_old_tv", name: { en: "Old TV", sv: "Gammal TV" }, free: true },
+          { id: "retro_arcade", name: { en: "Arcade Machine", sv: "Arkadmaskin" }, free: true },
+          { id: "retro_joystick", name: { en: "Joystick", sv: "Joystick" }, free: true },
+          { id: "retro_ufo", name: { en: "UFO", sv: "UFO" }, free: true },
+          { id: "retro_space_cat", name: { en: "Space Cat", sv: "Rymdkatt" }, free: true },
+          { id: "retro_android_head", name: { en: "Android Head", sv: "Androidhuvud" } },
+          { id: "retro_neon_heart", name: { en: "Neon Heart", sv: "Neonhj\xE4rta" } },
+          { id: "retro_synth_sun", name: { en: "Synth Sun", sv: "Synthsol" } },
+          { id: "retro_cassette", name: { en: "Cassette Tape", sv: "Kassettband" } },
+          { id: "retro_floppy", name: { en: "Floppy Disk", sv: "Diskett" } },
+          { id: "retro_satellite", name: { en: "Satellite", sv: "Satellit" } }
+        ],
+        abstract: [
+          { id: "abstract_circle_face", name: { en: "Circle Face", sv: "Cirkelansikte" }, free: true },
+          { id: "abstract_square_face", name: { en: "Square Face", sv: "Fyrkantsansikte" }, free: true },
+          { id: "abstract_triangle_face", name: { en: "Triangle Face", sv: "Triangelansikte" }, free: true },
+          { id: "abstract_hexagon", name: { en: "Hexagon", sv: "Hexagon" }, free: true },
+          { id: "abstract_split", name: { en: "Split Face", sv: "Delat ansikte" }, free: true },
+          { id: "abstract_stacked", name: { en: "Stacked Shapes", sv: "Staplade former" }, free: true },
+          { id: "abstract_blob", name: { en: "Blob", sv: "Klump" } },
+          { id: "abstract_one_eye", name: { en: "One Eye", sv: "Ett \xF6ga" } },
+          { id: "abstract_rings", name: { en: "Rings", sv: "Ringar" } },
+          { id: "abstract_diamond", name: { en: "Diamond", sv: "Diamant" } },
+          { id: "abstract_pill", name: { en: "Pill", sv: "Kapsel" } },
+          { id: "abstract_grid", name: { en: "Dot Grid", sv: "Prickrutn\xE4t" } }
+        ]
+      };
+      PACK_LABEL_KEYS = {
+        animals: "avatarPackAnimals",
+        genre: "avatarPackGenre",
+        cinema: "avatarPackCinema",
+        monster: "avatarPackMonster",
+        retro: "avatarPackRetro",
+        abstract: "avatarPackAbstract"
+      };
+      PACK_ORDER = ["animals", "genre", "cinema", "monster", "retro", "abstract"];
+      AVATAR_CATALOG = PACK_ORDER.map((id) => ({
+        id,
+        labelKey: PACK_LABEL_KEYS[id],
+        items: ITEMS[id]
+      }));
+      AVATAR_COUNT = AVATAR_CATALOG.reduce((sum, pack) => sum + pack.items.length, 0);
+      PACK_BY_AVATAR = /* @__PURE__ */ new Map();
+      ITEM_BY_ID = /* @__PURE__ */ new Map();
+      for (const pack of AVATAR_CATALOG) {
+        for (const item of pack.items) {
+          PACK_BY_AVATAR.set(item.id, pack);
+          ITEM_BY_ID.set(item.id, item);
+        }
+      }
       PROFILE_COLORS = [
         "#7dd3fc",
         "#60a5fa",
@@ -10254,12 +11717,41 @@
     }
   });
 
+  // lib/avatars/resolve.ts
+  var init_resolve = __esm({
+    "lib/avatars/resolve.ts"() {
+      init_catalog();
+      init_plugin_packs();
+    }
+  });
+
+  // lib/profile-photo/api.ts
+  var init_api2 = __esm({
+    "lib/profile-photo/api.ts"() {
+    }
+  });
+
+  // lib/supporter/use-supporter.ts
+  var init_use_supporter = __esm({
+    "lib/supporter/use-supporter.ts"() {
+      "use client";
+      init_react_shim();
+      init_api();
+      init_features();
+      init_store();
+    }
+  });
+
   // components/ui/profile-avatar.tsx
   var DEFAULT_COLOR;
   var init_profile_avatar = __esm({
     "components/ui/profile-avatar.tsx"() {
       "use client";
+      init_react_shim();
       init_catalog();
+      init_resolve();
+      init_api2();
+      init_use_supporter();
       init_jsx_runtime_shim();
       DEFAULT_COLOR = PROFILE_COLORS[0];
     }
@@ -10268,6 +11760,27 @@
   // lib/sleep-timer.ts
   var init_sleep_timer = __esm({
     "lib/sleep-timer.ts"() {
+    }
+  });
+
+  // lib/spoken-subtitles.ts
+  var init_spoken_subtitles = __esm({
+    "lib/spoken-subtitles.ts"() {
+    }
+  });
+
+  // lib/spoken-subtitles-engine.ts
+  var init_spoken_subtitles_engine = __esm({
+    "lib/spoken-subtitles-engine.ts"() {
+      init_spoken_subtitles();
+      init_tauri_native_player();
+    }
+  });
+
+  // lib/spoken-subtitles-settings.ts
+  var init_spoken_subtitles_settings = __esm({
+    "lib/spoken-subtitles-settings.ts"() {
+      init_profile_storage_shim();
     }
   });
 
@@ -10467,6 +11980,7 @@
       "use strict";
       init_profile_storage_shim();
       init_barcode_model();
+      init_incognito();
       BARCODES_CHANGED_EVENT = "lumio-barcodes-changed";
       items = /* @__PURE__ */ new Map();
       loadedFor2 = null;
@@ -10533,6 +12047,7 @@
   var init_use_barcode_recorder = __esm({
     "lib/barcode/use-barcode-recorder.ts"() {
       init_react_shim();
+      init_use_supporter();
       init_barcode_samplers();
       init_barcode_settings();
       init_barcode_id();
@@ -10667,36 +12182,36 @@
       init_barcode_strip();
       init_jsx_runtime_shim();
       CHIP_MS = 5e3;
-      PlayerBarcodeStrip = memo(function PlayerBarcodeStrip2({ state, duration, tv, hoverable }) {
+      PlayerBarcodeStrip = memo(function PlayerBarcodeStrip2({ state: state2, duration, tv, hoverable }) {
         const { t } = useLang();
-        const [barcode, setBarcode] = useState(() => state.id ? getBarcode(state.id) : null);
+        const [barcode, setBarcode] = useState(() => state2.id ? getBarcode(state2.id) : null);
         const [unseen, setUnseen] = useState(() => getBarcodeSettings().unseenStyle);
         const [hover, setHover] = useState(null);
         const [chipUntil, setChipUntil] = useState(0);
         useEffect(() => {
-          if (!state.id) return;
-          const id = state.id;
+          if (!state2.id) return;
+          const id = state2.id;
           const read2 = () => setBarcode(getBarcode(id));
           read2();
           return onBarcodesChanged(read2);
-        }, [state.id]);
+        }, [state2.id]);
         useEffect(() => onBarcodeSettingsChanged(() => setUnseen(getBarcodeSettings().unseenStyle)), []);
         useEffect(() => {
-          if (!state.status) return;
+          if (!state2.status) return;
           setChipUntil(Date.now() + CHIP_MS);
           const timer2 = setTimeout(() => setChipUntil(0), CHIP_MS);
           return () => clearTimeout(timer2);
-        }, [state.status]);
+        }, [state2.status]);
         const shown = useMemo(() => {
           if (barcode) return barcode;
-          if (!state.id || !state.recording) return null;
+          if (!state2.id || !state2.recording) return null;
           const columns = getBarcodeSettings().columns;
-          return { id: state.id, tmdbId: null, title: "", year: null, posterUrl: null, duration, columns, colors: new Array(columns).fill(null), updatedAt: "empty" };
-        }, [barcode, state.id, state.recording, duration]);
-        if (!state.showStrip || !shown) return null;
+          return { id: state2.id, tmdbId: null, title: "", year: null, posterUrl: null, duration, columns, colors: new Array(columns).fill(null), updatedAt: "empty" };
+        }, [barcode, state2.id, state2.recording, duration]);
+        if (!state2.showStrip || !shown) return null;
         const d = shown.duration > 0 ? shown.duration : duration;
         const hoverColor = hover != null ? shown.colors[columnIndex(hover * d, d, shown.columns)] : null;
-        const chipText = state.status === "recording" ? t("barcodeRecording") : state.status === "paused" ? t("barcodePaused") : state.status === "off" ? t("barcodeOff") : null;
+        const chipText = state2.status === "recording" ? t("barcodeRecording") : state2.status === "paused" ? t("barcodePaused") : state2.status === "off" ? t("barcodeOff") : null;
         const onMove = (e) => {
           if (!hoverable) return;
           const r = e.currentTarget.getBoundingClientRect();
@@ -10745,25 +12260,6 @@
       "use client";
       init_i18n();
       init_jsx_runtime_shim();
-    }
-  });
-
-  // lib/core-streams/stream-utils.ts
-  var SIZE_UNITS;
-  var init_stream_utils = __esm({
-    "lib/core-streams/stream-utils.ts"() {
-      "use client";
-      init_profile_storage_shim();
-      SIZE_UNITS = {
-        kb: 1e3,
-        mb: 1e3 ** 2,
-        gb: 1e3 ** 3,
-        tb: 1e3 ** 4,
-        kib: 1024,
-        mib: 1024 ** 2,
-        gib: 1024 ** 3,
-        tib: 1024 ** 4
-      };
     }
   });
 
@@ -10816,21 +12312,6 @@
     }
   });
 
-  // lib/core-streams/lookup.ts
-  var FRESH_SOURCE_MS;
-  var init_lookup = __esm({
-    "lib/core-streams/lookup.ts"() {
-      "use client";
-      init_core_addons();
-      init_addon_url();
-      init_plugin_sdk();
-      init_async_utils();
-      init_stream_utils();
-      init_mode();
-      FRESH_SOURCE_MS = 10 * 6e4;
-    }
-  });
-
   // lib/core-streams/prepare.ts
   var init_prepare = __esm({
     "lib/core-streams/prepare.ts"() {
@@ -10849,6 +12330,7 @@
       init_session_host();
       init_lookup();
       init_prepare();
+      init_incognito();
       init_stream_utils();
       SLATE_MIN_BYTES = 256 * 1024;
       DIRECT_START_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1e3;
@@ -10874,6 +12356,26 @@
     }
   });
 
+  // lib/playback-watched.ts
+  var init_playback_watched = __esm({
+    "lib/playback-watched.ts"() {
+      "use client";
+      init_incognito();
+      init_watched_episodes();
+      init_watched_movies();
+      init_video_progress();
+    }
+  });
+
+  // lib/use-incognito.ts
+  var init_use_incognito = __esm({
+    "lib/use-incognito.ts"() {
+      "use client";
+      init_react_shim();
+      init_incognito();
+    }
+  });
+
   // lib/trakt-scrobble.ts
   var init_trakt_scrobble = __esm({
     "lib/trakt-scrobble.ts"() {
@@ -10889,6 +12391,22 @@
       init_plugin_registry();
       init_plugin_state();
       init_trakt_scrobble();
+      init_incognito();
+    }
+  });
+
+  // lib/learned-skip.ts
+  var init_learned_skip = __esm({
+    "lib/learned-skip.ts"() {
+    }
+  });
+
+  // lib/learned-skip-store.ts
+  var init_learned_skip_store = __esm({
+    "lib/learned-skip-store.ts"() {
+      "use client";
+      init_profile_storage_shim();
+      init_learned_skip();
     }
   });
 
@@ -10918,6 +12436,662 @@
       init_video_tuning();
       init_audio_tuning();
       init_tauri_native_player();
+      init_playback_settings();
+      init_jsx_runtime_shim();
+    }
+  });
+
+  // lib/supporter/link.ts
+  var init_link = __esm({
+    "lib/supporter/link.ts"() {
+      "use client";
+      init_react_shim();
+      init_api();
+      init_store();
+    }
+  });
+
+  // lib/stremio/addons-storage.ts
+  var init_addons_storage = __esm({
+    "lib/stremio/addons-storage.ts"() {
+      "use client";
+      init_profile_storage_shim();
+    }
+  });
+
+  // lib/stremio/manifest.ts
+  var init_manifest = __esm({
+    "lib/stremio/manifest.ts"() {
+    }
+  });
+
+  // lib/tmdb-key/api.ts
+  var init_api3 = __esm({
+    "lib/tmdb-key/api.ts"() {
+      "use strict";
+    }
+  });
+
+  // lib/tmdb-key/lz-string.ts
+  var URI_SAFE_ALPHABET, URI_SAFE_INDEX;
+  var init_lz_string = __esm({
+    "lib/tmdb-key/lz-string.ts"() {
+      "use strict";
+      URI_SAFE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+      URI_SAFE_INDEX = Object.fromEntries(
+        [...URI_SAFE_ALPHABET].map((char, index2) => [char, index2])
+      );
+    }
+  });
+
+  // lib/tmdb-key/detect.ts
+  var init_detect = __esm({
+    "lib/tmdb-key/detect.ts"() {
+      "use strict";
+      init_lz_string();
+    }
+  });
+
+  // lib/tmdb-key/state.ts
+  var init_state = __esm({
+    "lib/tmdb-key/state.ts"() {
+      "use strict";
+      init_react_shim();
+      init_api3();
+    }
+  });
+
+  // lib/tmdb-key/autodetect.ts
+  var init_autodetect = __esm({
+    "lib/tmdb-key/autodetect.ts"() {
+      init_core_addons();
+      init_addons_storage();
+      init_api3();
+      init_detect();
+      init_api3();
+      init_state();
+    }
+  });
+
+  // lib/stremio/install-addon.ts
+  var init_install_addon = __esm({
+    "lib/stremio/install-addon.ts"() {
+      init_core_addons();
+      init_addons_storage();
+      init_manifest();
+      init_autodetect();
+    }
+  });
+
+  // lib/stremio/addon-inbox.ts
+  var init_addon_inbox = __esm({
+    "lib/stremio/addon-inbox.ts"() {
+      init_install_addon();
+    }
+  });
+
+  // lib/phone-setup.ts
+  var init_phone_setup = __esm({
+    "lib/phone-setup.ts"() {
+      "use client";
+      init_react_shim();
+    }
+  });
+
+  // components/tv/tv-auto-stations.tsx
+  var init_tv_auto_stations = __esm({
+    "components/tv/tv-auto-stations.tsx"() {
+      "use client";
+      init_react_shim();
+      init_jsx_runtime_shim();
+    }
+  });
+
+  // lib/tv-metrics.ts
+  var tvBox, TV_SETTINGS_SIDE_TEXT_COL_PX, TV_SETTINGS_SIDE_PAD_LEFT_PX, TV_SETTINGS_SIDE_PAD_RIGHT_PX, TV_SETTINGS_SIDE_LIST_PX;
+  var init_tv_metrics = __esm({
+    "lib/tv-metrics.ts"() {
+      tvBox = (px) => `calc(${px}px * var(--ui-scale, 1))`;
+      TV_SETTINGS_SIDE_TEXT_COL_PX = 416;
+      TV_SETTINGS_SIDE_PAD_LEFT_PX = 40;
+      TV_SETTINGS_SIDE_PAD_RIGHT_PX = 36;
+      TV_SETTINGS_SIDE_LIST_PX = TV_SETTINGS_SIDE_TEXT_COL_PX + TV_SETTINGS_SIDE_PAD_LEFT_PX + TV_SETTINGS_SIDE_PAD_RIGHT_PX;
+    }
+  });
+
+  // lib/tv-tab-heading.tsx
+  var TvTabHeadingContext;
+  var init_tv_tab_heading = __esm({
+    "lib/tv-tab-heading.tsx"() {
+      "use client";
+      init_react_shim();
+      init_jsx_runtime_shim();
+      TvTabHeadingContext = createContext(null);
+    }
+  });
+
+  // lib/settings-heading.ts
+  var init_settings_heading = __esm({
+    "lib/settings-heading.ts"() {
+      "use client";
+    }
+  });
+
+  // components/settings/redesigned/primitives.tsx
+  function Icon({
+    name,
+    size = 18,
+    color,
+    style,
+    fill: fill2
+  }) {
+    const path = ICON_PATHS[name];
+    if (!path) return null;
+    return /* @__PURE__ */ jsx(
+      "svg",
+      {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: fill2 || "none",
+        stroke: color || "currentColor",
+        strokeWidth: "1.6",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style,
+        "aria-hidden": "true",
+        children: path
+      }
+    );
+  }
+  function Checkbox({
+    checked,
+    onChange,
+    disabled,
+    label,
+    hint,
+    right
+  }) {
+    return /* @__PURE__ */ jsxs(
+      "label",
+      {
+        style: {
+          display: "flex",
+          alignItems: hint ? "flex-start" : "center",
+          gap: 12,
+          cursor: disabled ? "default" : "pointer",
+          opacity: disabled ? 0.55 : 1,
+          userSelect: "none"
+        },
+        children: [
+          /* @__PURE__ */ jsxs(
+            "span",
+            {
+              onClick: (e) => {
+                e.preventDefault();
+                if (!disabled && onChange) onChange(!checked);
+              },
+              style: { display: "flex", alignItems: hint ? "flex-start" : "center", gap: 12, flex: 1, minWidth: 0 },
+              children: [
+                /* @__PURE__ */ jsx(
+                  "span",
+                  {
+                    style: {
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      background: checked ? TOKENS.accent : TOKENS.surface2,
+                      border: `1.5px solid ${checked ? TOKENS.accent : TOKENS.borderStrong}`,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all .14s ease",
+                      flexShrink: 0,
+                      marginTop: hint ? 2 : 0
+                    },
+                    children: checked ? /* @__PURE__ */ jsx(Icon, { name: "check", size: 14, color: TOKENS.surface0 }) : null
+                  }
+                ),
+                label ? /* @__PURE__ */ jsxs("span", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 2 }, children: [
+                  /* @__PURE__ */ jsx("span", { style: { fontSize: TYPE.body, color: TOKENS.text, fontWeight: 500 }, children: label }),
+                  hint ? /* @__PURE__ */ jsx("span", { style: { fontSize: TYPE.small, color: TOKENS.textMute, lineHeight: 1.4 }, children: hint }) : null
+                ] }) : null
+              ]
+            }
+          ),
+          right
+        ]
+      }
+    );
+  }
+  function PillBtn({
+    children,
+    onClick,
+    variant = "ghost",
+    size = "md",
+    disabled,
+    icon,
+    type,
+    style,
+    title
+  }) {
+    const sizes = {
+      sm: { padding: "6px 10px", fontSize: TYPE.small },
+      md: { padding: "9px 14px", fontSize: TYPE.body },
+      lg: { padding: "11px 18px", fontSize: TYPE.body }
+    };
+    const variants = {
+      ghost: {
+        background: "transparent",
+        border: `1px solid ${TOKENS.borderStrong}`,
+        color: TOKENS.text
+      },
+      primary: {
+        background: TOKENS.orange,
+        border: `1px solid ${TOKENS.orange}`,
+        color: "#1A0E07",
+        fontWeight: 600
+      },
+      accent: {
+        background: TOKENS.accentSoft,
+        border: `1px solid ${TOKENS.accent}`,
+        color: "#fff"
+      },
+      danger: {
+        background: "transparent",
+        border: `1px solid rgba(255,90,106,.4)`,
+        color: TOKENS.red
+      }
+    };
+    return /* @__PURE__ */ jsxs(
+      "button",
+      {
+        type: type || "button",
+        onClick,
+        disabled,
+        title,
+        style: {
+          ...sizes[size],
+          ...variants[variant],
+          borderRadius: 8,
+          cursor: disabled ? "default" : "pointer",
+          opacity: disabled ? 0.5 : 1,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontWeight: variants[variant].fontWeight || 500,
+          letterSpacing: 0.2,
+          whiteSpace: "nowrap",
+          transition: "transform .08s, filter .12s",
+          ...style
+        },
+        onMouseDown: (e) => {
+          if (!disabled) e.currentTarget.style.transform = "scale(0.97)";
+        },
+        onMouseUp: (e) => {
+          ;
+          e.currentTarget.style.transform = "scale(1)";
+        },
+        onMouseLeave: (e) => {
+          ;
+          e.currentTarget.style.transform = "scale(1)";
+        },
+        children: [
+          icon ? /* @__PURE__ */ jsx(Icon, { name: icon, size: 14 }) : null,
+          children
+        ]
+      }
+    );
+  }
+  function Card({
+    children,
+    padding = 16,
+    style
+  }) {
+    return /* @__PURE__ */ jsx(
+      "div",
+      {
+        style: {
+          background: "var(--st-box)",
+          borderRadius: 10,
+          padding,
+          marginBottom: 10,
+          ...style
+        },
+        children
+      }
+    );
+  }
+  var import_react_dom2, TOKENS, TYPE, inputStyle, monoFont, eyebrowStyle, ICON_PATHS;
+  var init_primitives = __esm({
+    "components/settings/redesigned/primitives.tsx"() {
+      "use client";
+      init_react_shim();
+      init_tv_tab_heading();
+      init_settings_heading();
+      import_react_dom2 = __toESM(require_react_dom());
+      init_jsx_runtime_shim();
+      TOKENS = {
+        bg: "var(--tk-bg)",
+        surface0: "var(--tk-surface0)",
+        surface1: "var(--tk-surface1)",
+        surface2: "var(--tk-surface2)",
+        surface3: "var(--tk-surface3)",
+        border: "var(--tk-border)",
+        borderStrong: "var(--tk-border-strong)",
+        text: "#EAEEF6",
+        textDim: "#9AA5BC",
+        textMute: "#6B7691",
+        accent: "var(--color-accent)",
+        accentSoft: "rgb(var(--accent-500) / 0.22)",
+        mint: "#3CD6A3",
+        orange: "#FF8B5A",
+        red: "#FF5A6A",
+        cyan: "#5FD3E8",
+        warn: "#F3C969"
+      };
+      TYPE = {
+        /** Sifferbrickor och räknare. */
+        micro: "var(--st-micro)",
+        /** ÅTGÄRD/KLART, eyebrow, versala etiketter. */
+        label: "var(--st-label)",
+        /** Hjälptext under en rad. */
+        small: "var(--st-small)",
+        /** Radtitlar, länkar, fältvärden — skalans mittpunkt. */
+        body: "var(--st-body)",
+        /** Korttitel. */
+        h3: "var(--st-h3)",
+        /** Sektionsrubrik. */
+        h2: "var(--st-h2)",
+        /** Sidrubrik. */
+        h1: "var(--st-h1)"
+      };
+      inputStyle = {
+        width: "100%",
+        minHeight: 44,
+        padding: "10px 14px",
+        borderRadius: 10,
+        border: `1px solid ${TOKENS.border}`,
+        background: TOKENS.surface0,
+        color: TOKENS.text,
+        fontSize: TYPE.body,
+        outline: "none",
+        boxSizing: "border-box"
+      };
+      monoFont = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+      eyebrowStyle = {
+        fontSize: TYPE.label,
+        fontWeight: 600,
+        letterSpacing: "0.14em",
+        color: TOKENS.textMute,
+        textTransform: "uppercase"
+      };
+      ICON_PATHS = {
+        sparkle: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" }) }),
+        database: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("ellipse", { cx: "12", cy: "5.5", rx: "7.5", ry: "2.5" }),
+          /* @__PURE__ */ jsx("path", { d: "M4.5 5.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" }),
+          /* @__PURE__ */ jsx("path", { d: "M4.5 11.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" })
+        ] }),
+        layers: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("path", { d: "M12 3 3 8l9 5 9-5-9-5z" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 13l9 5 9-5" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 18l9 5 9-5" })
+        ] }),
+        plug: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M9 2v4M15 2v4M7 6h10v6a5 5 0 0 1-10 0V6zM12 17v5" }) }),
+        close: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M6 6l12 12M18 6 6 18" }) }),
+        search: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "11", cy: "11", r: "6.5" }),
+          /* @__PURE__ */ jsx("path", { d: "m20 20-4-4" })
+        ] }),
+        chevDown: /* @__PURE__ */ jsx("path", { d: "M6 9l6 6 6-6" }),
+        chevUp: /* @__PURE__ */ jsx("path", { d: "M6 15l6-6 6 6" }),
+        chevRight: /* @__PURE__ */ jsx("path", { d: "M9 6l6 6-6 6" }),
+        drag: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "6", r: "1", fill: "currentColor" }),
+          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "12", r: "1", fill: "currentColor" }),
+          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "18", r: "1", fill: "currentColor" }),
+          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "6", r: "1", fill: "currentColor" }),
+          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "12", r: "1", fill: "currentColor" }),
+          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "18", r: "1", fill: "currentColor" })
+        ] }),
+        plus: /* @__PURE__ */ jsx("path", { d: "M12 5v14M5 12h14" }),
+        check: /* @__PURE__ */ jsx("path", { d: "M5 13l4 4L19 7" }),
+        image: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "4", width: "18", height: "16", rx: "2" }),
+          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "10", r: "1.6" }),
+          /* @__PURE__ */ jsx("path", { d: "m3 17 5-5 5 5 3-3 5 5" })
+        ] }),
+        film: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "4", width: "18", height: "16", rx: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M7 4v16M17 4v16M3 9h4M3 14h4M17 9h4M17 14h4" })
+        ] }),
+        tv: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "13", rx: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M8 21h8M12 18v3" })
+        ] }),
+        list: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" }) }),
+        star: /* @__PURE__ */ jsx("path", { d: "M12 3l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.2l5.9-.9L12 3z" }),
+        trending: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("path", { d: "M3 17l6-6 4 4 8-8" }),
+          /* @__PURE__ */ jsx("path", { d: "M14 7h7v7" })
+        ] }),
+        clock: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
+          /* @__PURE__ */ jsx("path", { d: "M12 7v5l3 2" })
+        ] }),
+        folder: /* @__PURE__ */ jsx("path", { d: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" }),
+        history: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("path", { d: "M3 12a9 9 0 1 0 3-6.7L3 8" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 3v5h5M12 8v5l3 2" })
+        ] }),
+        zap: /* @__PURE__ */ jsx("path", { d: "M13 2 4 14h7l-1 8 9-12h-7l1-8z" }),
+        youtube: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "2.5", y: "6", width: "19", height: "12", rx: "3" }),
+          /* @__PURE__ */ jsx("path", { d: "M10.5 9.5v5l4-2.5z", fill: "currentColor", stroke: "none" })
+        ] }),
+        cog: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "3" }),
+          /* @__PURE__ */ jsx("path", { d: "M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" })
+        ] }),
+        upload: /* @__PURE__ */ jsx("path", { d: "M12 16V4M6 10l6-6 6 6M4 20h16" }),
+        refresh: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("path", { d: "M3 12a9 9 0 0 1 15.5-6.3L21 8" }),
+          /* @__PURE__ */ jsx("path", { d: "M21 3v5h-5" }),
+          /* @__PURE__ */ jsx("path", { d: "M21 12a9 9 0 0 1-15.5 6.3L3 16" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 21v-5h5" })
+        ] }),
+        globe: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18" })
+        ] }),
+        calendar: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "16", rx: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 9h18M8 3v4M16 3v4" })
+        ] }),
+        eye: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("path", { d: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" }),
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "3" })
+        ] }),
+        bookmark: /* @__PURE__ */ jsx("path", { d: "M6 4h12v17l-6-3.5L6 21z" }),
+        award: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "9", r: "6" }),
+          /* @__PURE__ */ jsx("path", { d: "m8.5 14-1.5 7 5-2.5L17 21l-1.5-7" })
+        ] }),
+        grid: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1" }),
+          /* @__PURE__ */ jsx("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1" }),
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1" }),
+          /* @__PURE__ */ jsx("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1" })
+        ] }),
+        carousel: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "1.5" }),
+          /* @__PURE__ */ jsx("path", { d: "M3 8v8M21 8v8" })
+        ] }),
+        rows: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "4", rx: "1" }),
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "11", width: "18", height: "2", rx: "1" }),
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "15", width: "18", height: "4", rx: "1" })
+        ] }),
+        showcase: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "3", y: "6", width: "9", height: "12", rx: "1.5" }),
+          /* @__PURE__ */ jsx("rect", { x: "14", y: "6", width: "3", height: "5", rx: "0.7" }),
+          /* @__PURE__ */ jsx("rect", { x: "18", y: "6", width: "3", height: "5", rx: "0.7" }),
+          /* @__PURE__ */ jsx("rect", { x: "14", y: "13", width: "3", height: "5", rx: "0.7" }),
+          /* @__PURE__ */ jsx("rect", { x: "18", y: "13", width: "3", height: "5", rx: "0.7" })
+        ] }),
+        play: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
+          /* @__PURE__ */ jsx("path", { d: "M10 8l6 4-6 4z", fill: "currentColor", stroke: "none" })
+        ] }),
+        trash: /* @__PURE__ */ jsx("path", { d: "M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" }),
+        user: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "8", r: "3.5" }),
+          /* @__PURE__ */ jsx("path", { d: "M4.5 20a7.5 7.5 0 0 1 15 0" })
+        ] }),
+        keyboard: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "2.5", y: "6", width: "19", height: "12", rx: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M6 14h12" })
+        ] }),
+        warning: /* @__PURE__ */ jsx("path", { d: "M10.3 3.86l-8.61 14.92A2 2 0 0 0 3.44 22h17.12a2 2 0 0 0 1.74-3.22L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" }),
+        copy: /* @__PURE__ */ jsxs(Fragment2, { children: [
+          /* @__PURE__ */ jsx("rect", { x: "8", y: "8", width: "12", height: "12", rx: "2" }),
+          /* @__PURE__ */ jsx("path", { d: "M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" })
+        ] })
+      };
+    }
+  });
+
+  // lib/tv-keyboard-settings.ts
+  var init_tv_keyboard_settings = __esm({
+    "lib/tv-keyboard-settings.ts"() {
+      "use client";
+      init_profile_storage_shim();
+    }
+  });
+
+  // lib/tv-hint-mode.ts
+  var init_tv_hint_mode = __esm({
+    "lib/tv-hint-mode.ts"() {
+      "use client";
+      init_profile_storage_shim();
+    }
+  });
+
+  // components/tv/tv-settings-rows.tsx
+  var import_react_dom3, TV, ROW_STYLE;
+  var init_tv_settings_rows = __esm({
+    "components/tv/tv-settings-rows.tsx"() {
+      "use client";
+      init_esm();
+      init_addon_inbox();
+      init_phone_setup();
+      init_react_shim();
+      init_tv_auto_stations();
+      init_tv_metrics();
+      init_primitives();
+      init_tv_keyboard_settings();
+      init_tv_hint_mode();
+      init_i18n();
+      import_react_dom3 = __toESM(require_react_dom());
+      init_supporter_gate();
+      init_jsx_runtime_shim();
+      TV = {
+        bg: "#161826",
+        surface: "#232532",
+        text: "#e9e9ed",
+        accent: "var(--color-accent)",
+        accent100: "var(--color-accent-100)",
+        accent200: "var(--color-accent-200)",
+        accent300: "var(--color-accent-300)",
+        accent700: "var(--color-accent-700)",
+        accent800: "var(--color-accent-800)",
+        accent900: "var(--color-accent-900)",
+        neutral100: "#f3f5fe",
+        neutral300: "#cfd3e5",
+        neutral400: "#b2b6ca",
+        neutral500: "#9397ab",
+        neutral600: "#75798c",
+        neutral700: "#595d6c",
+        neutral800: "#3f424d",
+        neutral900: "#292b31",
+        /** Sidlistans grund: en ton mörkare än innehållet, så kolumnerna skiljs utan linje. */
+        sideBg: "#12131e",
+        /** Segmenthylsans botten — samma ton som sidlistan. */
+        segTrack: "#12131e",
+        danger: "#e0776a",
+        dotDone: "#57c08a",
+        dotAction: "#e0b060",
+        shadowLg: "0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,0.65)"
+      };
+      ROW_STYLE = {
+        display: "flex",
+        alignItems: "center",
+        gap: 18,
+        padding: `${tvBox(22)} ${tvBox(30)}`,
+        /* 52 → 64 → 84. Höjden följer titeln (nu 30 px): en rad som inte växer med
+           texten ser trängd ut på tre meters håll. minHeight, inte height — texten
+           får ta mer plats om textstorleken skruvas upp. */
+        minHeight: tvBox(84),
+        borderRadius: 10,
+        background: TV.neutral900,
+        border: `1px solid ${TV.neutral800}`,
+        cursor: "pointer",
+        width: "100%",
+        textAlign: "left"
+      };
+    }
+  });
+
+  // lib/couch/host-api.ts
+  var init_host_api = __esm({
+    "lib/couch/host-api.ts"() {
+      init_i18n();
+    }
+  });
+
+  // components/settings/tv-pairing-body.tsx
+  var init_tv_pairing_body = __esm({
+    "components/settings/tv-pairing-body.tsx"() {
+      "use client";
+      init_react_shim();
+      init_esm();
+      init_i18n();
+      init_tv_settings_rows();
+      init_tv_metrics();
+      init_host_api();
+      init_jsx_runtime_shim();
+    }
+  });
+
+  // components/supporter/supporter-link-body.tsx
+  var init_supporter_link_body = __esm({
+    "components/supporter/supporter-link-body.tsx"() {
+      "use client";
+      init_react_shim();
+      init_esm();
+      init_i18n();
+      init_open_external();
+      init_link();
+      init_api();
+      init_tv_settings_rows();
+      init_tv_metrics();
+      init_tv_pairing_body();
+      init_jsx_runtime_shim();
+    }
+  });
+
+  // components/supporter/supporter-gate.tsx
+  var init_supporter_gate = __esm({
+    "components/supporter/supporter-gate.tsx"() {
+      "use client";
+      init_react_shim();
+      init_i18n();
+      init_tv_focus_shim();
+      init_use_supporter();
+      init_features();
+      init_api();
+      init_supporter_link_body();
       init_jsx_runtime_shim();
     }
   });
@@ -10937,9 +13111,16 @@
     }
   });
 
+  // lib/night-mode.ts
+  var init_night_mode = __esm({
+    "lib/night-mode.ts"() {
+    }
+  });
+
   // lib/core-streams/source-groups.ts
   var init_source_groups = __esm({
     "lib/core-streams/source-groups.ts"() {
+      init_source_hints();
       init_stream_utils();
     }
   });
@@ -10999,7 +13180,6 @@
   var PREFETCH_TTL_MS;
   var init_media_prefetch_cache = __esm({
     "lib/services/media-prefetch-cache.ts"() {
-      init_fetch_client();
       init_wiki_request_cache();
       init_soundtrack_request_cache();
       init_api_json_cache();
@@ -11008,17 +13188,34 @@
     }
   });
 
-  // lib/opensubtitles-settings.ts
-  var init_opensubtitles_settings = __esm({
-    "lib/opensubtitles-settings.ts"() {
+  // lib/stremio/opensubtitles-addon.ts
+  var OPENSUBTITLES_V3_BASE_URL, OPENSUBTITLES_V3_MANIFEST_URL;
+  var init_opensubtitles_addon = __esm({
+    "lib/stremio/opensubtitles-addon.ts"() {
+      "use client";
       init_profile_storage_shim();
+      init_core_addons();
+      init_addons_storage();
+      init_manifest();
+      OPENSUBTITLES_V3_BASE_URL = "https://opensubtitles-v3.strem.io";
+      OPENSUBTITLES_V3_MANIFEST_URL = `${OPENSUBTITLES_V3_BASE_URL}/manifest.json`;
     }
   });
 
   // lib/opensubtitles/os-client.ts
   var init_os_client = __esm({
     "lib/opensubtitles/os-client.ts"() {
-      init_opensubtitles_settings();
+      init_opensubtitles_addon();
+      init_playback_settings();
+    }
+  });
+
+  // lib/opensubtitles-settings.ts
+  var init_opensubtitles_settings = __esm({
+    "lib/opensubtitles-settings.ts"() {
+      "use client";
+      init_react_shim();
+      init_profile_storage_shim();
     }
   });
 
@@ -11113,11 +13310,32 @@
     }
   });
 
+  // lib/couch/remote-nav.ts
+  var init_remote_nav = __esm({
+    "lib/couch/remote-nav.ts"() {
+      "use strict";
+    }
+  });
+
+  // lib/quick-open.ts
+  var init_quick_open = __esm({
+    "lib/quick-open.ts"() {
+      "use client";
+      init_video_progress();
+      init_open_item_runtime();
+    }
+  });
+
   // lib/couch/host-bridge.ts
   var init_host_bridge = __esm({
     "lib/couch/host-bridge.ts"() {
       init_host_trakt();
       init_sport_protocol();
+      init_remote_nav();
+      init_quick_open();
+      init_video_progress();
+      init_gate();
+      init_store();
     }
   });
 
@@ -11143,6 +13361,7 @@
       init_continue_frames();
       init_tauri_mpv();
       init_tauri_native_player();
+      init_incognito();
     }
   });
 
@@ -11150,6 +13369,7 @@
   var init_use_continue_frame_capture = __esm({
     "lib/use-continue-frame-capture.ts"() {
       "use client";
+      init_gate();
       init_react_shim();
       init_continue_frames();
       init_continue_frame_capture();
@@ -11190,20 +13410,18 @@
     }
   });
 
+  // lib/credits-from-subs.ts
+  var init_credits_from_subs = __esm({
+    "lib/credits-from-subs.ts"() {
+      init_source_hints();
+    }
+  });
+
   // lib/player-reveal-hold.ts
   var CINEMA_REVEAL_HOLD_MAX_MS;
   var init_player_reveal_hold = __esm({
     "lib/player-reveal-hold.ts"() {
       CINEMA_REVEAL_HOLD_MAX_MS = 20 * 6e4;
-    }
-  });
-
-  // lib/core-streams/start-watchdog.ts
-  var SILENT_RELOAD_AFTER_AUDIO_MS, DEFAULT_START_BUDGETS;
-  var init_start_watchdog = __esm({
-    "lib/core-streams/start-watchdog.ts"() {
-      SILENT_RELOAD_AFTER_AUDIO_MS = 3e3;
-      DEFAULT_START_BUDGETS = { resolvingMs: 8e3, openingMs: 2e4, audioOnlyMs: SILENT_RELOAD_AFTER_AUDIO_MS + 4e3 };
     }
   });
 
@@ -11466,6 +13684,16 @@
     }
   });
 
+  // lib/season-lengths.ts
+  var SEASON_CACHE_TTL_MS;
+  var init_season_lengths = __esm({
+    "lib/season-lengths.ts"() {
+      "use client";
+      init_app_storage();
+      SEASON_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1e3;
+    }
+  });
+
   // lib/series-lock-gate.ts
   var init_series_lock_gate = __esm({
     "lib/series-lock-gate.ts"() {
@@ -11481,6 +13709,7 @@
       init_profile_storage_shim();
       init_watched_episodes();
       init_series_locks();
+      init_season_lengths();
       init_series_lock_gate();
     }
   });
@@ -11571,13 +13800,6 @@
     }
   });
 
-  // lib/couch/host-api.ts
-  var init_host_api = __esm({
-    "lib/couch/host-api.ts"() {
-      init_i18n();
-    }
-  });
-
   // lib/device-transfer.ts
   var init_device_transfer = __esm({
     "lib/device-transfer.ts"() {
@@ -11618,11 +13840,14 @@
   });
 
   // components/player/video-player-modal.tsx
-  var import_react_dom2, import_core6, import_window2;
+  var import_react_dom4, import_core6, import_window2;
   var init_video_player_modal = __esm({
     "components/player/video-player-modal.tsx"() {
       "use strict";
       "use client";
+      init_start_title();
+      init_watched_threshold();
+      init_mobile_data_guard();
       init_player_control_icons();
       init_trickplay_identity();
       init_playback_settings();
@@ -11631,9 +13856,10 @@
       init_subtitle_legibility();
       init_dual_subtitles();
       init_playback_speed_store();
+      init_series_track_store();
       init_react_shim();
       init_timing();
-      import_react_dom2 = __toESM(require_react_dom());
+      import_react_dom4 = __toESM(require_react_dom());
       import_core6 = __toESM(require_core());
       import_window2 = __toESM(require_window());
       init_transparent_webview();
@@ -11644,6 +13870,10 @@
       init_profile_storage_shim();
       init_profile_avatar();
       init_sleep_timer();
+      init_playback_settings();
+      init_spoken_subtitles();
+      init_spoken_subtitles_engine();
+      init_spoken_subtitles_settings();
       init_player_open();
       init_use_barcode_recorder();
       init_barcode_settings();
@@ -11655,16 +13885,22 @@
       init_android_media_keys();
       init_resume_playback();
       init_subtitle_autopick();
-      init_watched_episodes();
-      init_watched_movies();
+      init_playback_watched();
+      init_incognito();
+      init_use_incognito();
       init_scrobble_fanout();
+      init_learned_skip();
+      init_learned_skip_store();
       init_player_layout();
       init_player_tuning_panel();
+      init_use_supporter();
+      init_supporter_gate();
       init_video_tuning();
       init_audio_tuning();
       init_haptics_filter();
       init_haptics_host();
       init_playback_settings();
+      init_night_mode();
       init_scroll_lock();
       init_i18n();
       init_lighter_stream();
@@ -11680,6 +13916,7 @@
       init_wiki_request_cache();
       init_media_prefetch_cache();
       init_os_client();
+      init_opensubtitles_settings();
       init_player_wiki_panel();
       init_player_soundtrack_panel();
       init_player_episodes_panel();
@@ -11694,6 +13931,7 @@
       init_keyboard_shortcuts();
       init_playback_settings();
       init_autoplay_settings();
+      init_credits_from_subs();
       init_player_reveal_hold();
       init_player_silent_start();
       init_credits_recommendations();
@@ -11746,535 +13984,27 @@
     }
   });
 
-  // lib/stremio/addons-storage.ts
-  var init_addons_storage = __esm({
-    "lib/stremio/addons-storage.ts"() {
+  // lib/cast-recognition-core.ts
+  var CREDITS_TTL_MS;
+  var init_cast_recognition_core = __esm({
+    "lib/cast-recognition-core.ts"() {
+      CREDITS_TTL_MS = 7 * 864e5;
+    }
+  });
+
+  // lib/cast-recognition.ts
+  var FAILURE_BACKOFF_MS;
+  var init_cast_recognition = __esm({
+    "lib/cast-recognition.ts"() {
       "use client";
+      init_react_shim();
+      init_app_storage();
+      init_api_json_cache();
+      init_watched_movies();
+      init_watched_episodes();
       init_profile_storage_shim();
-    }
-  });
-
-  // lib/stremio/manifest.ts
-  var init_manifest = __esm({
-    "lib/stremio/manifest.ts"() {
-    }
-  });
-
-  // lib/stremio/install-addon.ts
-  var init_install_addon = __esm({
-    "lib/stremio/install-addon.ts"() {
-      init_core_addons();
-      init_addons_storage();
-      init_manifest();
-    }
-  });
-
-  // lib/stremio/addon-inbox.ts
-  var init_addon_inbox = __esm({
-    "lib/stremio/addon-inbox.ts"() {
-      init_install_addon();
-    }
-  });
-
-  // components/tv/tv-auto-stations.tsx
-  var init_tv_auto_stations = __esm({
-    "components/tv/tv-auto-stations.tsx"() {
-      "use client";
-      init_react_shim();
-      init_jsx_runtime_shim();
-    }
-  });
-
-  // lib/tv-metrics.ts
-  var tvBox, TV_SETTINGS_SIDE_TEXT_COL_PX, TV_SETTINGS_SIDE_PAD_LEFT_PX, TV_SETTINGS_SIDE_PAD_RIGHT_PX, TV_SETTINGS_SIDE_LIST_PX;
-  var init_tv_metrics = __esm({
-    "lib/tv-metrics.ts"() {
-      tvBox = (px) => `calc(${px}px * var(--ui-scale, 1))`;
-      TV_SETTINGS_SIDE_TEXT_COL_PX = 416;
-      TV_SETTINGS_SIDE_PAD_LEFT_PX = 40;
-      TV_SETTINGS_SIDE_PAD_RIGHT_PX = 36;
-      TV_SETTINGS_SIDE_LIST_PX = TV_SETTINGS_SIDE_TEXT_COL_PX + TV_SETTINGS_SIDE_PAD_LEFT_PX + TV_SETTINGS_SIDE_PAD_RIGHT_PX;
-    }
-  });
-
-  // lib/tv-tab-heading.tsx
-  var TvTabHeadingContext;
-  var init_tv_tab_heading = __esm({
-    "lib/tv-tab-heading.tsx"() {
-      "use client";
-      init_react_shim();
-      init_jsx_runtime_shim();
-      TvTabHeadingContext = createContext(null);
-    }
-  });
-
-  // lib/settings-heading.ts
-  var init_settings_heading = __esm({
-    "lib/settings-heading.ts"() {
-      "use client";
-    }
-  });
-
-  // components/settings/redesigned/primitives.tsx
-  function Icon({
-    name,
-    size = 18,
-    color,
-    style,
-    fill: fill2
-  }) {
-    const path = ICON_PATHS[name];
-    if (!path) return null;
-    return /* @__PURE__ */ jsx(
-      "svg",
-      {
-        width: size,
-        height: size,
-        viewBox: "0 0 24 24",
-        fill: fill2 || "none",
-        stroke: color || "currentColor",
-        strokeWidth: "1.6",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        style,
-        "aria-hidden": "true",
-        children: path
-      }
-    );
-  }
-  function Checkbox({
-    checked,
-    onChange,
-    disabled,
-    label,
-    hint,
-    right
-  }) {
-    return /* @__PURE__ */ jsxs(
-      "label",
-      {
-        style: {
-          display: "flex",
-          alignItems: hint ? "flex-start" : "center",
-          gap: 12,
-          cursor: disabled ? "default" : "pointer",
-          opacity: disabled ? 0.55 : 1,
-          userSelect: "none"
-        },
-        children: [
-          /* @__PURE__ */ jsxs(
-            "span",
-            {
-              onClick: (e) => {
-                e.preventDefault();
-                if (!disabled && onChange) onChange(!checked);
-              },
-              style: { display: "flex", alignItems: hint ? "flex-start" : "center", gap: 12, flex: 1, minWidth: 0 },
-              children: [
-                /* @__PURE__ */ jsx(
-                  "span",
-                  {
-                    style: {
-                      width: 22,
-                      height: 22,
-                      borderRadius: 6,
-                      background: checked ? TOKENS.accent : TOKENS.surface2,
-                      border: `1.5px solid ${checked ? TOKENS.accent : TOKENS.borderStrong}`,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all .14s ease",
-                      flexShrink: 0,
-                      marginTop: hint ? 2 : 0
-                    },
-                    children: checked ? /* @__PURE__ */ jsx(Icon, { name: "check", size: 14, color: TOKENS.surface0 }) : null
-                  }
-                ),
-                label ? /* @__PURE__ */ jsxs("span", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 2 }, children: [
-                  /* @__PURE__ */ jsx("span", { style: { fontSize: TYPE.body, color: TOKENS.text, fontWeight: 500 }, children: label }),
-                  hint ? /* @__PURE__ */ jsx("span", { style: { fontSize: TYPE.small, color: TOKENS.textMute, lineHeight: 1.4 }, children: hint }) : null
-                ] }) : null
-              ]
-            }
-          ),
-          right
-        ]
-      }
-    );
-  }
-  function PillBtn({
-    children,
-    onClick,
-    variant = "ghost",
-    size = "md",
-    disabled,
-    icon,
-    type,
-    style,
-    title
-  }) {
-    const sizes = {
-      sm: { padding: "6px 10px", fontSize: TYPE.small },
-      md: { padding: "9px 14px", fontSize: TYPE.body },
-      lg: { padding: "11px 18px", fontSize: TYPE.body }
-    };
-    const variants = {
-      ghost: {
-        background: "transparent",
-        border: `1px solid ${TOKENS.borderStrong}`,
-        color: TOKENS.text
-      },
-      primary: {
-        background: TOKENS.orange,
-        border: `1px solid ${TOKENS.orange}`,
-        color: "#1A0E07",
-        fontWeight: 600
-      },
-      accent: {
-        background: TOKENS.accentSoft,
-        border: `1px solid ${TOKENS.accent}`,
-        color: "#fff"
-      },
-      danger: {
-        background: "transparent",
-        border: `1px solid rgba(255,90,106,.4)`,
-        color: TOKENS.red
-      }
-    };
-    return /* @__PURE__ */ jsxs(
-      "button",
-      {
-        type: type || "button",
-        onClick,
-        disabled,
-        title,
-        style: {
-          ...sizes[size],
-          ...variants[variant],
-          borderRadius: 8,
-          cursor: disabled ? "default" : "pointer",
-          opacity: disabled ? 0.5 : 1,
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          fontWeight: variants[variant].fontWeight || 500,
-          letterSpacing: 0.2,
-          whiteSpace: "nowrap",
-          transition: "transform .08s, filter .12s",
-          ...style
-        },
-        onMouseDown: (e) => {
-          if (!disabled) e.currentTarget.style.transform = "scale(0.97)";
-        },
-        onMouseUp: (e) => {
-          ;
-          e.currentTarget.style.transform = "scale(1)";
-        },
-        onMouseLeave: (e) => {
-          ;
-          e.currentTarget.style.transform = "scale(1)";
-        },
-        children: [
-          icon ? /* @__PURE__ */ jsx(Icon, { name: icon, size: 14 }) : null,
-          children
-        ]
-      }
-    );
-  }
-  function Card({
-    children,
-    padding = 16,
-    style
-  }) {
-    return /* @__PURE__ */ jsx(
-      "div",
-      {
-        style: {
-          background: "var(--st-box)",
-          borderRadius: 10,
-          padding,
-          marginBottom: 10,
-          ...style
-        },
-        children
-      }
-    );
-  }
-  var import_react_dom3, TOKENS, TYPE, inputStyle, monoFont, eyebrowStyle, ICON_PATHS;
-  var init_primitives = __esm({
-    "components/settings/redesigned/primitives.tsx"() {
-      "use client";
-      init_react_shim();
-      init_tv_tab_heading();
-      init_settings_heading();
-      import_react_dom3 = __toESM(require_react_dom());
-      init_jsx_runtime_shim();
-      TOKENS = {
-        bg: "var(--tk-bg)",
-        surface0: "var(--tk-surface0)",
-        surface1: "var(--tk-surface1)",
-        surface2: "var(--tk-surface2)",
-        surface3: "var(--tk-surface3)",
-        border: "var(--tk-border)",
-        borderStrong: "var(--tk-border-strong)",
-        text: "#EAEEF6",
-        textDim: "#9AA5BC",
-        textMute: "#6B7691",
-        accent: "var(--color-accent)",
-        accentSoft: "rgb(var(--accent-500) / 0.22)",
-        mint: "#3CD6A3",
-        orange: "#FF8B5A",
-        red: "#FF5A6A",
-        cyan: "#5FD3E8",
-        warn: "#F3C969"
-      };
-      TYPE = {
-        /** Sifferbrickor och räknare. */
-        micro: "var(--st-micro)",
-        /** ÅTGÄRD/KLART, eyebrow, versala etiketter. */
-        label: "var(--st-label)",
-        /** Hjälptext under en rad. */
-        small: "var(--st-small)",
-        /** Radtitlar, länkar, fältvärden — skalans mittpunkt. */
-        body: "var(--st-body)",
-        /** Korttitel. */
-        h3: "var(--st-h3)",
-        /** Sektionsrubrik. */
-        h2: "var(--st-h2)",
-        /** Sidrubrik. */
-        h1: "var(--st-h1)"
-      };
-      inputStyle = {
-        width: "100%",
-        minHeight: 44,
-        padding: "10px 14px",
-        borderRadius: 10,
-        border: `1px solid ${TOKENS.border}`,
-        background: TOKENS.surface0,
-        color: TOKENS.text,
-        fontSize: TYPE.body,
-        outline: "none",
-        boxSizing: "border-box"
-      };
-      monoFont = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
-      eyebrowStyle = {
-        fontSize: TYPE.label,
-        fontWeight: 600,
-        letterSpacing: "0.14em",
-        color: TOKENS.textMute,
-        textTransform: "uppercase"
-      };
-      ICON_PATHS = {
-        sparkle: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" }) }),
-        database: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("ellipse", { cx: "12", cy: "5.5", rx: "7.5", ry: "2.5" }),
-          /* @__PURE__ */ jsx("path", { d: "M4.5 5.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" }),
-          /* @__PURE__ */ jsx("path", { d: "M4.5 11.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" })
-        ] }),
-        layers: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("path", { d: "M12 3 3 8l9 5 9-5-9-5z" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 13l9 5 9-5" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 18l9 5 9-5" })
-        ] }),
-        plug: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M9 2v4M15 2v4M7 6h10v6a5 5 0 0 1-10 0V6zM12 17v5" }) }),
-        close: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M6 6l12 12M18 6 6 18" }) }),
-        search: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "11", cy: "11", r: "6.5" }),
-          /* @__PURE__ */ jsx("path", { d: "m20 20-4-4" })
-        ] }),
-        chevDown: /* @__PURE__ */ jsx("path", { d: "M6 9l6 6 6-6" }),
-        chevUp: /* @__PURE__ */ jsx("path", { d: "M6 15l6-6 6 6" }),
-        chevRight: /* @__PURE__ */ jsx("path", { d: "M9 6l6 6-6 6" }),
-        drag: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "6", r: "1", fill: "currentColor" }),
-          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "12", r: "1", fill: "currentColor" }),
-          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "18", r: "1", fill: "currentColor" }),
-          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "6", r: "1", fill: "currentColor" }),
-          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "12", r: "1", fill: "currentColor" }),
-          /* @__PURE__ */ jsx("circle", { cx: "15", cy: "18", r: "1", fill: "currentColor" })
-        ] }),
-        plus: /* @__PURE__ */ jsx("path", { d: "M12 5v14M5 12h14" }),
-        check: /* @__PURE__ */ jsx("path", { d: "M5 13l4 4L19 7" }),
-        image: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "4", width: "18", height: "16", rx: "2" }),
-          /* @__PURE__ */ jsx("circle", { cx: "9", cy: "10", r: "1.6" }),
-          /* @__PURE__ */ jsx("path", { d: "m3 17 5-5 5 5 3-3 5 5" })
-        ] }),
-        film: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "4", width: "18", height: "16", rx: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M7 4v16M17 4v16M3 9h4M3 14h4M17 9h4M17 14h4" })
-        ] }),
-        tv: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "13", rx: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M8 21h8M12 18v3" })
-        ] }),
-        list: /* @__PURE__ */ jsx(Fragment2, { children: /* @__PURE__ */ jsx("path", { d: "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" }) }),
-        star: /* @__PURE__ */ jsx("path", { d: "M12 3l2.6 5.3 5.9.9-4.3 4.2 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.2l5.9-.9L12 3z" }),
-        trending: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("path", { d: "M3 17l6-6 4 4 8-8" }),
-          /* @__PURE__ */ jsx("path", { d: "M14 7h7v7" })
-        ] }),
-        clock: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
-          /* @__PURE__ */ jsx("path", { d: "M12 7v5l3 2" })
-        ] }),
-        folder: /* @__PURE__ */ jsx("path", { d: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" }),
-        history: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("path", { d: "M3 12a9 9 0 1 0 3-6.7L3 8" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 3v5h5M12 8v5l3 2" })
-        ] }),
-        zap: /* @__PURE__ */ jsx("path", { d: "M13 2 4 14h7l-1 8 9-12h-7l1-8z" }),
-        youtube: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "2.5", y: "6", width: "19", height: "12", rx: "3" }),
-          /* @__PURE__ */ jsx("path", { d: "M10.5 9.5v5l4-2.5z", fill: "currentColor", stroke: "none" })
-        ] }),
-        cog: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "3" }),
-          /* @__PURE__ */ jsx("path", { d: "M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" })
-        ] }),
-        upload: /* @__PURE__ */ jsx("path", { d: "M12 16V4M6 10l6-6 6 6M4 20h16" }),
-        refresh: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("path", { d: "M3 12a9 9 0 0 1 15.5-6.3L21 8" }),
-          /* @__PURE__ */ jsx("path", { d: "M21 3v5h-5" }),
-          /* @__PURE__ */ jsx("path", { d: "M21 12a9 9 0 0 1-15.5 6.3L3 16" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 21v-5h5" })
-        ] }),
-        globe: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18" })
-        ] }),
-        calendar: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "16", rx: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 9h18M8 3v4M16 3v4" })
-        ] }),
-        eye: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("path", { d: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" }),
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "3" })
-        ] }),
-        bookmark: /* @__PURE__ */ jsx("path", { d: "M6 4h12v17l-6-3.5L6 21z" }),
-        award: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "9", r: "6" }),
-          /* @__PURE__ */ jsx("path", { d: "m8.5 14-1.5 7 5-2.5L17 21l-1.5-7" })
-        ] }),
-        grid: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1" }),
-          /* @__PURE__ */ jsx("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1" }),
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1" }),
-          /* @__PURE__ */ jsx("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1" })
-        ] }),
-        carousel: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "1.5" }),
-          /* @__PURE__ */ jsx("path", { d: "M3 8v8M21 8v8" })
-        ] }),
-        rows: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "5", width: "18", height: "4", rx: "1" }),
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "11", width: "18", height: "2", rx: "1" }),
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "15", width: "18", height: "4", rx: "1" })
-        ] }),
-        showcase: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "3", y: "6", width: "9", height: "12", rx: "1.5" }),
-          /* @__PURE__ */ jsx("rect", { x: "14", y: "6", width: "3", height: "5", rx: "0.7" }),
-          /* @__PURE__ */ jsx("rect", { x: "18", y: "6", width: "3", height: "5", rx: "0.7" }),
-          /* @__PURE__ */ jsx("rect", { x: "14", y: "13", width: "3", height: "5", rx: "0.7" }),
-          /* @__PURE__ */ jsx("rect", { x: "18", y: "13", width: "3", height: "5", rx: "0.7" })
-        ] }),
-        play: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "9" }),
-          /* @__PURE__ */ jsx("path", { d: "M10 8l6 4-6 4z", fill: "currentColor", stroke: "none" })
-        ] }),
-        trash: /* @__PURE__ */ jsx("path", { d: "M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" }),
-        user: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("circle", { cx: "12", cy: "8", r: "3.5" }),
-          /* @__PURE__ */ jsx("path", { d: "M4.5 20a7.5 7.5 0 0 1 15 0" })
-        ] }),
-        keyboard: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "2.5", y: "6", width: "19", height: "12", rx: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M6 14h12" })
-        ] }),
-        warning: /* @__PURE__ */ jsx("path", { d: "M10.3 3.86l-8.61 14.92A2 2 0 0 0 3.44 22h17.12a2 2 0 0 0 1.74-3.22L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" }),
-        copy: /* @__PURE__ */ jsxs(Fragment2, { children: [
-          /* @__PURE__ */ jsx("rect", { x: "8", y: "8", width: "12", height: "12", rx: "2" }),
-          /* @__PURE__ */ jsx("path", { d: "M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" })
-        ] })
-      };
-    }
-  });
-
-  // lib/tv-keyboard-settings.ts
-  var init_tv_keyboard_settings = __esm({
-    "lib/tv-keyboard-settings.ts"() {
-      "use client";
-      init_profile_storage_shim();
-    }
-  });
-
-  // lib/tv-hint-mode.ts
-  var init_tv_hint_mode = __esm({
-    "lib/tv-hint-mode.ts"() {
-      "use client";
-      init_profile_storage_shim();
-    }
-  });
-
-  // components/tv/tv-settings-rows.tsx
-  var TV, ROW_STYLE;
-  var init_tv_settings_rows = __esm({
-    "components/tv/tv-settings-rows.tsx"() {
-      "use client";
-      init_esm();
-      init_addon_inbox();
-      init_react_shim();
-      init_tv_auto_stations();
-      init_tv_metrics();
-      init_primitives();
-      init_tv_keyboard_settings();
-      init_tv_hint_mode();
-      init_i18n();
-      init_jsx_runtime_shim();
-      TV = {
-        bg: "#161826",
-        surface: "#232532",
-        text: "#e9e9ed",
-        accent: "var(--color-accent)",
-        accent100: "var(--color-accent-100)",
-        accent200: "var(--color-accent-200)",
-        accent300: "var(--color-accent-300)",
-        accent700: "var(--color-accent-700)",
-        accent800: "var(--color-accent-800)",
-        accent900: "var(--color-accent-900)",
-        neutral100: "#f3f5fe",
-        neutral300: "#cfd3e5",
-        neutral400: "#b2b6ca",
-        neutral500: "#9397ab",
-        neutral600: "#75798c",
-        neutral700: "#595d6c",
-        neutral800: "#3f424d",
-        neutral900: "#292b31",
-        /** Sidlistans grund: en ton mörkare än innehållet, så kolumnerna skiljs utan linje. */
-        sideBg: "#12131e",
-        /** Segmenthylsans botten — samma ton som sidlistan. */
-        segTrack: "#12131e",
-        danger: "#e0776a",
-        dotDone: "#57c08a",
-        dotAction: "#e0b060",
-        shadowLg: "0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,0.65)"
-      };
-      ROW_STYLE = {
-        display: "flex",
-        alignItems: "center",
-        gap: 18,
-        padding: `${tvBox(22)} ${tvBox(30)}`,
-        /* 52 → 64 → 84. Höjden följer titeln (nu 30 px): en rad som inte växer med
-           texten ser trängd ut på tre meters håll. minHeight, inte height — texten
-           får ta mer plats om textstorleken skruvas upp. */
-        minHeight: tvBox(84),
-        borderRadius: 10,
-        background: TV.neutral900,
-        border: `1px solid ${TV.neutral800}`,
-        cursor: "pointer",
-        width: "100%",
-        textAlign: "left"
-      };
+      init_cast_recognition_core();
+      FAILURE_BACKOFF_MS = 10 * 6e4;
     }
   });
 
@@ -12288,6 +14018,7 @@
       init_tv_focus_shim();
       init_wiki_request_cache();
       init_api_json_cache();
+      init_cast_recognition();
       init_person_banner();
       init_tv_settings_rows();
       init_jsx_runtime_shim();
@@ -12404,6 +14135,7 @@
       init_zapp_settings();
       init_zapp_runtime();
       init_open_item_runtime();
+      init_system_notification();
       init_video_player_modal_shim();
       init_full_cast_page_shim();
       init_next_episode_card_shim();
@@ -12414,13 +14146,13 @@
     }
   });
 
-  // ../../../lumio-official-plugins-langs/plugins/homekit/runtime/index.ts
+  // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/homekit/runtime/index.ts
   var runtime_exports = {};
   __export(runtime_exports, {
     HomeKitPlugin: () => HomeKitPlugin
   });
 
-  // ../../../lumio-official-plugins-langs/plugins/homekit/runtime/homekit-settings-section.tsx
+  // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/homekit/runtime/homekit-settings-section.tsx
   init_react_shim();
   init_plugin_sdk();
   init_plugin_sdk();
@@ -12630,23 +14362,23 @@
     ] });
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/homekit/runtime/index.ts
+  // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/homekit/runtime/index.ts
   var HomeKitPlugin = {
     id: "com.lumio.homekit",
-    name: { en: "HomeKit", sv: "HomeKit", de: "HomeKit", fr: "HomeKit", es: "HomeKit" },
+    name: { en: "Apple Home", sv: "Apple Hem", de: "Apple Home", fr: "Apple Maison", es: "Apple Casa" },
     version: "0.1.1",
     description: {
-      en: "Connect Lumio playback events to HomeKit scenes and automations.",
-      sv: "Koppla Lumios uppspelning till HomeKit-scener och automationer.",
-      de: "Verbinde Lumio-Wiedergabeereignisse mit HomeKit-Szenen und -Automationen.",
-      fr: "Associez les \xE9v\xE9nements de lecture de Lumio aux sc\xE8nes et automatisations HomeKit.",
-      es: "Vincula los eventos de reproducci\xF3n de Lumio con escenas y automatizaciones de HomeKit."
+      en: "Works with Apple Home: connect Lumio playback events to Apple Home scenes and automations.",
+      sv: "Fungerar med Apple Hem: koppla Lumios uppspelningsh\xE4ndelser till scener och automationer i Apple Hem.",
+      de: "Funktioniert mit Apple Home: Verbinde Lumio-Wiedergabeereignisse mit Szenen und Automationen in Apple Home.",
+      fr: "Compatible avec Apple Maison : associez les \xE9v\xE9nements de lecture de Lumio aux sc\xE8nes et automatisations d\u2019Apple Maison.",
+      es: "Compatible con Apple Casa: vincula los eventos de reproducci\xF3n de Lumio con escenas y automatizaciones de Apple Casa."
     },
     preinstalled: true,
     register(ctx) {
       ctx.registerSettingsSection({
         id: "homekit",
-        label: { en: "HomeKit", sv: "HomeKit", de: "HomeKit", fr: "HomeKit", es: "HomeKit" },
+        label: { en: "Apple Home", sv: "Apple Hem", de: "Apple Home", fr: "Apple Maison", es: "Apple Casa" },
         Section: HomeKitSettingsSection
       });
     }

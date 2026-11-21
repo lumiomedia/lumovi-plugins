@@ -8,7 +8,7 @@
     "fr": "Apple Maison",
     "es": "Apple Casa"
   },
-  "version": "0.2.8",
+  "version": "0.2.9",
   "minAppVersion": "0.1.637",
   "description": {
     "en": "Works with Apple Home: connect Lumio playback events to Apple Home scenes and automations.",

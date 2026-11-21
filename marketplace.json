@@ -82,8 +82,8 @@
         "en": "Live TV",
         "sv": "Live TV"
       },
-      "version": "0.21.0",
-      "minAppVersion": "0.1.641",
+      "version": "0.22.0",
+      "minAppVersion": "0.1.642",
       "description": {
         "en": "Manage M3U sources, browse live TV channels, and see EPG (now/next) inside Lumio.",
         "sv": "Hantera M3U-källor, bläddra bland live-TV-kanaler och se EPG (nu/härnäst) i Lumio."
@@ -105,7 +105,7 @@
         "en": "Apple Home",
         "sv": "Apple Hem"
       },
-      "version": "0.2.8",
+      "version": "0.2.9",
       "description": {
         "en": "Works with Apple Home: connect Lumio playback events to Apple Home scenes and automations.",
         "sv": "Fungerar med Apple Hem: koppla Lumios uppspelningshändelser till scener och automationer i Apple Hem."
@@ -222,7 +222,7 @@
         "en": "LumioTV",
         "sv": "LumioTV"
       },
-      "version": "0.1.44",
+      "version": "0.1.45",
       "description": {
         "en": "Personal linear TV channels built from your library and watchlist — a real schedule that runs with the clock.",
         "sv": "Personliga linjära TV-kanaler av ditt bibliotek och din watchlist — en riktig tablå som rullar med klockan."
