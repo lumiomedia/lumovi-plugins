@@ -2,13 +2,13 @@
   "id": "lumio-official",
   "name": "Lumio Official",
   "description": "Official Lumio plugin marketplace. One repository can publish multiple plugins through this manifest.",
-  "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+  "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
   "visibility": "private-for-now",
   "plugins": [
     {
       "id": "com.lumio.plex",
       "slug": "plex",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Plex",
         "sv": "Plex"
@@ -31,7 +31,7 @@
     {
       "id": "com.lumio.jellyfin",
       "slug": "jellyfin",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Jellyfin",
         "sv": "Jellyfin"
@@ -54,7 +54,7 @@
     {
       "id": "com.lumio.emby",
       "slug": "emby",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Emby",
         "sv": "Emby"
@@ -77,7 +77,7 @@
     {
       "id": "com.lumio.live-tv",
       "slug": "live-tv",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Live TV",
         "sv": "Live TV"
@@ -100,7 +100,7 @@
     {
       "id": "com.lumio.homekit",
       "slug": "homekit",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Apple Home",
         "sv": "Apple Hem"
@@ -123,7 +123,7 @@
     {
       "id": "com.lumio.trakt",
       "slug": "trakt",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Trakt",
         "sv": "Trakt"
@@ -190,7 +190,7 @@
     {
       "id": "com.lumio.twitch",
       "slug": "twitch",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "Twitch",
         "sv": "Twitch"
@@ -217,7 +217,7 @@
     {
       "id": "com.lumio.channels",
       "slug": "channels",
-      "repoUrl": "https://github.com/lumiomedia/lumio-official-plugins",
+      "repoUrl": "https://github.com/lumiomedia/lumovi-plugins",
       "name": {
         "en": "LumioTV",
         "sv": "LumioTV"

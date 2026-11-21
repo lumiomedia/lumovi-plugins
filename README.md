@@ -132,8 +132,8 @@ Settings -> Plugins -> Check updates flow.
    Check raw GitHub:
 
    ```bash
-   rtk proxy curl -s https://raw.githubusercontent.com/lumiomedia/lumio-official-plugins/main/plugins/<slug>/plugin.json
-   rtk proxy curl -s https://raw.githubusercontent.com/lumiomedia/lumio-official-plugins/main/marketplace.json
+   rtk proxy curl -s https://raw.githubusercontent.com/lumiomedia/lumovi-plugins/main/plugins/<slug>/plugin.json
+   rtk proxy curl -s https://raw.githubusercontent.com/lumiomedia/lumovi-plugins/main/marketplace.json
    ```
 
    If Lumio is running locally, verify its marketplace endpoint too:
