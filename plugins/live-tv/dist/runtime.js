@@ -20520,6 +20520,7 @@
   var COMPLETE_THRESHOLD;
   var init_barcode_model = __esm({
     "lib/barcode/barcode-model.ts"() {
+      "use strict";
       COMPLETE_THRESHOLD = 0.99;
     }
   });
@@ -43910,6 +43911,34 @@ ${cue.text}`).join("\n\n")}
     }
   });
 
+  // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/live-tv/runtime/profile-sources.ts
+  function setProfileListsReader(reader) {
+    listsReader = reader;
+  }
+  function readRawLists() {
+    const parsed2 = readPluginJson("com.lumio.live-tv", "lists", []);
+    return Array.isArray(parsed2) ? parsed2.filter((entry) => Boolean(entry) && typeof entry === "object") : [];
+  }
+  function profileIndexSources(lists = listsReader ? listsReader() : readRawLists()) {
+    const out = [];
+    for (const list of lists) {
+      if (list.kind === "custom" || typeof list.source !== "string" || list.source.length === 0) continue;
+      if (!out.includes(list.source)) out.push(list.source);
+    }
+    return out;
+  }
+  function profileSourcesParam() {
+    return profileIndexSources().join(",");
+  }
+  var listsReader;
+  var init_profile_sources = __esm({
+    "../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/live-tv/runtime/profile-sources.ts"() {
+      "use strict";
+      init_plugin_sdk();
+      listsReader = null;
+    }
+  });
+
   // ../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/live-tv/runtime/index-client.ts
   function emitIndexChanged() {
     window.dispatchEvent(new CustomEvent(INDEX_CHANGED_EVENT));
@@ -43927,11 +43956,14 @@ ${cue.text}`).join("\n\n")}
   function buildQuery(params) {
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      if (value === void 0 || value === "") continue;
+      if (value === void 0 || value === "" && key !== "sources") continue;
       search.set(key, String(value));
     }
     const qs = search.toString();
     return qs ? `?${qs}` : "";
+  }
+  function scopeFor(source) {
+    return source ? void 0 : profileSourcesParam();
   }
   async function requestJson(path, init) {
     const res = await fetch(path, init);
@@ -43953,7 +43985,8 @@ ${cue.text}`).join("\n\n")}
       group: opts.group,
       q: opts.q,
       offset: opts.offset,
-      limit: opts.limit
+      limit: opts.limit,
+      sources: scopeFor(opts.source)
     });
     const data = await requestJson(
       `/api/live-tv/query${qs}`,
@@ -43983,7 +44016,7 @@ ${cue.text}`).join("\n\n")}
     return results;
   }
   async function listGroups(source) {
-    const qs = buildQuery({ source: source ?? void 0 });
+    const qs = buildQuery({ source: source ?? void 0, sources: scopeFor(source) });
     const data = await requestJson(`/api/live-tv/groups${qs}`);
     return data.groups ?? [];
   }
@@ -44103,6 +44136,7 @@ ${cue.text}`).join("\n\n")}
       "use strict";
       "use client";
       init_epg_shift();
+      init_profile_sources();
       INDEX_CHANGED_EVENT = "lumio-live-tv-index-changed";
       QUERY_PAGE_LIMIT = 5e3;
       LOOKUP_CHUNK_SIZE = 200;
@@ -44120,11 +44154,14 @@ ${cue.text}`).join("\n\n")}
   function buildQuery2(params) {
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      if (value === void 0 || value === "") continue;
+      if (value === void 0 || value === "" && key !== "sources") continue;
       search.set(key, String(value));
     }
     const qs = search.toString();
     return qs ? `?${qs}` : "";
+  }
+  function scopeFor2(source) {
+    return source ? void 0 : profileSourcesParam();
   }
   async function requestJson2(path, init) {
     const res = await fetch(path, init);
@@ -44140,7 +44177,8 @@ ${cue.text}`).join("\n\n")}
       tmdbId: opts.tmdbId,
       sort: opts.sort,
       offset: opts.offset,
-      limit: opts.limit
+      limit: opts.limit,
+      sources: scopeFor2(opts.source)
     });
     const data = await requestJson2(
       `/api/live-tv/vod/query${qs}`,
@@ -44149,7 +44187,7 @@ ${cue.text}`).join("\n\n")}
     return { items: data.items ?? [], total: data.total ?? 0, known: Boolean(data.known) };
   }
   async function listVodCategories(source, signal) {
-    const qs = buildQuery2({ source: source ?? void 0 });
+    const qs = buildQuery2({ source: source ?? void 0, sources: scopeFor2(source) });
     const data = await requestJson2(`/api/live-tv/vod/categories${qs}`, signal ? { signal } : void 0);
     return {
       categories: data.categories ?? [],
@@ -44171,7 +44209,7 @@ ${cue.text}`).join("\n\n")}
     const data = await requestJson2("/api/live-tv/vod/lookup", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ source: source ?? void 0, keys: keys2 })
+      body: JSON.stringify({ source: source ?? void 0, sources: scopeFor2(source), keys: keys2 })
     });
     return data.items ?? [];
   }
@@ -44203,6 +44241,7 @@ ${cue.text}`).join("\n\n")}
     "../../../lumio-official-plugins/.worktrees/sale-plugins/plugins/live-tv/runtime/vod-client.ts"() {
       "use strict";
       "use client";
+      init_profile_sources();
       VOD_CHANGED_EVENT = "lumio-live-tv-vod-changed";
     }
   });
@@ -45205,6 +45244,7 @@ ${cue.text}`).join("\n\n")}
       init_plugin_sdk();
       init_index_client();
       init_vod_client();
+      init_profile_sources();
       init_vod_library_map();
       init_list_curation();
       init_live_format();
@@ -45219,6 +45259,7 @@ ${cue.text}`).join("\n\n")}
       LIVE_TV_LOGO_BUCKET = "com.lumio.live-tv:logo";
       logoSrcCache = /* @__PURE__ */ new Map();
       LOGO_SRC_CACHE_MAX = 5e3;
+      setProfileListsReader(getLiveTvLists);
       MAX_CUSTOM_LIST_CHANNELS = 500;
       XTREAM_LOGINS_KEY = "xtream_logins";
       XTREAM_URL_PREFIX = "xtream://";
@@ -55957,10 +55998,11 @@ ${ON} [data-focus-row]:has([data-fcur="1"]) ${ROW_DECL}
   }
   function fetchSportDay(day, now2 = Date.now()) {
     const shiftMin = getEpgShiftMinutes();
-    const key = `${day}|${shiftMin}`;
+    const sources = profileSourcesParam();
+    const key = `${day}|${shiftMin}|${sources}`;
     const hit = cache8.get(key);
     if (hit && now2 - hit.at < TTL_MS2) return hit.promise;
-    const qs = new URLSearchParams({ listId: LIVE_TV_GLOBAL_EPG_ID, day, tzOffset: String(hostTzOffset(day, shiftMin)) });
+    const qs = new URLSearchParams({ listId: LIVE_TV_GLOBAL_EPG_ID, day, tzOffset: String(hostTzOffset(day, shiftMin)), sources });
     const promise = fetch(`/api/live-tv/sport/day?${qs.toString()}`).then(async (res) => {
       if (res.status === 404) throw new SportEndpointMissing();
       if (!res.ok) throw new Error(`/api/live-tv/sport/day returned ${res.status}`);
@@ -55998,6 +56040,7 @@ ${ON} [data-focus-row]:has([data-fcur="1"]) ${ROW_DECL}
       init_react_shim();
       init_live_tv_data();
       init_epg_shift();
+      init_profile_sources();
       pad2 = (n) => String(n).padStart(2, "0");
       SportEndpointMissing = class extends Error {
         constructor() {
@@ -56447,6 +56490,8 @@ ${ON} [data-focus-row]:has([data-fcur="1"]) ${ROW_DECL}
           listId: LIVE_TV_GLOBAL_EPG_ID,
           day: args.day,
           tzOffset: hostTzOffset(args.day),
+          // Samma urval som `/sport/day`: kopplingen ska peka på profilens matcher.
+          sources: profileSourcesParam(),
           fixtures: args.fixtures.map((f) => ({ id: fixtureMatchKey(f), sport: f.sport, home: f.home.name, away: f.away.name, league: f.league.name, kickoff: f.kickoff - getEpgShiftMinutes() * 6e4 }))
         })
       });
@@ -56465,6 +56510,7 @@ ${ON} [data-focus-row]:has([data-fcur="1"]) ${ROW_DECL}
       init_sport_epg();
       init_epg_shift();
       init_merge();
+      init_profile_sources();
     }
   });
 

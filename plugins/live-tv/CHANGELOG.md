@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.2
+
+- Profiles: the library (films and series), categories, channel search and Sport also stay within the current profile's own playlists. Needs Lumovi 0.1.643; older versions keep working as before.
+
 ## 0.22.1
 
 - Profiles: "All playlists" and programme search only show channels from the current profile's own playlists. A new profile without playlists no longer sees another profile's channels.
