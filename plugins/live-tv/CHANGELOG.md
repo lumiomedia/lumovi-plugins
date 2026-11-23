@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.1
+
+- Profiles: "All playlists" and programme search only show channels from the current profile's own playlists. A new profile without playlists no longer sees another profile's channels.
+
 ## 0.21.0
 
 - Pause live TV on Android (phones and TV boxes with the built-in engine): with Settings → Recording → Pause live TV on this device turned on, the app keeps a local copy of the channel while you watch (15, 30 or 60 minutes). Pausing continues where the picture stopped; -30/+30 and Go live work in the player, on the phone as a row under the controls. One connection at your provider as before, and the channel starts as fast as before. A pause longer than the buffer continues from the oldest point. Off by default on Android. Needs Lumio 0.1.641.

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { epgSearch } from '../index-client'
 import { resolveChannelKeys } from '../channel-resolver'
-import { LIVE_TV_GLOBAL_EPG_ID, type M3uChannel } from '../live-tv-data'
+import { channelKey, getLiveTvLists, LIVE_TV_GLOBAL_EPG_ID, type M3uChannel } from '../live-tv-data'
+import { loadChannelsShared } from '../live-tv-model'
 import type { EpgProgramme } from '../epg/types'
 
 export interface ProgrammeSearchHit {
@@ -20,6 +21,15 @@ export interface ProgrammeSearchResult {
 const DEBOUNCE_MS = 150
 
 const EMPTY: ProgrammeSearchHit[] = []
+
+/** Nycklarna i profilens egna listor: indexerade källor plus manuella listor. */
+async function profileChannelKeys(): Promise<Set<string>> {
+  const keys = new Set((await loadChannelsShared(null)).map((channel) => channel.key))
+  for (const list of getLiveTvLists()) {
+    for (const channel of list.channels ?? []) keys.add(channelKey(channel))
+  }
+  return keys
+}
 
 /**
  * Sökning i PROGRAM (spec 4.2) — appen söker, webviewn ritar.
@@ -56,8 +66,15 @@ export function useProgrammeSearch(
     const timer = window.setTimeout(() => {
       epgSearch(listId, q, dayStart, dayEnd, limit)
         .then(async (items) => {
-          const channels = await resolveChannelKeys(items.map((item) => item.key))
-          const byKey = new Map(channels.map((channel) => [channel.key, channel as M3uChannel]))
+          const [channels, owned] = await Promise.all([
+            resolveChannelKeys(items.map((item) => item.key)),
+            profileChannelKeys(),
+          ])
+          // Tablån och indexet delas mellan profiler: bara kanaler ur den
+          // här profilens egna listor får bli träffar.
+          const byKey = new Map(channels
+            .filter((channel) => owned.has(channel.key))
+            .map((channel) => [channel.key, channel as M3uChannel]))
           const hits: ProgrammeSearchHit[] = []
           for (const item of items) {
             const channel = byKey.get(item.key)

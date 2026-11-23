@@ -390,9 +390,10 @@ function ensureCurationSubscription(): void {
  * uppsättning per källa i minnet, aldrig två.
  *
  * Utan indexerbara listor (inga listor alls, eller bara manuellt skapade som
- * inte har någon källa i indexet) faller den tillbaka på den gamla vägen:
- * då finns det ingen källa att bygga unionen av, och indexet kan ändå bära
- * kanaler.
+ * inte har någon källa i indexet) är svaret TOMT. Indexet delas mellan
+ * profiler: förr föll den här vägen tillbaka på hela indexet (`source`
+ * utelämnad), och en ny profil såg då en annan profils spellistor (Jerry
+ * 2026-11-23). Profilens egna listor är det enda som får synas.
  */
 async function loadEveryChannel(signal?: AbortSignal): Promise<IndexChannel[]> {
   const sources = [...new Set(
@@ -400,7 +401,7 @@ async function loadEveryChannel(signal?: AbortSignal): Promise<IndexChannel[]> {
       .filter((list) => list.kind !== 'custom' && Boolean(list.source))
       .map((list) => list.source as string),
   )]
-  if (sources.length === 0) return loadAllChannels(null, undefined, signal)
+  if (sources.length === 0) return []
 
   const items: IndexChannel[] = []
   const seen = new Set<string>()

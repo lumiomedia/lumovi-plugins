@@ -7,7 +7,12 @@ vi.mock('../index-client', () => ({
   lookupChannels: vi.fn(async () => []),
 }))
 
+vi.mock('../live-tv-model', () => ({
+  loadChannelsShared: vi.fn(async () => []),
+}))
+
 import { epgSearch, lookupChannels } from '../index-client'
+import { loadChannelsShared } from '../live-tv-model'
 import { useProgrammeSearch } from './useProgrammeSearch'
 import { __resetChannelResolverForTests } from '../channel-resolver'
 
@@ -21,6 +26,8 @@ beforeEach(() => {
   vi.mocked(lookupChannels).mockReset()
   vi.mocked(epgSearch).mockResolvedValue([])
   vi.mocked(lookupChannels).mockResolvedValue([])
+  vi.mocked(loadChannelsShared).mockReset()
+  vi.mocked(loadChannelsShared).mockResolvedValue([channel])
 })
 
 afterEach(() => {
@@ -43,6 +50,17 @@ describe('useProgrammeSearch', () => {
     expect(result.current.hits[0].channel.name).toBe('Sky')
     expect(result.current.hits[0].programme.title).toBe('Golf Tonight')
     expect(lookupChannels).toHaveBeenCalledWith([KEY])
+  })
+
+  it('en träff på en kanal som inte finns i profilens listor visas inte', async () => {
+    // Indexet och tablån delas mellan profiler (Jerry 2026-11-23).
+    vi.mocked(loadChannelsShared).mockResolvedValue([])
+    vi.mocked(epgSearch).mockResolvedValue([{ key: KEY, programme }])
+    vi.mocked(lookupChannels).mockResolvedValue([channel])
+    const { result } = renderHook(() => useProgrammeSearch('golf', 0, 86_400_000))
+    await waitFor(() => expect(lookupChannels).toHaveBeenCalled())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.hits).toHaveLength(0)
   })
 
   it('debouncar 150 ms: en snabb serie tangenttryck ger EN sökning', async () => {

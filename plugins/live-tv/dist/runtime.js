@@ -16215,6 +16215,10 @@
     const type = raw?.type;
     return type === "wifi" || type === "ethernet" || type === "cellular" || type === "none" || type === "other" ? type : "unknown";
   }
+  function parseNetworkMetered(raw) {
+    const metered = raw?.metered;
+    return typeof metered === "boolean" ? metered : null;
+  }
   async function confirmPlaybackNetwork(query) {
     if (!getBlockMobileData() || allowedThisSession) return true;
     const network = parseNetworkKind(await query(NETWORK_QUERY_TIMEOUT_MS).catch(() => null));
@@ -20516,7 +20520,6 @@
   var COMPLETE_THRESHOLD;
   var init_barcode_model = __esm({
     "lib/barcode/barcode-model.ts"() {
-      "use strict";
       COMPLETE_THRESHOLD = 0.99;
     }
   });
@@ -28942,7 +28945,7 @@ ${effectiveName(url, id)}`;
                 ...identity,
                 selected: toCandidate(sel2),
                 candidates,
-                ...syncRequestExtras(health ? { playerBufferAheadS: health.playerBufferAheadS, isBuffering: health.isBuffering, isPaused: health.isPaused, playPositionS: l.getPlayTime() } : null, getSubtitleSyncFastReadAhead())
+                ...syncRequestExtras(health ? { playerBufferAheadS: health.playerBufferAheadS, isBuffering: health.isBuffering, isPaused: health.isPaused, networkMetered: health.networkMetered ?? null, playPositionS: l.getPlayTime() } : null, getSubtitleSyncFastReadAhead())
               }, controller2.signal);
             },
             waitPlayed,
@@ -32707,6 +32710,30 @@ ${cue.text}`).join("\n\n")}
     }
     const mpvDesktop = useMpvPlayer(isMpvEngine);
     const droid = useNativePlayer(isDroidEngine);
+    const networkMeteredRef = useRef(null);
+    useEffect(() => {
+      if (!isDroidEngine) {
+        networkMeteredRef.current = null;
+        return;
+      }
+      let alive = true;
+      const ask = () => {
+        void Promise.resolve(np({ cmd: "networkType" }, 800)).then(
+          (raw) => {
+            if (alive) networkMeteredRef.current = parseNetworkMetered(raw);
+          },
+          () => {
+            if (alive) networkMeteredRef.current = null;
+          }
+        );
+      };
+      ask();
+      const id = setInterval(ask, 15e3);
+      return () => {
+        alive = false;
+        clearInterval(id);
+      };
+    }, [isDroidEngine]);
     const mpv = isDroidEngine ? droid : mpvDesktop;
     const externalDisplayActive = isDroidEngine && droid.externalDisplay;
     useEffect(() => {
@@ -36289,7 +36316,8 @@ ${cue.text}`).join("\n\n")}
       getPlaybackHealth: () => ({
         playerBufferAheadS: isDroidEngine ? droid.stats?.buffered ?? null : null,
         isBuffering: !!mpv.pausedForCache,
-        isPaused: !!mpv.paused
+        isPaused: !!mpv.paused,
+        networkMetered: isDroidEngine ? networkMeteredRef.current : null
       }),
       applySynced: applySyncedSubtitle,
       isPlayerReady: () => !useMpv || firstFrameRenderedRef.current,
@@ -52635,7 +52663,7 @@ ${cue.text}`).join("\n\n")}
     const sources = [...new Set(
       getLiveTvLists().filter((list) => list.kind !== "custom" && Boolean(list.source)).map((list) => list.source)
     )];
-    if (sources.length === 0) return loadAllChannels(null, void 0, signal);
+    if (sources.length === 0) return [];
     const items2 = [];
     const seen2 = /* @__PURE__ */ new Set();
     for (const source of sources) {
@@ -80962,8 +80990,16 @@ ${on} [data-v2f="btn"][data-f]:focus, ${on} [data-v2f="btn"][data-f][data-fcur="
   init_index_client();
   init_channel_resolver();
   init_live_tv_data();
+  init_live_tv_model();
   var DEBOUNCE_MS = 150;
   var EMPTY11 = [];
+  async function profileChannelKeys() {
+    const keys2 = new Set((await loadChannelsShared(null)).map((channel) => channel.key));
+    for (const list of getLiveTvLists()) {
+      for (const channel of list.channels ?? []) keys2.add(channelKey(channel));
+    }
+    return keys2;
+  }
   function useProgrammeSearch(query, dayStart, dayEnd, opts) {
     const listId = opts?.listId === void 0 ? LIVE_TV_GLOBAL_EPG_ID : opts.listId;
     const limit = opts?.limit ?? 30;
@@ -80979,8 +81015,11 @@ ${on} [data-v2f="btn"][data-f]:focus, ${on} [data-v2f="btn"][data-f][data-fcur="
       setState((prev) => ({ hits: prev.hits, loading: true }));
       const timer5 = window.setTimeout(() => {
         epgSearch(listId, q, dayStart, dayEnd, limit).then(async (items2) => {
-          const channels = await resolveChannelKeys(items2.map((item) => item.key));
-          const byKey = new Map(channels.map((channel) => [channel.key, channel]));
+          const [channels, owned] = await Promise.all([
+            resolveChannelKeys(items2.map((item) => item.key)),
+            profileChannelKeys()
+          ]);
+          const byKey = new Map(channels.filter((channel) => owned.has(channel.key)).map((channel) => [channel.key, channel]));
           const hits = [];
           for (const item of items2) {
             const channel = byKey.get(item.key);

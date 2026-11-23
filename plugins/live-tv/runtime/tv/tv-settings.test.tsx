@@ -33,7 +33,7 @@ import { tvText } from './tv-strings'
 import { __setHlsPlaylistProxyForTests } from '../hls-playlist-proxy'
 import { completeLogos } from '../index-client'
 
-const list: LiveTvList = { id: 'l1', name: 'Xtream', channels: [{ name: 'A', logo: null, group: 'Sport', url: 'http://x/A', tvgId: null }], createdAt: '', urlTvg: null, epgUrls: ['http://x/epg.xml'], autoEpgDisabled: false, fetchedAt: '2026-09-12T10:00:00Z' }
+const list: LiveTvList = { id: 'l1', name: 'Xtream', kind: 'xtream', source: 'xtream://x/l1', channels: [{ name: 'A', logo: null, group: 'Sport', url: 'http://x/A', tvgId: null }], createdAt: '', urlTvg: null, epgUrls: ['http://x/epg.xml'], autoEpgDisabled: false, fetchedAt: '2026-09-12T10:00:00Z' }
 const urlList: LiveTvList = { id: 'l2', name: 'iptv.example.com', channels: [], createdAt: '', urlTvg: null, epgUrls: [], autoEpgDisabled: false, fetchedAt: null }
 
 afterEach(() => {
