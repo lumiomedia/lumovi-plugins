@@ -10,6 +10,7 @@
 
 import { epgShiftMs, shiftTimes } from './epg-shift'
 import type { M3uChannel } from './live-tv-data'
+import { profileSourcesParam } from './profile-sources'
 import type { EpgProgramme, NowNextLater } from './epg/types'
 
 export interface IndexChannel extends M3uChannel {
@@ -78,11 +79,18 @@ function chunk<T>(items: T[], size: number): T[][] {
 function buildQuery(params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === '') continue
+    // `sources` skickas även tom: "profilen har inga listor" är ett svar,
+    // inte ett utelämnat filter som ger hela det delade indexet.
+    if (value === undefined || (value === '' && key !== 'sources')) continue
     search.set(key, String(value))
   }
   const qs = search.toString()
   return qs ? `?${qs}` : ''
+}
+
+/** Utan namngiven källa: begränsa till profilens egna (se `profile-sources`). */
+function scopeFor(source: string | null | undefined): string | undefined {
+  return source ? undefined : profileSourcesParam()
 }
 
 /**
@@ -119,6 +127,7 @@ export async function queryChannels(opts: {
     q: opts.q,
     offset: opts.offset,
     limit: opts.limit,
+    sources: scopeFor(opts.source),
   })
   const data = await requestJson<{ items?: IndexChannel[]; total?: number; known?: boolean }>(
     `/api/live-tv/query${qs}`,
@@ -164,13 +173,13 @@ export async function lookupChannels(keys: string[]): Promise<IndexChannel[]> {
 }
 
 export async function searchChannels(q: string, limit?: number): Promise<IndexChannel[]> {
-  const qs = buildQuery({ q, limit })
+  const qs = buildQuery({ q, limit, sources: profileSourcesParam() })
   const data = await requestJson<{ items?: IndexChannel[] }>(`/api/live-tv/search${qs}`)
   return data.items ?? []
 }
 
 export async function listGroups(source: string | null): Promise<{ name: string; count: number }[]> {
-  const qs = buildQuery({ source: source ?? undefined })
+  const qs = buildQuery({ source: source ?? undefined, sources: scopeFor(source) })
   const data = await requestJson<{ groups?: { name: string; count: number }[] }>(`/api/live-tv/groups${qs}`)
   return data.groups ?? []
 }

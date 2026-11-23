@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { LIVE_TV_GLOBAL_EPG_ID } from '../live-tv-data'
 import { getEpgShiftMinutes } from '../epg-shift'
+import { profileSourcesParam } from '../profile-sources'
 import type { SportDay, SportMatch } from './sport-model'
 
 /*
@@ -95,10 +96,14 @@ function shiftDayTimes(d: SportDay, ms: number): SportDay {
 
 export function fetchSportDay(day: string, now: number = Date.now()): Promise<SportDay> {
   const shiftMin = getEpgShiftMinutes()
-  const key = `${day}|${shiftMin}`
+  // Det globala EPG:t har inga egna källor: utan `sources` blev varje profils
+  // kanaler sportkandidater. Profilen ingår i nyckeln — ett profilbyte får
+  // inte svara ur den förra profilens dag.
+  const sources = profileSourcesParam()
+  const key = `${day}|${shiftMin}|${sources}`
   const hit = cache.get(key)
   if (hit && now - hit.at < TTL_MS) return hit.promise
-  const qs = new URLSearchParams({ listId: LIVE_TV_GLOBAL_EPG_ID, day, tzOffset: String(hostTzOffset(day, shiftMin)) })
+  const qs = new URLSearchParams({ listId: LIVE_TV_GLOBAL_EPG_ID, day, tzOffset: String(hostTzOffset(day, shiftMin)), sources })
   const promise = fetch(`/api/live-tv/sport/day?${qs.toString()}`).then(async (res) => {
     if (res.status === 404) throw new SportEndpointMissing()
     if (!res.ok) throw new Error(`/api/live-tv/sport/day returned ${res.status}`)

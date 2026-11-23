@@ -23,6 +23,7 @@ import {
   type XtreamImportSource,
 } from './index-client'
 import { forgetVod, vodStatus } from './vod-client'
+import { setProfileListsReader } from './profile-sources'
 import { VOD_LIBRARY_PROVIDER_ID } from './vod-library-map'
 import { normalizeCuration } from './list-curation'
 import { sanitizeLiveFormat, type LiveFormat } from './live-format'
@@ -462,6 +463,11 @@ export function clearStoredLiveTvChannels(urlsKey?: string): void {
 export function getLiveTvLists(): LiveTvList[] {
   return readLists()
 }
+
+// Klienterna mot indexet begränsar "Alla spellistor" till profilens egna
+// källor och behöver listorna — men får inte importera den här modulen
+// (cykel), så läsaren lämnas över hit i stället.
+setProfileListsReader(getLiveTvLists)
 
 export function getAllLiveTvEpgUrls(lists = readLists()): string[] {
   const urls = new Set<string>()

@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { SportEndpointMissing, __resetSportDayCache, fetchSportDay, localDayKey, shiftDay, tzOffsetFor, useSportDay } from './sport-epg'
 import { crestText, matchTitle } from './sport-model'
 import { HOUR, fxMatch, stubSportDays } from './__sport-fixture'
+import { __resetPluginStorageForTests, writePluginJson } from '@/lib/plugin-sdk'
 
 afterEach(() => __resetSportDayCache())
 
@@ -33,6 +34,18 @@ describe('fetchSportDay', () => {
     expect(first.matches).toHaveLength(1)
     await fetchSportDay('2026-10-10', now + 6 * 60_000)
     expect(spy).toHaveBeenCalledTimes(2)
+  })
+  it('begränsar dagen till profilens egna källor, och profilen ingår i cachenyckeln', async () => {
+    const spy = stubSportDays({ '2026-10-10': [fxMatch()] })
+    const now = Date.now()
+    await fetchSportDay('2026-10-10', now)
+    expect(new URL(String(spy.mock.calls[0]![0]), 'http://localhost').searchParams.get('sources')).toBe('')
+
+    writePluginJson('com.lumio.live-tv', 'lists', [{ id: 'l1', name: 'kkz', kind: 'xtream', source: 'xtream://kkz.test/1' }])
+    await fetchSportDay('2026-10-10', now + 1_000)
+    expect(spy).toHaveBeenCalledTimes(2)
+    expect(new URL(String(spy.mock.calls[1]![0]), 'http://localhost').searchParams.get('sources')).toBe('xtream://kkz.test/1')
+    __resetPluginStorageForTests()
   })
   it('404 = äldre app: SportEndpointMissing, och felet cachas inte', async () => {
     const spy = stubSportDays('missing')

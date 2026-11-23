@@ -78,7 +78,7 @@ describe('queryChannels', () => {
     await queryChannels({ offset: 0, limit: 50 })
 
     const [url] = fetchMock.mock.calls[0]
-    expect(String(url)).toBe('/api/live-tv/query?offset=0&limit=50')
+    expect(String(url)).toBe('/api/live-tv/query?offset=0&limit=50&sources=')
   })
 })
 
@@ -144,7 +144,7 @@ describe('searchChannels / listGroups', () => {
     const fetchMock = mockFetch()
     fetchMock.mockResolvedValueOnce(jsonResponse({ items: [channel('hit')] }))
     const items = await searchChannels('bbc', 10)
-    expect(String(fetchMock.mock.calls[0][0])).toBe('/api/live-tv/search?q=bbc&limit=10')
+    expect(String(fetchMock.mock.calls[0][0])).toBe('/api/live-tv/search?q=bbc&limit=10&sources=')
     expect(items).toEqual([channel('hit')])
   })
 
@@ -152,7 +152,7 @@ describe('searchChannels / listGroups', () => {
     const fetchMock = mockFetch()
     fetchMock.mockResolvedValueOnce(jsonResponse({ groups: [{ name: 'News', count: 3 }] }))
     const groups = await listGroups(null)
-    expect(String(fetchMock.mock.calls[0][0])).toBe('/api/live-tv/groups')
+    expect(String(fetchMock.mock.calls[0][0])).toBe('/api/live-tv/groups?sources=')
     expect(groups).toEqual([{ name: 'News', count: 3 }])
   })
 })

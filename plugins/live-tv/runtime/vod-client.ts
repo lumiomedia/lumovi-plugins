@@ -11,6 +11,8 @@
  * att hela biblioteket gick över bryggan för att sorteras och kastas.
  */
 
+import { profileSourcesParam } from './profile-sources'
+
 export type VodKind = 'movie' | 'series'
 export type VodSort = 'new' | 'az' | 'rating'
 
@@ -91,11 +93,18 @@ export const VOD_MIN_APP_VERSION = '0.1.601'
 function buildQuery(params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === '') continue
+    // `sources` skickas även tom: "profilen har inga listor" är ett svar,
+    // inte ett utelämnat filter som ger hela det delade indexet.
+    if (value === undefined || (value === '' && key !== 'sources')) continue
     search.set(key, String(value))
   }
   const qs = search.toString()
   return qs ? `?${qs}` : ''
+}
+
+/** Utan namngiven källa: begränsa till profilens egna (se `profile-sources`). */
+function scopeFor(source: string | null | undefined): string | undefined {
+  return source ? undefined : profileSourcesParam()
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -125,6 +134,7 @@ export async function queryVod(opts: {
     sort: opts.sort,
     offset: opts.offset,
     limit: opts.limit,
+    sources: scopeFor(opts.source),
   })
   const data = await requestJson<{ items?: VodItem[]; total?: number; known?: boolean }>(
     `/api/live-tv/vod/query${qs}`,
@@ -134,7 +144,7 @@ export async function queryVod(opts: {
 }
 
 export async function listVodCategories(source: string | null, signal?: AbortSignal): Promise<VodCategories> {
-  const qs = buildQuery({ source: source ?? undefined })
+  const qs = buildQuery({ source: source ?? undefined, sources: scopeFor(source) })
   const data = await requestJson<{
     categories?: VodCategory[]
     total?: number
@@ -168,7 +178,7 @@ export async function lookupVod(source: string | null, keys: string[]): Promise<
   const data = await requestJson<{ items?: VodItem[] }>('/api/live-tv/vod/lookup', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ source: source ?? undefined, keys }),
+    body: JSON.stringify({ source: source ?? undefined, sources: scopeFor(source), keys }),
   })
   return data.items ?? []
 }
