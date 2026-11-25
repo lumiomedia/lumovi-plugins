@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.23.0
+
+Needs Lumovi 0.1.644.
+
+- Live buffer: a new setting with Fast start, Stable and Extra stable. Stable and Extra stable collect 6 or 12 seconds before playback carries on after a stop, which gives fewer stops when the provider sends a channel slower than it plays. The picture is then a few seconds behind the broadcast. Applies to TS streams, on desktop and Android.
+- When a channel keeps stopping and there is no other source to switch to, the player suggests the stable buffer. During a stop on desktop it shows how much of the buffer has been filled.
+- Android: a channel that the provider cuts off, or that loses its connection, reconnects by itself instead of standing still. A dead connection is noticed after 15 seconds instead of two minutes.
+- Profiles: "Use as library" and the category question under Content only list the current profile's own playlists.
+
 ## 0.22.2
 
 - Profiles: the library (films and series), categories, channel search and Sport also stay within the current profile's own playlists. Needs Lumovi 0.1.643; older versions keep working as before.
