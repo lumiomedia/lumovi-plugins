@@ -56,7 +56,7 @@ import { PlaylistCard, playlistHost } from './playlist-card'
 import { TvSettingsPage } from './tv-settings-views'
 import { FALLBACK_AFTER_OPTIONS, setTvSettings, useTvSettings, type FallbackAfterS } from './tv/tv-settings-store'
 import { LIVE_BUFFERS, liveBufferLabelKey, sanitizeLiveBuffer } from './live-buffer'
-import { isDesktopTauri } from './tv/guide-surface'
+import { liveBufferSupported } from './tv/guide-surface'
 import { RecordingSettingsDesktop, recordingSummary } from './recording-settings'
 import { START_VIEWS, startViewLabelKey } from './tv/start-view'
 import { GUIDE_CATEGORY_LAYOUTS, HUB_LAYOUTS, LIVE_BACKGROUNDS, guideCategoryLayoutLabelKey, hubLayoutLabelKey, liveBackgroundLabelKey, sanitizeHexColor } from './tv/v2-settings'
@@ -416,8 +416,8 @@ function DesktopPage() {
             value={String(tvSettings.streamFallbackAfterS)}
             onChange={(key) => setTvSettings({ streamFallbackAfterS: Number(key) as FallbackAfterS })}
           />
-          {/* Livebufferten (live-buffer.ts): bara mpv-motorn, alltså skrivbordsappen. */}
-          {isDesktopTauri() ? (
+          {/* Livebufferten (live-buffer.ts): mpv på datorn och ExoPlayer på Android. */}
+          {liveBufferSupported() ? (
             <LtChoiceRow
               testId="lt-live-buffer"
               label={tt('settingLiveBuffer')}

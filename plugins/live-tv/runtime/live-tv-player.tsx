@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { getTvSettings, setTvSettings, useTvSettings } from './tv/tv-settings-store'
-import { bufferAheadSeconds, liveBufferOpenProps, liveBufferRefillSeconds, liveBufferRestartProps } from './live-buffer'
+import { bufferAheadSeconds, liveBufferOpenProps, liveBufferRefillSeconds, liveBufferRestartProps, nativeLiveOption } from './live-buffer'
 import { LIVE_EDGE_SLACK_S_HLS, resumeAction } from './timeshift'
 import { createTimeshiftSession, deleteTimeshiftSession, droidTimeshiftRange, startTimeshiftHeartbeat, timeshiftSessionStatus, type TimeshiftSession } from './timeshift-session'
 import { useTimeshiftOnDevice } from './timeshift-device'
@@ -362,10 +362,15 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
       // HLS ur liveformatet: säg det rakt ut till media3 i stället för att
       // låta den gissa — panelen 302:ar `.m3u8` till en ändelselös /live/play/….
       if (isDroidEngine) {
+        // Direktsändning: korta nättider, egen återanslutning av en löpande
+        // ström och Livebuffertens påfyllning (LiveRecovery.kt i appen).
+        // Läses i stunden — inställningen gäller nästa öppning.
+        const live = nativeLiveOption(url, getTvSettings().liveBuffer)
+        const liveOpt = live ? { live } : {}
         if (viaProxy) {
           // Reservvägen öppnar en egen anslutning: sessionen bort FÖRST, annars ser panelen två.
           await endTimeshiftSession()
-          return openNativePlayer({ url: target, mimeType: HOST_PROXY_MIME })
+          return openNativePlayer({ url: target, mimeType: HOST_PROXY_MIME, ...liveOpt })
         }
         if (timeshiftWantedRef.current.wanted) {
           // Omöppning av samma kanal (stall, slut på reläet, play efter paus utan
@@ -375,7 +380,7 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
             tsOnPlaylistRef.current = false
             setDroidOnPlaylist(false)
             const liveIsHls = /\.m3u8(?:[?#]|$)/i.test(existing.liveUrl)
-            return openNativePlayer({ url: existing.liveUrl, ...(liveIsHls ? { mimeType: HOST_PROXY_MIME } : {}) })
+            return openNativePlayer({ url: existing.liveUrl, ...(liveIsHls ? { mimeType: HOST_PROXY_MIME } : {}), ...liveOpt })
           }
           await endTimeshiftSession()
           const session = await createTimeshiftSession(url, timeshiftWantedRef.current.minutes)
@@ -387,10 +392,10 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
             void timeshiftSessionStatus(session.id).then(onTimeshiftStatus)
             // Reläet är rå TS (ingen mimeType); för HLS-källor är det proxyns spellista.
             const liveIsHls = /\.m3u8(?:[?#]|$)/i.test(session.liveUrl)
-            return openNativePlayer({ url: session.liveUrl, ...(liveIsHls ? { mimeType: HOST_PROXY_MIME } : {}) })
+            return openNativePlayer({ url: session.liveUrl, ...(liveIsHls ? { mimeType: HOST_PROXY_MIME } : {}), ...liveOpt })
           }
         }
-        return openNativePlayer({ url: target, ...(isHlsPlayUrl(url) ? { mimeType: HOST_PROXY_MIME } : {}) })
+        return openNativePlayer({ url: target, ...(isHlsPlayUrl(url) ? { mimeType: HOST_PROXY_MIME } : {}), ...liveOpt })
       }
       // HLS-demuxern utan parallella anslutningar (hls-recovery.ts). Sätts
       // före VARJE öppning — tomt för allt annat — eftersom egenskapen lever
@@ -1041,7 +1046,7 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
   // med snabb start föreslås stabil buffert — en gång, tills man svarat.
   const [bufferHint, setBufferHint] = useState(false)
   useEffect(() => {
-    if (fallback.hits === 0 || engineKind !== 'mpv' || playIsHls) return
+    if (fallback.hits === 0 || engineKind === 'html' || playIsHls) return
     const current = getTvSettings()
     if (current.liveBuffer !== 'fast' || current.liveBufferHintDismissed) return
     setBufferHint(true)

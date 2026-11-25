@@ -26,7 +26,7 @@ describe('Livebuffert i Live TV:s inställningar', () => {
     fireEvent.click(screen.getByTestId('setting-liveBuffer'))
     expect(getTvSettings().liveBuffer).toBe('max')
   })
-  it('utanför skrivbordsappen (Android, webbklient) finns raden inte — motorn där styrs inte härifrån', () => {
+  it('webbklienten har ingen rad — dess <video> buffrar själv', () => {
     mount()
     expect(screen.queryByTestId('setting-liveBuffer')).toBeNull()
   })

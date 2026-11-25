@@ -8,8 +8,9 @@
  * i bufferten blir stoppen färre och längre isär; priset är att bilden ligger
  * lika många sekunder efter sändningen.
  *
- * Bara mpv-motorn (dator). Androids spelare fyller redan på 5 s efter ett
- * stopp och styrs inte härifrån.
+ * Datorn (mpv) får värdena som egenskaper efter att filen laddats. Android
+ * (ExoPlayer) får påfyllningen med i öppningen (`nativeLiveOption`), från
+ * appen som bär `live` i spelarbryggan; äldre appar struntar i fältet.
  *
  * Bara rena funktioner här: inställningslagret och spelaren läser samma tabell.
  */
@@ -76,4 +77,28 @@ export function liveBufferRestartProps(mode: LiveBuffer, hls: boolean): MpvProp[
 export function bufferAheadSeconds(range: { start: number; end: number } | null, timePos: number): number | null {
   if (!range || !Number.isFinite(timePos) || !Number.isFinite(range.end)) return null
   return Math.max(0, range.end - timePos)
+}
+
+/**
+ * Xtreams arkiv (catch-up) och VOD är FILER med ett slut, även när de spelas
+ * i Live TV:s spelare: `/timeshift/u/p/min/start/id.ts`, `/movie/…`, `/series/…`.
+ */
+const FINITE_XTREAM_PATH = /^https?:\/\/[^/?#]+\/(timeshift|movie|series)\//i
+/** En M3U-lista kan bära filmfiler som "kanaler". */
+const FINITE_FILE_EXT = /\.(mp4|mkv|avi|mov|webm|m4v|mp3|flac)$/i
+
+export function isFiniteStreamUrl(url: string): boolean {
+  const trimmed = url.trim()
+  return FINITE_XTREAM_PATH.test(trimmed) || FINITE_FILE_EXT.test(trimmed.split(/[?#]/)[0])
+}
+
+/**
+ * `live`-fältet till Androids spelare för KANALENS egen adress, eller
+ * undefined för arkiv och VOD — en fil som tar slut ska inte kopplas upp igen.
+ * Avgörs på kanalens adress, inte på den som öppnas: timeshift-reläet och
+ * strömproxyn är lokala adresser som inte säger vad som ligger bakom.
+ */
+export function nativeLiveOption(channelUrl: string, mode: LiveBuffer): { rebufferMs: number } | undefined {
+  if (isFiniteStreamUrl(channelUrl)) return undefined
+  return { rebufferMs: (liveBufferRefillSeconds(mode) ?? 0) * 1000 }
 }

@@ -20,7 +20,7 @@ import { TvVodCategoriesPanel, useSourceHasVod } from './vod-categories-picker'
 import { useTvText } from './tv/tv-strings'
 import { nextFallbackAfter, setTvSettings, useTvSettings } from './tv/tv-settings-store'
 import { liveBufferLabelKey, nextLiveBuffer } from './live-buffer'
-import { isDesktopTauri } from './tv/guide-surface'
+import { liveBufferSupported } from './tv/guide-surface'
 import { RecordingSettingsTvRows } from './recording-settings'
 import { nextStartView, startViewLabelKey } from './tv/start-view'
 import { listGroups } from './index-client'
@@ -153,7 +153,7 @@ export function TvSettingsPage() {
       {/* Strömbytet: växeln har onToggle och tiden onOk — båda blir stationer (data-f). */}
       <TvRow testId="tv-stream-fallback" label={tt('settingStreamFallback')} hint={tt('settingStreamFallbackHint')} toggle={tvSettings.streamFallback} onToggle={(streamFallback) => setTvSettings({ streamFallback })} />
       <TvRow testId="tv-stream-fallback-after" label={tt('settingStreamFallbackAfter')} hint={tt('settingStreamFallbackAfterHint')} value={tvSettings.streamFallbackAfterS === 0 ? tt('never') : tt('seconds', { s: tvSettings.streamFallbackAfterS })} onOk={() => setTvSettings({ streamFallbackAfterS: nextFallbackAfter(tvSettings.streamFallbackAfterS) })} />
-      {isDesktopTauri() ? <TvRow testId="tv-live-buffer" label={tt('settingLiveBuffer')} hint={tt('settingLiveBufferHint')} value={tt(liveBufferLabelKey(tvSettings.liveBuffer))} onOk={() => setTvSettings({ liveBuffer: nextLiveBuffer(tvSettings.liveBuffer) })} /> : null}
+      {liveBufferSupported() ? <TvRow testId="tv-live-buffer" label={tt('settingLiveBuffer')} hint={tt('settingLiveBufferHint')} value={tt(liveBufferLabelKey(tvSettings.liveBuffer))} onOk={() => setTvSettings({ liveBuffer: nextLiveBuffer(tvSettings.liveBuffer) })} /> : null}
       <TvRow testId="tv-group-order" label={tt('settingGroupOrder')} hint={tt('settingGroupOrderHint')} value={tt(groupOrderLabelKey(tvSettings.groupOrder))} onOk={() => setTvSettings({ groupOrder: nextGroupOrder(tvSettings.groupOrder) })} />
       <RecordingSettingsTvRows tvSettings={tvSettings} tt={tt} />
 

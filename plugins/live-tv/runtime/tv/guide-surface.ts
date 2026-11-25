@@ -4,6 +4,14 @@ import * as sdk from '@/lib/plugin-sdk'
 import type { GuideMode } from './tv-settings-store'
 
 /**
+ * Motorer som Livebufferten styr (`live-buffer.ts`): mpv på datorn och
+ * ExoPlayer på Android. Webbklienten (`<video>`) buffrar själv.
+ */
+export function liveBufferSupported(): boolean {
+  return isDesktopTauri() || (sdk as { isAndroidTauriEnv?: boolean }).isAndroidTauriEnv === true
+}
+
+/**
  * Skrivbordsappen (Tauri). Läses defensivt: äldre värdar saknar exportet
  * helt, och stubben i test byter ut den bakomliggande flaggan dynamiskt
  * (`__setDesktopTauriEnvForTests`) — ett direkt destrukturerat import hade

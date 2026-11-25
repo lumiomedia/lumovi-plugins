@@ -22,6 +22,8 @@ import { MobileHeader } from './mobile-header'
 import { RecordingSettingsRows } from '../../recording-settings'
 import { MobileSegment } from './mobile-segment'
 import { MobileToggle } from './mobile-toggle'
+import { liveBufferLabelKey, nextLiveBuffer } from '../../live-buffer'
+import { liveBufferSupported } from '../guide-surface'
 import { phoneGuideMode, type PhoneGuideMode } from './guide-phone'
 
 /**
@@ -120,6 +122,7 @@ export function TvSettingsPhone(props: TvViewProps) {
           <ToggleRow testId="setting-fullscreenOnRotate" label={tt('settingFullscreenOnRotate')} on={settings.fullscreenOnRotate} onOk={() => setTvSettings({ fullscreenOnRotate: !settings.fullscreenOnRotate })} />
           <ToggleRow testId="setting-streamFallback" label={tt('settingStreamFallback')} on={settings.streamFallback} onOk={() => setTvSettings({ streamFallback: !settings.streamFallback })} />
           <Row phone testId="setting-streamFallbackAfterS" label={tt('settingStreamFallbackAfter')} right={settings.streamFallbackAfterS === 0 ? tt('never') : tt('seconds', { s: settings.streamFallbackAfterS })} onOk={() => setTvSettings({ streamFallbackAfterS: nextFallbackAfter(settings.streamFallbackAfterS) })} />
+          {liveBufferSupported() ? <Row phone testId="setting-liveBuffer" label={tt('settingLiveBuffer')} right={tt(liveBufferLabelKey(settings.liveBuffer))} onOk={() => setTvSettings({ liveBuffer: nextLiveBuffer(settings.liveBuffer) })} /> : null}
           <Row phone testId="setting-groupOrder" label={tt('settingGroupOrder')} right={tt(groupOrderLabelKey(settings.groupOrder))} onOk={() => setTvSettings({ groupOrder: nextGroupOrder(settings.groupOrder) })} />
         </Card>
       </Section>
