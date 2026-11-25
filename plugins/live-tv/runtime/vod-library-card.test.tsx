@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 
 import { LIBRARY_STUB, __resetLibraryStubForTests } from '../src/__test-stubs__/plugin-sdk'
+import { writePluginJson } from '@/lib/plugin-sdk'
 import { VodLibraryCard } from './vod-library-card'
 
 /**
@@ -20,8 +21,12 @@ const källa = (over: Record<string, unknown> = {}) => ({
   id: 'kkzbigserver', total: 41_000, movies: 32_000, series: 9_000, updatedAt: 1_758_000_000, importing: false, ...over,
 })
 
+/** Profilens spellista: raden visas bara för källor profilen själv har. */
+const egenLista = (source: string) => [{ id: 'l1', name: 'Panel', kind: 'm3u', source, url: source, createdAt: '2026-01-01T00:00:00.000Z', epgUrls: [] }]
+
 beforeEach(() => {
   __resetLibraryStubForTests()
+  writePluginJson('com.lumio.live-tv', 'lists', egenLista('kkzbigserver'))
 })
 
 afterEach(() => {
@@ -30,14 +35,24 @@ afterEach(() => {
 })
 
 function medVodStatus(sources: unknown[]) {
-  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+  const spy = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url)
     if (url.includes('/api/live-tv/vod/status')) return svar(sources) as unknown as Response
     throw new Error(`oväntat anrop: ${url}`)
-  }))
+  })
+  vi.stubGlobal('fetch', spy)
+  return spy
 }
 
 describe('VodLibraryCard', () => {
+  it('visar INTE en källa som hör till en annan profil (ingen egen spellista pekar på den)', async () => {
+    const fetchSpy = medVodStatus([källa({ id: 'annan-profil' }), källa()])
+    render(<VodLibraryCard />)
+    await waitFor(() => expect(screen.getByTestId('vod-library-kkzbigserver')).toBeTruthy())
+    expect(screen.queryByTestId('vod-library-annan-profil')).toBeNull()
+    expect(fetchSpy).toHaveBeenCalled()
+  })
+
   it('visar en rad för en källa som har VOD', async () => {
     medVodStatus([källa()])
     render(<VodLibraryCard />)

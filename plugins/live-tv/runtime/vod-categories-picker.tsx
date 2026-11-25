@@ -7,7 +7,7 @@ import { fetchXtreamVodCategories, findXtreamLoginByPseudoUrl, getLiveTvLists } 
 import { useTextPrompt } from './tv/tv-text-entry'
 import { TvBtns, TvNote, TvPanel, TvRow } from './tv-settings-ui'
 import { useTvText } from './tv/tv-strings'
-import { listVodCategories, onVodChanged, vodStatus, type VodCategory, type VodKind, type VodSourceStatus } from './vod-client'
+import { listVodCategories, onVodChanged, profileVodStatus, vodStatus, type VodCategory, type VodKind, type VodSourceStatus } from './vod-client'
 import { ensureVodChoiceMigrated, getVodCategoryChoice, isVodChoiceMade, isVodChoiceMigrated, onVodCategoryChoiceChanged, vodCategoryKey, type VodCategoryMerge } from './vod-category-filter'
 import { applyVodCategoryChoice } from './vod-category-apply'
 import type { TvNav } from './tv/tv-shell'
@@ -395,7 +395,7 @@ export function usePendingVodSources(): VodSourceStatus[] {
   useEffect(() => {
     let live = true
     const load = () => {
-      void vodStatus()
+      void profileVodStatus()
         .then((all) => { if (live) setSources(all) })
         .catch(() => { if (live) setSources([]) })
     }

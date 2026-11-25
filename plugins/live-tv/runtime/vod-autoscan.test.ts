@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { writePluginJson } from '@/lib/plugin-sdk'
 import { LIVE_TV_PLUGIN_ID } from './live-tv-data'
 vi.mock('@/lib/plugin-sdk', async (orig) => ({ ...(await orig<object>()), fetchLibraryStatus: vi.fn(), isLibraryScanRunning: vi.fn(() => false), runLibraryScan: vi.fn(async () => {}) }))
-vi.mock('./vod-client', async (orig) => ({ ...(await orig<object>()), vodStatus: vi.fn() }))
+// Profilens källor är en egen sak (vod-client.test): här är alla källor profilens egna.
+vi.mock('./vod-client', async (orig) => {
+  const vodStatus = vi.fn()
+  return { ...(await orig<object>()), vodStatus, profileVodStatus: (...args: unknown[]) => vodStatus(...args) }
+})
 import { fetchLibraryStatus, isLibraryScanRunning, runLibraryScan } from '@/lib/plugin-sdk'
 import { vodStatus, type VodSourceStatus } from './vod-client'
 import { VOD_READY_EVENT, maybeAutoScanVod, resetVodAutoScanForTests, retryDelayMs, vodHomeState, vodHomeStatus } from './vod-autoscan'

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchLibraryStatus, isLibraryScanRunning, runLibraryScan } from '@/lib/plugin-sdk'
 import type { LibraryStatus } from '@/lib/plugin-sdk'
-import { onVodChanged, vodStatus, type VodSourceStatus } from '../vod-client'
+import { onVodChanged, profileVodStatus, type VodSourceStatus } from '../vod-client'
 import { vodLibraryBuildDisabled, vodLibraryRows, type VodLibraryRow } from '../vod-library-rows'
 import { vodLibraryProvider } from '../vod-library-provider'
 
@@ -51,7 +51,7 @@ export function useVodLibrarySources(): VodLibraryController {
   const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(() => {
-    void vodStatus().then(setSources).catch(() => setSources([]))
+    void profileVodStatus().then(setSources).catch(() => setSources([]))
     void fetchLibraryStatus().then(setLibrary).catch(() => setLibrary(null))
   }, [])
 

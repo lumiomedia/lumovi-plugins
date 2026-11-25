@@ -11,7 +11,7 @@
  * att hela biblioteket gick över bryggan för att sorteras och kastas.
  */
 
-import { profileSourcesParam } from './profile-sources'
+import { profileIndexSources, profileSourcesParam } from './profile-sources'
 
 export type VodKind = 'movie' | 'series'
 export type VodSort = 'new' | 'az' | 'rating'
@@ -162,6 +162,20 @@ export async function listVodCategories(source: string | null, signal?: AbortSig
 export async function vodStatus(): Promise<VodSourceStatus[]> {
   const data = await requestJson<{ sources?: VodSourceStatus[] }>('/api/live-tv/vod/status')
   return data.sources ?? []
+}
+
+/**
+ * VOD-källorna som hör till PROFILENS egna spellistor.
+ *
+ * `/vod/status` listar varje profils källor (indexet är delat i värden). Allt
+ * som visas eller byggs åt den som tittar ska läsa härifrån: annars stod en
+ * annan profils Xtream-konto under "Använd som bibliotek" i en profil som
+ * varken har spellistan eller inloggningen — och därmed inget sätt att ta
+ * bort det (Jerry 2026-11-25). Städning av övergivna källor läser `vodStatus`.
+ */
+export async function profileVodStatus(): Promise<VodSourceStatus[]> {
+  const own = new Set(profileIndexSources())
+  return (await vodStatus()).filter((source) => own.has(source.id))
 }
 
 /**

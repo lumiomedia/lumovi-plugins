@@ -1,6 +1,6 @@
 import { fetchLibraryStatus, isLibraryScanRunning, readPluginJson, runLibraryScan, writePluginJson } from '@/lib/plugin-sdk'
 import { LIVE_TV_PLUGIN_ID, getLiveTvLists } from './live-tv-data'
-import { vodStatus } from './vod-client'
+import { profileVodStatus } from './vod-client'
 import { vodLibraryProvider } from './vod-library-provider'
 import { vodLibraryRows, type VodLibraryRow } from './vod-library-rows'
 import { VOD_LIBRARY_PROVIDER_ID } from './vod-library-map'
@@ -59,7 +59,7 @@ export async function maybeAutoScanVod(opts: { force?: boolean; now?: number } =
   inFlight = true
   try {
     const now = opts.now ?? Date.now()
-    const [sources, library] = await Promise.all([vodStatus(), fetchLibraryStatus()])
+    const [sources, library] = await Promise.all([profileVodStatus(), fetchLibraryStatus()])
     // Källor som fanns före kategorivalet räknas som valda; först därefter
     // kan en ny källa sägas vänta på sitt val.
     await ensureVodChoiceMigrated(async () => sources)
@@ -127,7 +127,7 @@ export async function vodHomeStatus(): Promise<VodHomeStatus> {
   const only = (state: VodHomeState): VodHomeStatus => ({ state, indexed: null, total: null })
   if (vodHiddenForActivePlaylist()) return only('hidden')
   try {
-    const [sources, library] = await Promise.all([vodStatus(), fetchLibraryStatus()])
+    const [sources, library] = await Promise.all([profileVodStatus(), fetchLibraryStatus()])
     if (library?.sources?.some((entry) => entry.id.startsWith(`${VOD_LIBRARY_PROVIDER_ID}:`) && entry.lastFullSync)) return only('ready')
     const rows = vodLibraryRows(sources, library)
     if (rows.length === 0) {
