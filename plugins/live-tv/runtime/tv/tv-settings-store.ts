@@ -16,6 +16,7 @@ import { DEFAULT_GROUP_ORDER, sanitizeGroupOrder, type GroupOrder } from '../gro
 import { DEFAULT_HUB_LAYOUT, sanitizeGuideCategoryLayout, sanitizeHexColor, sanitizeHubLayout, sanitizeLiveBackground, type GuideCategoryLayout, type HubLayout, type LiveBackground } from './v2-settings'
 import { sanitizeHubRows, type HubRowPref } from './hub-rows'
 import { sanitizeRemoteBindings, type RemoteBinding } from './remote-keys'
+import { DEFAULT_LIVE_BUFFER, sanitizeLiveBuffer, type LiveBuffer } from '../live-buffer'
 
 export const TV_SETTINGS_KEY = 'live_tv_tv_settings_v1'
 export const GUIDE_MODE_KEY = 'live_tv_guide_mode_v1'
@@ -64,6 +65,10 @@ export interface TvSettings {
   streamFallback: boolean
   /** Sekunder innan förslaget byter självt; 0 = Aldrig. */
   streamFallbackAfterS: FallbackAfterS
+  /** Livebufferten (`live-buffer.ts`): hur mycket spelaren fyller på efter ett stopp. */
+  liveBuffer: LiveBuffer
+  /** Tipset om stabil buffert har avböjts — fråga inte igen. */
+  liveBufferHintDismissed: boolean
   /**
    * Ordningen grupperna listas i (chipraden, grupplistorna, rutnätet,
    * guidens filter, kurateringen). Spellistans ordning är standard — förut
@@ -120,6 +125,8 @@ const DEFAULTS: TvSettings = {
   startView: DEFAULT_START_VIEW,
   streamFallback: true,
   streamFallbackAfterS: 5,
+  liveBuffer: DEFAULT_LIVE_BUFFER,
+  liveBufferHintDismissed: false,
   groupOrder: DEFAULT_GROUP_ORDER,
   hubLayout: DEFAULT_HUB_LAYOUT,
   guideCategoryLayout: 'column',
@@ -159,6 +166,8 @@ function sanitize(raw: unknown): TvSettings {
     startView: sanitizeStartView(r.startView),
     streamFallback: typeof r.streamFallback === 'boolean' ? r.streamFallback : DEFAULTS.streamFallback,
     streamFallbackAfterS: (FALLBACK_AFTER_OPTIONS as readonly number[]).includes(r.streamFallbackAfterS as number) ? (r.streamFallbackAfterS as FallbackAfterS) : DEFAULTS.streamFallbackAfterS,
+    liveBuffer: sanitizeLiveBuffer(r.liveBuffer),
+    liveBufferHintDismissed: r.liveBufferHintDismissed === true,
     groupOrder: sanitizeGroupOrder(r.groupOrder),
     hubLayout: sanitizeHubLayout(r.hubLayout),
     guideCategoryLayout: sanitizeGuideCategoryLayout(r.guideCategoryLayout),

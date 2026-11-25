@@ -55,6 +55,8 @@ import { CategoriesDialog } from './category-curation-panel'
 import { PlaylistCard, playlistHost } from './playlist-card'
 import { TvSettingsPage } from './tv-settings-views'
 import { FALLBACK_AFTER_OPTIONS, setTvSettings, useTvSettings, type FallbackAfterS } from './tv/tv-settings-store'
+import { LIVE_BUFFERS, liveBufferLabelKey, sanitizeLiveBuffer } from './live-buffer'
+import { isDesktopTauri } from './tv/guide-surface'
 import { RecordingSettingsDesktop, recordingSummary } from './recording-settings'
 import { START_VIEWS, startViewLabelKey } from './tv/start-view'
 import { GUIDE_CATEGORY_LAYOUTS, HUB_LAYOUTS, LIVE_BACKGROUNDS, guideCategoryLayoutLabelKey, hubLayoutLabelKey, liveBackgroundLabelKey, sanitizeHexColor } from './tv/v2-settings'
@@ -414,6 +416,17 @@ function DesktopPage() {
             value={String(tvSettings.streamFallbackAfterS)}
             onChange={(key) => setTvSettings({ streamFallbackAfterS: Number(key) as FallbackAfterS })}
           />
+          {/* Livebufferten (live-buffer.ts): bara mpv-motorn, alltså skrivbordsappen. */}
+          {isDesktopTauri() ? (
+            <LtChoiceRow
+              testId="lt-live-buffer"
+              label={tt('settingLiveBuffer')}
+              desc={tt('settingLiveBufferHint')}
+              options={LIVE_BUFFERS.map((key) => ({ key, label: tt(liveBufferLabelKey(key)) }))}
+              value={tvSettings.liveBuffer}
+              onChange={(key) => setTvSettings({ liveBuffer: sanitizeLiveBuffer(key) })}
+            />
+          ) : null}
           {/* Gruppordningen (2026-10-14). Samma lager som TV:ns och telefonens rader. */}
           <LtChoiceRow
             testId="lt-group-order"

@@ -6,6 +6,8 @@ import type { TvViewProps } from './tv-shell'
 import { TV, Toggle, dp, station } from './tv-ui'
 import { useRowNeighbours } from '../sport/row-nav'
 import { useTvText } from './tv-strings'
+import { liveBufferLabelKey, nextLiveBuffer } from '../live-buffer'
+import { isDesktopTauri } from './guide-surface'
 import { BANNER_HIDE_OPTIONS, nextFallbackAfter, setGuideMode, setTvSettings, useGuideMode, type BannerHideMs, type GuideMode, type TvSettings } from './tv-settings-store'
 import { ContentTab, EpgTab, GuideAlertsTab, Heading, HelpTab, ParentalTab, PlaylistsTab, Row } from './settings-tabs'
 import { hubText } from '../hub-strings'
@@ -184,6 +186,7 @@ function AppearanceTab({ settings, tt, nav }: { settings: TvSettings; tt: TT; na
         <Row testId="setting-bannerHideMs" label={tt('settingBannerHide')} right={settings.bannerHideMs === 0 ? tt('never') : tt('seconds', { s: settings.bannerHideMs / 1000 })} onOk={() => setTvSettings({ bannerHideMs: nextBanner(settings.bannerHideMs) })} />
         <Row testId="setting-streamFallback" label={tt('settingStreamFallback')} right={<Toggle on={settings.streamFallback} />} onOk={() => setTvSettings({ streamFallback: !settings.streamFallback })} />
         <Row testId="setting-streamFallbackAfterS" label={tt('settingStreamFallbackAfter')} right={settings.streamFallbackAfterS === 0 ? tt('never') : tt('seconds', { s: settings.streamFallbackAfterS })} onOk={() => setTvSettings({ streamFallbackAfterS: nextFallbackAfter(settings.streamFallbackAfterS) })} />
+        {isDesktopTauri() ? <Row testId="setting-liveBuffer" label={tt('settingLiveBuffer')} right={tt(liveBufferLabelKey(settings.liveBuffer))} onOk={() => setTvSettings({ liveBuffer: nextLiveBuffer(settings.liveBuffer) })} /> : null}
         <Row testId="setting-groupOrder" label={tt('settingGroupOrder')} right={tt(groupOrderLabelKey(settings.groupOrder))} onOk={() => setTvSettings({ groupOrder: nextGroupOrder(settings.groupOrder) })} />
       </section>
       <RecordingSettingsRows settings={settings} tt={tt} onOpen={() => nav.go('recordings')} />

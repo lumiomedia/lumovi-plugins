@@ -76,5 +76,5 @@ export function useStreamFallback(args: { channel: M3uChannel; pausedForCache: b
   }, [target, onSwitch, key])
   const stay = useCallback(() => setTarget(null), [])
   // Stängs förslaget av medan det visas försvinner det.
-  return { target: settings.streamFallback ? target : null, autoSwitchS: settings.streamFallbackAfterS, switchNow, stay }
+  return { target: settings.streamFallback ? target : null, autoSwitchS: settings.streamFallbackAfterS, switchNow, stay, hits: state.hit }
 }

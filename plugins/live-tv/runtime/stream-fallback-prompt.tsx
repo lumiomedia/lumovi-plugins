@@ -34,3 +34,23 @@ export function StreamFallbackPrompt({ target, seconds = FALLBACK_COUNTDOWN_S, o
     </div>
   )
 }
+
+/**
+ * "Strömmen stannar om och om igen" — föreslår stabil buffert (live-buffer.ts)
+ * när en TS-ström töms gång på gång med snabb start. Ingen nedräkning: det
+ * är en inställning som ändras, inte en kanal som byts.
+ */
+export function BufferHintPrompt({ onUse, onLater }: { onUse(): void; onLater(): void }) {
+  const { tt } = useTvText()
+  const btn = (primary: boolean) => ({ padding: `${dp(8)}px ${dp(14)}px`, borderRadius: dp(10), fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, background: primary ? TV.text : 'transparent', color: primary ? '#0e0f13' : TV.text, border: primary ? 'none' : `1px solid ${TV.lineStrong}` })
+  return (
+    <div data-live-tv-buffer-hint="" role="status" style={{ position: 'absolute', bottom: dp(120), left: '50%', transform: 'translateX(-50%)', zIndex: 31, display: 'flex', alignItems: 'center', gap: dp(16), maxWidth: '90%', padding: `${dp(14)}px ${dp(20)}px`, borderRadius: dp(16), background: TV.panel, border: `1px solid ${TV.lineStrong}`, color: TV.text }}>
+      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <span style={{ fontSize: dp(20), fontWeight: 600 }}>{tt('bufferHintTitle')}</span>
+        <span style={{ fontSize: dp(16), color: TV.muted }}>{tt('bufferHintBody')}</span>
+      </span>
+      <div {...station(onUse, undefined, { 'data-init': '' })} style={btn(true)}>{tt('bufferHintUse')}</div>
+      <div {...station(onLater)} style={btn(false)}>{tt('bufferHintLater')}</div>
+    </div>
+  )
+}

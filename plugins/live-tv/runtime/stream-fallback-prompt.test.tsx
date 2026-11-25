@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { StreamFallbackPrompt } from './stream-fallback-prompt'
+import { BufferHintPrompt, StreamFallbackPrompt } from './stream-fallback-prompt'
 
 const target = { name: 'V Sport Fotboll HD SE', url: 'b', logo: null, group: 'g', tvgId: null }
 afterEach(() => { cleanup(); vi.useRealTimers() })
@@ -42,5 +42,20 @@ describe('StreamFallbackPrompt', () => {
     render(<StreamFallbackPrompt target={target} onSwitch={vi.fn()} onStay={onStay} />)
     fireEvent.click(screen.getByText(/Stanna kvar|Stay/))
     expect(onStay).toHaveBeenCalledOnce()
+  })
+})
+
+describe('BufferHintPrompt', () => {
+  it('två stationer: Använd stabil buffert (startfokus) och Inte nu', () => {
+    const onUse = vi.fn()
+    const onLater = vi.fn()
+    render(<BufferHintPrompt onUse={onUse} onLater={onLater} />)
+    const use = screen.getByText(/Use stable buffer|Använd stabil buffert/)
+    expect(use).toHaveAttribute('data-f')
+    expect(use).toHaveAttribute('data-init')
+    fireEvent.click(use)
+    expect(onUse).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByText(/Not now|Inte nu/))
+    expect(onLater).toHaveBeenCalledOnce()
   })
 })

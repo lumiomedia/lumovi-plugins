@@ -23,6 +23,8 @@ describe('tv-settings-store', () => {
       startView: 'home',
       streamFallback: true,
       streamFallbackAfterS: 5,
+      liveBuffer: 'fast',
+      liveBufferHintDismissed: false,
       groupOrder: 'playlist',
       hubLayout: 'experience',
       guideCategoryLayout: 'column',

@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useTvSettings } from './tv/tv-settings-store'
+import { getTvSettings, setTvSettings, useTvSettings } from './tv/tv-settings-store'
+import { bufferAheadSeconds, liveBufferOpenProps, liveBufferRefillSeconds, liveBufferRestartProps } from './live-buffer'
 import { LIVE_EDGE_SLACK_S_HLS, resumeAction } from './timeshift'
 import { createTimeshiftSession, deleteTimeshiftSession, droidTimeshiftRange, startTimeshiftHeartbeat, timeshiftSessionStatus, type TimeshiftSession } from './timeshift-session'
 import { useTimeshiftOnDevice } from './timeshift-device'
@@ -59,7 +60,7 @@ import { isHlsPlayUrl } from './live-format'
 import { nativeLiveOpenUrl } from './hls-playlist-proxy'
 import { TvPlayerChrome } from './tv/tv-player-chrome'
 import { PlayerGoalOverlay } from './sport/tv/player-goal-overlay'
-import { StreamFallbackPrompt } from './stream-fallback-prompt'
+import { BufferHintPrompt, StreamFallbackPrompt } from './stream-fallback-prompt'
 import { useStreamFallback } from './use-stream-fallback'
 import { setPlayingChannel } from './sport/goal-alerts'
 import { usePollDemand } from './sport/live-poller'
@@ -118,9 +119,6 @@ const MPV_STARTUP_TIMEOUT_MS = 18_000
 /** Budget för kanalens egen URL innan värdens strömproxy får försöka. */
 const MPV_FIRST_ATTEMPT_TIMEOUT_MS = 9_000
 
-// Bara pausen: väntetiden styr appen (1 s vid start för snabb bild, 3 s efter
-// första omstarten). En egen 3 s här gav 3,5 s start i stället för 0,8 s.
-const TS_REFILL_ON_UNDERRUN = [{ name: 'cache-pause', value: 'yes' }]
 export { isHlsPlayUrl as isHlsUrl } from './live-format'
 
 export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv }: LiveTvPlayerProps) {
@@ -1011,16 +1009,50 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
   // levererar under realtid: slowmotion, ljudavbrott och till sist frysning
   // (CL-kvällen 2026-10-13). Pausa i stället och fyll på, som mpv gör
   // fristående. HLS behåller appens val.
+  //
+  // Livebufferten (live-buffer.ts) lägger på hur MYCKET som fylls på. Snabb
+  // start sätter bara pausen: väntetiden är då appens (1 s vid start, 3 s
+  // efter första omstarten — en egen 3 s här gav 3,5 s start i stället för 0,8).
+  const liveBufferMode = useTvSettings().liveBuffer
+  const playIsHls = isHlsPlayUrl(playUrl)
   useEffect(() => {
-    if (engineKind !== 'mpv' || !mpvFileLoaded || isHlsPlayUrl(playUrl)) return
-    void mpvSetPropertyStrings(TS_REFILL_ON_UNDERRUN).catch(() => {})
-  }, [engineKind, mpvFileLoaded, playUrl])
+    if (engineKind !== 'mpv' || !mpvFileLoaded) return
+    const props = liveBufferOpenProps(liveBufferMode, playIsHls)
+    if (props.length > 0) void mpvSetPropertyStrings(props).catch(() => {})
+  }, [engineKind, mpvFileLoaded, playUrl, playIsHls, liveBufferMode])
+  // Appen skriver cache-pause-wait=3 vid VARJE playback-restart, före
+  // händelsen hit — så det valda värdet sätts om efter var och en.
+  const mpvRestartToken = mpvDesktop.playbackRestartedToken
+  useEffect(() => {
+    if (engineKind !== 'mpv' || !mpvFileLoaded || mpvRestartToken === 0) return
+    const props = liveBufferRestartProps(liveBufferMode, playIsHls)
+    if (props.length > 0) void mpvSetPropertyStrings(props).catch(() => {})
+    // Bara på en ny omstart; övrigt täcks av effekten ovan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mpvRestartToken])
 
   // Hackar kanalen om och om igen: föreslå (och byt efter vald tid till) nästa källa.
   const fallback = useStreamFallback({
     channel, pausedForCache: mpv.pausedForCache, userPaused: mpvPaused,
     channels: tvChrome?.neighbours ?? [], onSwitch: tvChrome?.onSwitchChannel,
   })
+
+  // Samma utlösning, men för bufferten: stannar en TS-ström om och om igen
+  // med snabb start föreslås stabil buffert — en gång, tills man svarat.
+  const [bufferHint, setBufferHint] = useState(false)
+  useEffect(() => {
+    if (fallback.hits === 0 || engineKind !== 'mpv' || playIsHls) return
+    const current = getTvSettings()
+    if (current.liveBuffer !== 'fast' || current.liveBufferHintDismissed) return
+    setBufferHint(true)
+    // Bara när en ny utlösning kommer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fallback.hits])
+  useEffect(() => { setBufferHint(false) }, [channel.url])
+  // Under ett stopp: hur mycket som hunnit fyllas på av det som väntas in.
+  const refillWant = engineKind === 'mpv' && !playIsHls ? (liveBufferRefillSeconds(liveBufferMode) ?? 3) : null
+  const refillHave = bufferAheadSeconds(mpvDesktop.cacheRange, mpvTimePos)
+  const refilling = engineKind === 'mpv' && mpv.pausedForCache && !mpvPaused && !loading && !error && refillWant !== null && refillHave !== null
 
   // Nollställ trappan när kanalen byts: nästa kanal ska börja med sin egen
   // URL, inte ärva föregående kanals reservväg.
@@ -1537,6 +1569,17 @@ export function LiveTvPlayer({ channel, onClose, listId = null, epgUrls = [], tv
       ) : null}
       <PlayerGoalOverlay channelKey={playingKey} onJump={(next) => tvChrome?.onSwitchChannel(next)} />
       {fallback.target ? <StreamFallbackPrompt key={channelKey(fallback.target)} target={fallback.target} seconds={fallback.autoSwitchS} onSwitch={fallback.switchNow} onStay={fallback.stay} /> : null}
+      {bufferHint && !fallback.target ? (
+        <BufferHintPrompt
+          onUse={() => { setTvSettings({ liveBuffer: 'stable' }); setBufferHint(false); setNotice(ttPlayer('bufferHintOn')) }}
+          onLater={() => { setTvSettings({ liveBufferHintDismissed: true }); setBufferHint(false) }}
+        />
+      ) : null}
+      {refilling && !notice ? (
+        <div data-testid="player-refilling" className="pointer-events-none absolute left-1/2 top-6 z-30 -translate-x-1/2 rounded-full bg-black/70 px-4 py-2 text-sm text-white">
+          {ttPlayer('bufferRefilling', { have: Math.min(refillWant ?? 0, Math.floor(refillHave ?? 0)), want: refillWant ?? 0 })}
+        </div>
+      ) : null}
       {tvChrome ? (
         <TvPlayerChrome channel={channel} tv={tvChrome} controls={playerControls} paused={mpvPaused} onTogglePause={toggleMpvPause} onClose={handleClose} phoneLandscape={phoneLandscape} />
       ) : null}
