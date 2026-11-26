@@ -103,9 +103,8 @@ export function useVodCategories(requested: string | null): VodLibraryCategories
     /**
      * `null` betyder ALLA spellistor, inte "ingen".
      *
-     * `model.activeSource` sätts bara i TV-läge (live-tv-model.ts) — på
-     * skrivbordet och telefonen är den alltid null, precis som kanallistan
-     * där visar hela indexet. Ett tidigt `return` här gjorde Biblioteket tomt
+     * `model.activeSource` är null när "All playlists" är vald, precis som
+     * kanallistan då visar hela indexet. Ett tidigt `return` här gjorde Biblioteket tomt
      * på varje yta utom TV, fast titlarna låg i indexet hela tiden.
      */
     let cancelled = false

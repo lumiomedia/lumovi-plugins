@@ -408,7 +408,12 @@ describe('Biblioteket utanför TV-läget (skrivbord och telefon)', () => {
    * är den alltid null. Vyerna tolkade null som "ingen källa" och frågade
    * aldrig. Rätt tolkning är "alla spellistor", precis som kanallistan gör.
    */
-  beforeEach(() => __setTvModeForTests(false))
+  // Ingen spellista vald: förr gav läget det av sig självt (modellen
+  // ignorerade valet utanför TV-läge), nu nollställs valet uttryckligen.
+  beforeEach(() => {
+    __setTvModeForTests(false)
+    writePluginJson(LIVE_TV_PLUGIN_ID, ACTIVE_PLAYLIST_KEY, null)
+  })
   afterEach(() => __setTvModeForTests(true))
 
   it('visar titlarna trots att ingen spellista är aktiv', async () => {

@@ -75,7 +75,6 @@ beforeEach(() => {
   __resetNowSnapshotForTests()
   __resetChannelResolverForTests()
   vi.clearAllMocks()
-  // Spellistfiltret är ett TV-begrepp: modellen tillämpar det bara i TV-läge.
   __setTvModeForTests(true)
   writePluginJson(LIVE_TV_PLUGIN_ID, 'lists', lists)
   writePluginJson(LIVE_TV_PLUGIN_ID, 'pins', ['C::http://x/C', 'A::http://x/A'])
@@ -197,19 +196,23 @@ describe('useLiveTvModel: kanaler ur indexet', () => {
     second.unmount()
   })
 
-  it('utanför TV-läget ignoreras ett sparat spellistval helt', async () => {
-    // Skrivbordet och mobilen har ingen ratt för aktiv spellista. Ett val som
-    // blivit kvar i lagringen klippte ändå deras kanallista till en enda
-    // spellista, utan förklaring och utan väg tillbaka.
-    writePluginJson(LIVE_TV_PLUGIN_ID, ACTIVE_PLAYLIST_KEY, 'l2')
+  it('telefonen och webbklienten följer spellistvalet (varken TV-läge eller skrivbordsapp)', async () => {
+    // Skalet ritas överallt sedan 0.6.0, och telefonens hubb har en egen
+    // spellistpill. Med grinden `tvMode || isDesktopTauri()` skrevs valet men
+    // lästes aldrig: pillen stod kvar på "All playlists" vad man än valde.
     __setTvModeForTests(false)
     const { result } = renderHook(() => useLiveTvModel())
     await waitFor(() => expect(result.current.channelsLoading).toBe(false))
-    expect(result.current.channels.map((c) => c.name)).toEqual(['A', 'B', 'C'])
-    expect(result.current.byKey.size).toBe(3)
-    expect(result.current.groups).toEqual(['Sport', 'News'])
     expect(result.current.activePlaylistId).toBeNull()
-    expect(loadedSources()).toEqual(['s1', 's2'])
+
+    await act(async () => result.current.setActivePlaylist('l2'))
+    await waitFor(() => expect(result.current.channels.map((c) => c.name)).toEqual(['C']))
+    expect(result.current.activePlaylistId).toBe('l2')
+    expect(result.current.activePlaylistName).toBe('Nordic')
+
+    await act(async () => result.current.setActivePlaylist(null))
+    await waitFor(() => expect(result.current.channels.map((c) => c.name)).toEqual(['A', 'B', 'C']))
+    expect(result.current.activePlaylistId).toBeNull()
   })
 
   it('skrivbordsappen (Tauri) delar TV-lägets källväljare även utanför TV-läget', async () => {

@@ -48,8 +48,8 @@ function readRecord(key: string): Record<string, string> {
 /**
  * Nyckeln valet sparas under.
  *
- * `activePlaylistId` finns bara i TV-läge — på skrivbordet och telefonen är
- * den null, och då spänner Biblioteket alla spellistor. Det läget får en egen,
+ * `activePlaylistId` är null när "All playlists" är vald, och då spänner
+ * Biblioteket alla spellistor. Det läget får en egen,
  * delad nyckel i stället för att valet tyst inte går att spara (vilket det
  * inte gjorde: `setVodMode` returnerade utan att skriva).
  */

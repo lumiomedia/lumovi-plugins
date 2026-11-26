@@ -8,7 +8,6 @@ import {
   clearPluginMemoryCacheByPrefix,
   getPluginMemoryCache,
   setPluginMemoryCache,
-  useTvMode,
 } from '@/lib/plugin-sdk'
 import type { NowNextLater } from './epg/types'
 import {
@@ -26,7 +25,6 @@ import {
   type IndexChannel,
 } from './index-client'
 import { clearResolvedChannels, getResolvedChannels, resolveChannelKeys } from './channel-resolver'
-import { isDesktopTauri } from './tv/guide-surface'
 import { migrateStorageV2 } from './storage-v2-migration'
 import { getChannelHistory, onChannelHistoryChanged, type ChannelHistoryEntry } from './channel-history'
 import { applyChannelOverrides, renameChannel, useChannelOverrides } from './channel-overrides'
@@ -554,29 +552,18 @@ export function useLiveTvModel(tickMs = 60_000): LiveTvModel {
   useEffect(() => onChannelHistoryChanged(() => setHistory(getChannelHistory())), [])
 
   /**
-   * Den aktiva spellistan är ett TV-BEGREPP.
+   * Den aktiva spellistan gäller ALLA ytor.
    *
-   * Filtret sätts bara från TV-hubbens spellistmeny, men modellen är delad med
-   * skrivbordet och mobilen — de har ingen ratt som visar eller ändrar det. Ett
-   * val som blev kvar i lagringen (någon provade TV-läget, eller läget byttes
-   * på samma enhet) klippte därför skrivbordets kanallista till en enda
-   * spellista UTAN att något i gränssnittet förklarade varför, och utan någon
-   * väg tillbaka. Utanför TV-läget gäller alltid alla listor.
-   *
-   * Hooken kallas ovillkorligt (hooks-reglerna) — det är bara dess RESULTAT
-   * som grindar filtret.
-   *
-   * Skrivbordsappen (Tauri) delar samma källväljare sedan den städade guiden
-   * (spec "Beslut", Källa): `isDesktopTauri()` är ingen hook (läser bara en
-   * modulflagga), så den får läggas till i samma villkor utan att bryta
-   * hooks-reglerna.
+   * Här fanns en grind (`tvMode || isDesktopTauri()`) från tiden då
+   * skrivbordet och telefonen hade egna vyer utan spellistväljare. Sedan
+   * skalet ritas överallt har telefonens hubb en egen spellistpill och
+   * webbklienten TV-hubbens — grinden gjorde att valet skrevs men aldrig
+   * lästes, så pillen stod kvar på "All playlists".
    */
-  const tvMode = useTvMode()
-  const activeListGate = tvMode || isDesktopTauri()
   // Vald spellista som inte längre finns → tillbaka till alla.
   const activeList = useMemo(
-    () => (activeListGate ? lists.find((list) => list.id === activePlaylistId) ?? null : null),
-    [activeListGate, lists, activePlaylistId],
+    () => lists.find((list) => list.id === activePlaylistId) ?? null,
+    [lists, activePlaylistId],
   )
   const activeSource = activeList?.source ?? null
 

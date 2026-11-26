@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.23.1
+
+- Phone and web: choosing a playlist in the playlist menu on the Channels page now works. Before, the choice was saved but the page stayed on "All playlists".
+
 ## 0.23.0
 
 Needs Lumovi 0.1.644.
