@@ -10408,7 +10408,6 @@
   var COMPLETE_THRESHOLD;
   var init_barcode_model = __esm({
     "lib/barcode/barcode-model.ts"() {
-      "use strict";
       COMPLETE_THRESHOLD = 0.99;
     }
   });
@@ -10480,7 +10479,6 @@
   var BARCODES_CHANGED_EVENT, items, loadedFor2, loading, dirty, lastWrite, timers;
   var init_barcode_store = __esm({
     "lib/barcode/barcode-store.ts"() {
-      "use strict";
       init_profile_storage_shim();
       init_barcode_model();
       BARCODES_CHANGED_EVENT = "lumio-barcodes-changed";
@@ -12419,17 +12417,17 @@
     }
   });
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/index.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/index.tsx
   var runtime_exports = {};
   __export(runtime_exports, {
     TwitchPlugin: () => TwitchPlugin,
     default: () => runtime_default
   });
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-auth.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-auth.ts
   init_plugin_sdk();
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-app-credentials.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-app-credentials.ts
   init_plugin_sdk();
   var CLIENT_ID_KEY = "twitch_client_id_v1";
   function getTwitchClientId() {
@@ -12443,7 +12441,7 @@
     return getTwitchClientId().length > 0;
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-storage.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-storage.ts
   init_plugin_sdk();
   var SESSION_KEY = "twitch_session_v1";
   var EVENT2 = "lumio-twitch-plugin-changed";
@@ -12518,7 +12516,7 @@
     return () => window.removeEventListener(EVENT2, listener);
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-client.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-client.ts
   var HELIX_BASE = "https://api.twitch.tv/helix";
   function helixUrl(path, params = {}) {
     const qs = Object.entries(params).filter(([, v]) => v !== void 0 && v !== "").map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`).join("&");
@@ -12616,7 +12614,7 @@
     return data;
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-auth.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-auth.ts
   var TwitchAuthError = class extends Error {
     constructor(text) {
       super(typeof text === "string" ? text : text.en ?? "Twitch login failed.");
@@ -12719,7 +12717,7 @@
   }
   async function resolveTwitchAccount(accessToken) {
     const response = await fetch(helixUrl("users"), {
-      headers: { "x-twitch-user-token": accessToken }
+      headers: { "Client-Id": requireClientId(), Authorization: `Bearer ${accessToken}` }
     });
     if (!response.ok) {
       throw new TwitchAuthError({
@@ -12835,7 +12833,7 @@
     return inflightSessionRefresh;
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-auth-capability-provider.ts
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-auth-capability-provider.ts
   function getStatus() {
     const session = getTwitchSession();
     if (isTwitchSessionValid(session)) {
@@ -12884,7 +12882,7 @@
     }
   };
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-settings-section.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-settings-section.tsx
   init_react_shim();
   init_plugin_sdk();
   init_plugin_sdk();
@@ -13136,12 +13134,12 @@
     ] });
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-browser.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-browser.tsx
   init_react_shim();
   var import_react_dom5 = __toESM(require_react_dom(), 1);
   init_plugin_sdk();
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-player.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-player.tsx
   init_react_shim();
   var import_react_dom4 = __toESM(require_react_dom(), 1);
   init_plugin_sdk();
@@ -13201,7 +13199,7 @@
     );
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/twitch-browser.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/twitch-browser.tsx
   init_jsx_runtime_shim();
   function pickLang(table, lang) {
     return table[lang] ?? table.en;
@@ -14993,7 +14991,7 @@
     ] });
   }
 
-  // ../../../lumio-official-plugins-langs/plugins/twitch/runtime/index.tsx
+  // ../../../lumio-official-plugins-twitchfix/plugins/twitch/runtime/index.tsx
   init_jsx_runtime_shim();
   var twitchHidesHero = true;
   var TwitchPlugin = {

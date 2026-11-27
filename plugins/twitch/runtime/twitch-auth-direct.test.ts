@@ -14,7 +14,7 @@ vi.mock('./twitch-app-credentials', () => ({
   hasTwitchClientId: () => clientId.length > 0,
 }))
 
-import { requestDeviceCode, exchangeDeviceCode, DEVICE_URL, TOKEN_URL } from './twitch-auth'
+import { requestDeviceCode, exchangeDeviceCode, resolveTwitchAccount, DEVICE_URL, TOKEN_URL } from './twitch-auth'
 
 beforeEach(() => { clientId = 'cid-123' })
 afterEach(() => { vi.restoreAllMocks() })
@@ -87,5 +87,24 @@ describe('device code exchange', () => {
     // Ingen hemlighet skickas: appen registreras som public client, och en
     // client_secret i webview-lagring vore ett onödigt skyddsvärde.
     expect(String(init.body)).not.toContain('client_secret')
+  })
+})
+
+describe('account lookup after login', () => {
+  // Helix needs Client-Id + Authorization when called straight from the webview;
+  // the old x-twitch-user-token header only meant something to the Rust proxy.
+  it('sends the user\'s Client-Id and the new token as a Bearer', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: [{ id: '42', login: 'viewer', display_name: 'Viewer' }] }),
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const user = await resolveTwitchAccount('tok-1')
+
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(String(url)).toBe('https://api.twitch.tv/helix/users')
+    expect(init.headers).toEqual({ 'Client-Id': 'cid-123', Authorization: 'Bearer tok-1' })
+    expect(user.login).toBe('viewer')
   })
 })

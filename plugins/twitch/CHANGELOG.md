@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.5
+
+- Connecting your Twitch account works again. After you approved the code on twitch.tv, the last step could not read your account and the login stopped with an error.
+
 ## 1.4.3
 
 - The "Twitch is not set up yet" screen no longer traps you. It has an Open Twitch settings button and a Back button, and the remote's Back button leaves the page. On TV and phones there was no way out before, and the app had to be force-closed.

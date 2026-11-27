@@ -182,9 +182,11 @@ export async function exchangeDeviceCode(deviceCode: string): Promise<DevicePoll
   return { ok: false, status: payload.status ?? response.status, error: payload.message }
 }
 
-async function resolveTwitchAccount(accessToken: string): Promise<TwitchHelixUser> {
+export async function resolveTwitchAccount(accessToken: string): Promise<TwitchHelixUser> {
+  // Straight to Twitch (no Rust proxy any more), so the request carries the same
+  // headers as every other Helix call: the user's Client-Id and the new token.
   const response = await fetch(helixUrl('users'), {
-    headers: { 'x-twitch-user-token': accessToken },
+    headers: { 'Client-Id': requireClientId(), Authorization: `Bearer ${accessToken}` },
   })
   if (!response.ok) {
     throw new TwitchAuthError({
